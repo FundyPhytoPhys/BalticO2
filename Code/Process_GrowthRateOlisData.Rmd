@@ -53,7 +53,7 @@ library(tidyverse)
 ```
 
 ```{r set project variables}
-Project <- "BalticCCA"
+Project <- "BalticO2"
 DataOut <- file.path("..", "Data", "ProcessedData", "ProcessedGrowthRateData")
 DataIn <- file.path("..", "Data", "CleanData", "CleanedMCData", fsep = .Platform$file.sep)
 
@@ -126,14 +126,38 @@ MCGrowthRate<-MultiCultiGrowth %>%
 
 ```{r preliminary plot, warning = FALSE}
 MCGrowthRate %>%
-  filter(Run!= 59 & Run!= 56) %>% 
   ggplot() +
   geom_point(aes(x = Par_ue, y = deltaOD_Lmu_corr,colour=as.factor(Strain)), size = 3.5, alpha = 0.9, show.legend = T) +
-  geom_errorbar(aes(x = Par_ue, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se), alpha = 0.5, width=0) +
+  # geom_errorbar(aes(x = Par_ue, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se), alpha = 0.5, width=0) +
   scale_colour_discrete(type=c("palegreen3", "brown4")) +
-  ggh4x::facet_nested(rows = vars(Strain), cols = vars(WL)) +
+  ggh4x::facet_nested(rows = vars(Strain, O2), cols = vars(WL)) +
   theme_bw()
+
 ```
+
+```{r}
+O2.labs <- c("Oxygen level: high", "Oxygen level: low", "Oxygen level: high")
+names(O2.labs) <- c("21", "0", "21")
+
+MCGrowthRate %>%
+  filter(Par_ue!=30) %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  ggplot() +
+  geom_point(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = 'black'), size = 3) +
+  geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr), color = 'black') +
+labs(y = "Logistic Growth Rate" ~ "("~"Delta OD"~h^-1~")", x = "Wavelength (nm)") +
+  #scale_x_continuous(breaks=seq(0, 200, by = 50)) +
+  #coord_cartesian(xlim = c (0, 200)) +
+ coord_cartesian(xlim = c (400, 800)) +
+  guides(colour = FALSE) +
+ ggh4x::facet_nested(cols = vars(O2), rows = vars(Strain),
+                     labeller = labeller(Strain = label_value, Photoperiod = label_both, O2 = O2.labs)) +
+  theme_bw() 
+
+```
+
+
 # Save plot 
 
 ```{r save plot}
@@ -144,16 +168,16 @@ ggsave(file = file.path(PlotsPath, paste("GrowthRate_Plot",".png",sep = "")), he
 
 ```{r calculated statistics}
 MCGrowthRateStats<-MCGrowthRate %>% 
-    filter(Run!= 59 & Run!= 56) 
+    filter(Par_ue!= 30) 
 
-MCGrowthRateStats$Par_ue <- factor(MCGrowthRateStats$Par_ue)
+MCGrowthRateStats$O2 <- factor(MCGrowthRateStats$O2)
 MCGrowthRateStats$WL <- factor(MCGrowthRateStats$WL)
 MCGrowthRateStats$Strain <- factor(MCGrowthRateStats$Strain)
 
 # Two way Anova with interactions
-model<-aov(deltaOD_Lmu_corr~Strain*Par_ue*WL, data=MCGrowthRateStats)
+model<-aov(deltaOD_Lmu_corr~Strain*O2*WL, data=MCGrowthRateStats)
 AnovaTest_GrowthRate<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
-TukeyHSDTest_GrowthRate<-TukeyHSD(model, which = c("Strain", "Par_ue", "WL"))
+TukeyHSDTest_GrowthRate<-TukeyHSD(model, which = c("Strain", "O2", "WL"))
 ```
 
 # Save RDS that create stats and tables

@@ -1,0 +1,200 @@
+---
+title: "MultiSpectralGrowth_manuscript"
+author: 
+- Sylwia Sliwinska-Wilczewska:
+    institute: [MTA, UG]
+    email: ssliwinskawilczews@mta.ca
+- Naaman Oman: 
+    institute: MTA
+    email: nomar@mta.ca
+- Mireille Savoie: 
+    institute: MTA
+    email: msavoie@mta.ca
+- Maximilian Berthold: 
+    institute: MTA
+    email: mberthold@mta.ca
+- Douglas A. Campbell: 
+    institute: MTA
+    email: dcampbel@mta.ca
+    corespondence: TRUE
+institute:
+  - MTA: "Department of Biology, Mount Allison University, 53 York St., Sackville NB, Canada, E4L 1C9"
+  - UG: "Institute of Oceanography, University of Gdansk, 46 Pilsudskiego St, P81-378, Gdynia, Poland"
+
+output: 
+  bookdown::html_document2:
+    code-folding: show
+    keep_md: yes
+    fig.caption: yes
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 6
+    pandoc_args: 
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'
+  bookdown::word_document2:
+    keep_md: yes
+    fig.caption: yes
+    toc: TRUE
+    toc_depth: 6
+    pandoc_args: 
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'
+bibliography: [Complementary_chromatic_adaptation.bib, packages.bib]
+csl: elsevier-harvard.csl
+---
+```{r, import libraries, include = FALSE}
+library(tidyverse)
+library(glue)
+library(googlesheets4)
+googlesheets4:: gs4_deauth()
+library(kableExtra)
+```
+
+```{r, save package citations, include = FALSE}
+knitr:: write_bib(c("tidyverse", "glue", "googlesheets4", "kableExtra"), "packages.bib")
+```
+
+```{r defining filepaths}
+FiguresFP <- file.path("SySl_MultiSpectralGrowth_manuscript_files", "figure-html")
+```
+ 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction {.unnumbered}
+Note: What is the target journal and content for this assessment of spectral and O2 influences on growth of Baltic strains?
+It could clearly hit some 'local' journal on Baltic coastal issues.
+Is there potential for wider conclusions for a wide journal?
+
+Functional analyses to complete the growth and pigment plots:
+
+-Solisense light response curves under all five actinic light colours.
+  So, for example, PSII ETR vs. colour and/or JVPSII vs. colour
+    Needs Doug to implement new PSII ETR and/or JVPSII; on Doug's list.
+    
+-OLIS spectra could be deconvoluted to pigment pools at Days many repeats
+  Possibly focus on achieved pigment pool after XX days; ecologically relevant
+  Mixing rates? Eddy duration?....  Or just pick a baseline period
+  Or achieved pigment pools from mid-exponential vs. stationary....????
+  Or after so many rounds of cell division....
+  
+  Something to rationally motivate choices of what data are presented.
+  
+  Consider fitting growth rate vs. spectra with a function (or interpolate) to compare to JVPSII vs. spectra
+  Is growth rate pattern mirroring JVPSII or do other factors intervene?
+  
+  With correct unit choices we can plot growth return on JVPSII (or on PSII ETR) across spectra....
+  
+  Use OLIS spectra to generate a* etc.
+  a* is the achieved absorbance per unit chlorophyll
+  a* can be across PAR or waveband specific
+  
+  Calculation is a bit confusing but we can work it out.
+  
+  Attempt to use O2 calibration to get absolute values for JVPSII...
+  
+  Doug tasks:
+  -add JVPSII and new PSII ETR
+  
+  Sylwia tasks:
+  Continue to plot data
+  -OLIS import and plot representative spectra
+  -consider OLIS deconvolution  (consult with Doug as needed; do not be stuck!)
+ 
+
+  
+  Use OLIS spectral deconvolution to express PE/PC as index of (Complementary) Chromatic Acclimation
+ 
+  Experimental Work: 
+  *Probably add low O2 for BA127R* 
+
+# Material and Methods {.unnumbered}
+
+## Statistical analysis {.unnumbered}
+We used R [@rcoreteamLanguageEnvironmentStatistical2019] running under RStudio [@rstudioteamRStudioIntegratedDevelopment2015], using packages "tidyverse" [@R-tidyverse], "glue" [@R-glue], "googlesheets4" [@R-googlesheets4], "kableExtra" [@R-kableExtra].
+
+# Results {.unnumbered}
+
+Note:
+Are there any validations of [O2] with optode for 'low O2'?
+In remaining runs test achieved low O2 range
+With Mireille we found wide variation in growth responses in tubes that were consistently ~< 5 µmol O2 l-1 compared to tubes that were ~ 20 µmol O2 l-1
+
+i) Clear difference in growth response to spectral range
+ii) Evidence for combined toxicity of O2 x 405 nm b/c growth faster under low O2 x 405 nm
+
+```{r GrowthRate, fig.cap = GrowtRate_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+GrowtRate_cap<- glue("Growth rate - Logistic OD720 (MultiCulti)", .sep = " ")
+
+knitr::include_graphics(file.path(FiguresFP, "Multi_LogisticOD720.png"))
+# knitr::include_graphics(file.path("SySl_MultiSpectralGrowth_manuscript_files", "figure-html", "Multi_LogisticOD720.png"))
+
+```
+
+```{r GrowthRateDelta, fig.cap = GrowtRateDelta_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+GrowtRateDelta_cap<- glue("Growth rate - Logistic Delta (MultiCulti)", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP, "Multi_LogisticDeltaFIXSCALE.png"))
+```
+
+
+Possibly interesting differences in patterns of fitted logistic growth rate vs. achieved absorbance after 7 days!
+Possibly presentation approach is to present growth achievement over 7 days (or other window) rather than nominal fitted growth rate
+
+Note: Figure Caption Numbering messed up in HTML
+Avoid spaces in r chunk names for auto-numbering
+
+Consider some XY cross plots and regressions among different metrics of chlorophyll for Supplemental results.
+Use fitted linear model NOT the ggplot geom_smooth b/c we need to be sure that fitted models are actually based upon the presented data.
+
+Cross plots of Pico cell counts vs. PAMAS and vs. OD750 etc.
+  Possible discrepancy with results from Gdansk calibration curves from flow cytometer?
+```{r ABClario, fig.cap = ABClario_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+ABClario_cap<- glue("Absorbance - OD750 (ClarioSTAR)", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP, "AB_OD750.png"))
+```
+
+```{r ABClarioOD680, fig.cap = ABClarioOD680_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+ABClarioOD680_cap<- glue("Absorbance - OD680 (ClarioSTAR)", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP, "AB_OD680.png"))
+```
+
+```{r ChlTurner, fig.cap = ChlugmLTurner_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+ChlugmLTurner_cap<- glue("Chl a ug/mL (Turner)", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP, "ChlaTurner_ugml-1.png"))
+```
+
+```{r ChlTurnerN, fig.cap = ChlugmLTurnerN_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+ChlugmLTurnerN_cap<- glue("Chl a fg/cell (Turner)", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP, "ChlaTurner_fgcell-1_lack730.png"))
+```
+
+Re-set sizes of .png upon generation
+```{r Ncytometer, fig.cap = Ncytometer_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+Ncytometer_cap<- glue("N 10^7 cell/mL (MD Pico cytometer)", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP, "MDPicoN107.png"))
+```
+
+```{r NBDAccurri, fig.cap = Nflowcytometer_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+Nflowcytometer_cap<- glue("N 10^7^ cell/mL (BD Accurri flowcytometer)", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP, "OD750NBDcytometer.png"))
+```
+
+```{r PCPERatio, fig.cap = PCPERatio_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+PCPERatio_cap<- glue("PC/PE Ratio (Filters)", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP, "PCPERatio.png"))
+```
+
+OLIS based PC/PE ratios; incomplete data from filters
+PC/PE or PE/PC?
+Also PC/Chl and PE/Chl?
+
+
+According to Fig. /@ref(fig:SolisenseData) blah
+
+
+# Discusion {.unnumbered}
+
+# References {.unnumbered}
