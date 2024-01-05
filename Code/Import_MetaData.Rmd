@@ -60,7 +60,7 @@ CultureCatalog <- read_sheet("https://docs.google.com/spreadsheets/d/1ZXpwR7Gfto
   mutate(WL = unlist(WL)) %>%
   mutate(ExpDate = ymd(ExpDate),
           ExpEndDate = ymd_hms(`ExpEndDate`)) %>% 
-  filter(str_detect(SampleID,  ProjectRows)) %>% 
+  filter(str_detect(SampleID, ProjectRows)) %>% 
   select(all_of(ProjectCols))          
 ```
 # Remove a unrelated character (1899-12-30) in data frame column
@@ -95,7 +95,7 @@ rm(CultureCatalog1, CultureCatalog2)
 # Save rds for further analysis
 
 ```{r save rds}
-saveRDS(object = CultureCatalog, file = file.path("..", "Data", "CultureCatalog.Rds"), compress = "xz")
+saveRDS(object = CultureCatalog, file = file.path("..", "Data", "ImportedData", "ImportedMetaData", "CultureCatalog.Rds"), compress = "xz")
 ```
 
 # Variable names used in Data Dictionary
