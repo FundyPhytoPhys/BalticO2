@@ -43,7 +43,7 @@ library(googlesheets4)
 
 ```{r set project variables, warning = FALSE, echo=FALSE}
 #"..", takes up a level in the directory path
-Project <- "BalticCCA"
+Project <- "BalticO2"
 DataOut <- file.path("..","Data", "ImportedData", "ImportedMetaData")
 ProjectRows <- c("SySl")
 
@@ -73,7 +73,7 @@ CultureCatalog$ExpStartTime<-gsub("1899-12-30 ","",as.character(CultureCatalog$E
 
 ```{r filter MetaData}
 CultureCatalog<-CultureCatalog %>% 
-  filter(Run == 56 | Run== 59 | Run == 63 | Run == 68| Run == 70) 
+  filter(Run == 57 | Run== 61 | Run == 76 | Run == 118| Run == 119 | Run == 122 | Run == 124) 
 ```
 
 # Calculate daily PAR photon dose
