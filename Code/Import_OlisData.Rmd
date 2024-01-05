@@ -46,7 +46,7 @@ library(readxl)
 ```
 
 ```{r set project variables, read zipped files, list available files, warning = FALSE, echo=FALSE}
-Project <- "BalticCCA"
+Project <- "BalticO2"
 DataOut <- file.path("..", "Data", "ImportedData", "ImportedOlisData")
 
 # Set the path to the zip folder and the destination folder
@@ -131,7 +131,7 @@ TargetSpectraLong <- TargetSpectraLong %>%
 # Read MetaData
 
 ```{r read locally stored metadata from rds}
-CultureCatalog <- readRDS(file = file.path("..", "Data","CultureCatalog.Rds"))
+CultureCatalog <- readRDS(file = file.path("..", "Data","ImportedData", "ImportedMetaData", "CultureCatalog.Rds"))
 
 CultureCatalog<-CultureCatalog %>% 
   select(-c(PrimaryOperator, Temp_c, ExpCul, ExpStartTime, O2_Category, Optode, OptodeCh, OptodeMeasure))
@@ -150,8 +150,8 @@ group_by(SampleID) %>%
   mutate(SumAb = sum(Absorbance)) %>% 
 ungroup()
 
-OLISSpectraMeta <- OLISSpectraMeta %>%
-  filter(nm >= 400 & nm <= 700)
+# OLISSpectraMeta <- OLISSpectraMeta %>%
+#   filter(nm >= 400 & nm <= 700)
 ```
 
 # Normalize spectra to 440 nm
@@ -171,6 +171,7 @@ group_by(SampleID, E_days, Par_ue, Photoperiod) %>%
   mutate(SumAbNorm = sum(AbsNorm440)) %>% 
 ungroup()
 ```
+
 # Cleaning df before saving as rds and removed unnecessary files from the environment
 
 ```{r cleaning and ordering OLISSpectraMeta440 before creating rds}

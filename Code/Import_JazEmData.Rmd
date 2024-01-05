@@ -40,7 +40,7 @@ library(googledrive)
 ```
 
 ```{r set project variables, read zipped files, list available files, warning = FALSE, echo=FALSE}
-Project <- "BalticCCA"
+Project <- "BalticO2"
 DataOut <- file.path("..", "Data", "ImportedData", "ImportedJazEmData")
 
 # Set the path to the zip folder and the destination folder
