@@ -203,7 +203,7 @@ SolFitsTrimOS_lightsteps <- SolFitsTrimOS %>%
 # Save rds for further analysis
 
 ```{r save rds}
-# saveRDS(SolFitsTrimOS_lightsteps, file.path(DataOut, paste(Project, "Imported_SolFitsTrimOS_lightsteps.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+# saveRDS(SolFitsTrimOS_lightsteps, file.path(DataOut, paste(Project, "Imported_SolFitsTrimOS_lightstepsAll.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 
 ```
 
@@ -367,7 +367,7 @@ SolFitsTrimMetaDarkafterLightOS<- SolFitsTrimMetaDarkafterLightOS %>%
 # Save rds for further analysis
 
 ```{r save rds}
-# saveRDS(SolFitsTrimMetaDarkafterLightOS, file.path(DataOut, paste(Project, "Imported_SolFitsTrimMetaDarkafterLightOS.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+# saveRDS(SolFitsTrimMetaDarkafterLightOS, file.path(DataOut, paste(Project, "Imported_SolFitsTrimMetaDarkafterLightOSAll.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 
 ```
 
@@ -377,7 +377,7 @@ SolFitsTrimMetaDarkafterLightOS<- SolFitsTrimMetaDarkafterLightOS %>%
 Project <- "BalticO2"
 DataOut <- file.path("..", "Data", "ImportedData", "ImportedSolisenseData")
 
-zip_file <- file.path("..", "Data", "RawData", "SolisenseNSData.zip")
+zip_file <- file.path("..", "Data", "RawData", "SolisenseNSDatas.zip")
 
 SolisenseFilesNS <- unzip(zip_file, list = TRUE)
 SolisenseFilesNS <- SolisenseFilesNS[grepl(".csv$", SolisenseFilesNS$Name), "Name"]
@@ -406,12 +406,13 @@ SolFitsNS <- SolisenseFilesNS %>%
 ```{r tidy SolFitsTrim}
 SolFitsTrimNS <- SolFitsNS %>%
   filter(!grepl("----", DATE)) %>% 
+  select(-c(Alp2PQ, Alp3PQ)) %>% 
   select(-c("RFID_User_Data", "Barcode_Data", "PIF",  "Lon", "Lat", "GPS_stat", "LEDSel")) %>% # remove superfluous columns for unfit data
 
-  mutate(Filename = str_remove(string = Filename, pattern = "/RawData/SolisenseNSData.zip/"),
+  mutate(Filename = str_remove(string = Filename, pattern = "/RawData/SolisenseNSDatas.zip/"),
          Filename = str_remove(string = Filename, pattern = "_fit.csv")
          ) %>%
-  separate(Filename, into = c("fp1", "fp2", "fp3", "fp4", "fp5", "fp6", "fp7", "Project", "RunDateTime", "SampleID", "Ex_WL"), sep = "([\\/\\_])", remove = FALSE) %>%
+  separate(Filename, into = c("fp1", "fp2", "fp3", "fp4", "fp5", "fp6", "fp7", "RunDateTime", "Project",  "SampleID", "Ex_WL"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(RunDateTime = ymd_hm(RunDateTime),
          TIME = as.character(TIME)) %>%  #time-column may be read in as factor, and as.character changes it to numeric; using lubdridate::hms would only change the format to 13H 4M 2S but does not work later to merge into one DateTime-column
   mutate(SourceDataFile = `Source DataFile`,
@@ -688,9 +689,10 @@ SolFitsMetaDarkafterLight <-SolFitsMetaDarkafterLight %>%
 
 ```{r preliminary plot}
 SolFitsMeta %>%
+  #filter(Par_ue!=30) %>% 
   ggplot() +
   geom_point(aes(x = Par_ue, y = Sig, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-  facet_grid(rows = vars(Ex_WL), cols = vars(Photoperiod)) +
+  facet_grid(rows = vars(Ex_WL), cols = vars(Photoperiod, WL, O2)) +
   theme_bw()
 # 
 # SolFitsMetaDarkafterLight %>%
