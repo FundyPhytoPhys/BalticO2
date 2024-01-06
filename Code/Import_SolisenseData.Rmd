@@ -86,10 +86,10 @@ CultureCatalog<-CultureCatalog %>%
 # Set Project Variables from old software (OS)
 
 ```{r set project variables, read zipped files, list available files, warning = FALSE, echo=FALSE}
-Project <- "BalticCCA"
+Project <- "BalticO2"
 DataOut <- file.path("..", "Data", "ImportedData", "ImportedSolisenseData")
 
-zip_file <- file.path("..", "Data", "RawData", "SolisenseOSData.zip")
+zip_file <- file.path("..", "Data", "RawData", "SolisenseOSColourData.zip")
 
 SolisenseFilesOS <- unzip(zip_file, list = TRUE)
 SolisenseFilesOS <- SolisenseFilesOS[grepl(".csv$", SolisenseFilesOS$Name), "Name"]
@@ -362,7 +362,7 @@ SolFitsTrimMetaDarkafterLightOS<- SolFitsTrimMetaDarkafterLightOS %>%
 # Set Project Variables from new software (NS)
 
 ```{r set project variables, read zipped files, list available files, warning = FALSE, echo=FALSE}
-Project <- "BalticCCA"
+Project <- "BalticO2"
 DataOut <- file.path("..", "Data", "ImportedData", "ImportedSolisenseData")
 
 zip_file <- file.path("..", "Data", "RawData", "SolisenseNSData.zip")
