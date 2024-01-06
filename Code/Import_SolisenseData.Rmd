@@ -91,6 +91,9 @@ DataOut <- file.path("..", "Data", "ImportedData", "ImportedSolisenseData")
 
 zip_file <- file.path("..", "Data", "RawData", "SolisenseOSData.zip")
 
+PlotsPath <- file.path("..", "Output", "Plots")
+RDSPlotPath <- file.path("..", "Output", "PlotsRDS")
+
 SolisenseFilesOS <- unzip(zip_file, list = TRUE)
 SolisenseFilesOS <- SolisenseFilesOS[grepl(".csv$", SolisenseFilesOS$Name), "Name"]
 print(SolisenseFilesOS)
@@ -377,7 +380,7 @@ SolFitsTrimMetaDarkafterLightOS<- SolFitsTrimMetaDarkafterLightOS %>%
 Project <- "BalticO2"
 DataOut <- file.path("..", "Data", "ImportedData", "ImportedSolisenseData")
 
-zip_file <- file.path("..", "Data", "RawData", "SolisenseNSDatas.zip")
+zip_file <- file.path("..", "Data", "RawData", "SolisenseNSData.zip")
 
 SolisenseFilesNS <- unzip(zip_file, list = TRUE)
 SolisenseFilesNS <- SolisenseFilesNS[grepl(".csv$", SolisenseFilesNS$Name), "Name"]
@@ -409,7 +412,7 @@ SolFitsTrimNS <- SolFitsNS %>%
   select(-c(Alp2PQ, Alp3PQ)) %>% 
   select(-c("RFID_User_Data", "Barcode_Data", "PIF",  "Lon", "Lat", "GPS_stat", "LEDSel")) %>% # remove superfluous columns for unfit data
 
-  mutate(Filename = str_remove(string = Filename, pattern = "/RawData/SolisenseNSDatas.zip/"),
+  mutate(Filename = str_remove(string = Filename, pattern = "/RawData/SolisenseNSData.zip/"),
          Filename = str_remove(string = Filename, pattern = "_fit.csv")
          ) %>%
   separate(Filename, into = c("fp1", "fp2", "fp3", "fp4", "fp5", "fp6", "fp7", "RunDateTime", "Project",  "SampleID", "Ex_WL"), sep = "([\\/\\_])", remove = FALSE) %>%
@@ -692,7 +695,7 @@ SolFitsMeta %>%
   #filter(Par_ue!=30) %>% 
   ggplot() +
   geom_point(aes(x = Par_ue, y = Sig, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-  facet_grid(rows = vars(Ex_WL), cols = vars(Photoperiod, WL, O2)) +
+  facet_grid(rows = vars(Ex_WL), cols = vars(WL, O2)) +
   theme_bw()
 # 
 # SolFitsMetaDarkafterLight %>%
@@ -701,6 +704,12 @@ SolFitsMeta %>%
 #   facet_grid(rows = vars(Ex_WL), cols = vars(Photoperiod)) +
 #   theme_bw()
 ```
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(PlotsPath, paste("Solisense2_SupPlot",".png",sep = "")), height=10, width= 8,  dpi = 300, limitsize = TRUE)
+```
+
 
 # Save rds for further analysis
 
