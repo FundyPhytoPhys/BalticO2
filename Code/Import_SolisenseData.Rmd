@@ -77,7 +77,7 @@ A2_m2 <- 1E20 #for sigma -> angstrom (Å) – a metric unit of length equal to 1
 # Read MetaData
 
 ```{r read locally stored metadata from rds}
-CultureCatalog <- readRDS(file = file.path("..", "Data","CultureCatalog.Rds"))
+CultureCatalog <- readRDS(file = file.path("..", "Data", "ImportedData", "ImportedMetaData", "CultureCatalog.Rds"))
 
 CultureCatalog<-CultureCatalog %>% 
   select(-c(PrimaryOperator, Temp_c, ExpCul, ExpStartTime, O2_Category, Optode, OptodeCh, OptodeMeasure))
@@ -89,7 +89,7 @@ CultureCatalog<-CultureCatalog %>%
 Project <- "BalticO2"
 DataOut <- file.path("..", "Data", "ImportedData", "ImportedSolisenseData")
 
-zip_file <- file.path("..", "Data", "RawData", "SolisenseOSColourData.zip")
+zip_file <- file.path("..", "Data", "RawData", "SolisenseOSData.zip")
 
 SolisenseFilesOS <- unzip(zip_file, list = TRUE)
 SolisenseFilesOS <- SolisenseFilesOS[grepl(".csv$", SolisenseFilesOS$Name), "Name"]
@@ -198,6 +198,13 @@ SolFitsTrimOS_lightsteps <- SolFitsTrimOS %>%
   relocate(Ex_WL, .after = Dark1s) %>%
   relocate(ActPAR, .after = Ex_WL) %>%
   ungroup()
+```
+
+# Save rds for further analysis
+
+```{r save rds}
+# saveRDS(SolFitsTrimOS_lightsteps, file.path(DataOut, paste(Project, "Imported_SolFitsTrimOS_lightsteps.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
 ```
 
 # Merge Solisense data with MetaData
@@ -357,7 +364,12 @@ SolFitsTrimMetaDarkafterLightOS<- SolFitsTrimMetaDarkafterLightOS %>%
   mutate(Time_h = E_days*24)
 ```
 
+# Save rds for further analysis
 
+```{r save rds}
+# saveRDS(SolFitsTrimMetaDarkafterLightOS, file.path(DataOut, paste(Project, "Imported_SolFitsTrimMetaDarkafterLightOS.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
+```
 
 # Set Project Variables from new software (NS)
 
