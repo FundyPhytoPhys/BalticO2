@@ -236,7 +236,7 @@ MultiCultiDataAll %>%
   ggplot() +
   #geom_area(aes(x = Time_h, y = meanActinic_par_h), size = 0.1, fill = "tan1", alpha = 0.6) +
   geom_line(aes(x = Time_h, y = meanOD680_h, colour = as.factor(O2)), size = 0.5, show.legend = T) +
-  scale_colour_discrete(type=c("palegreen3", "brown4"), name="") +
+  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="") +
   labs(y = "Optical density ("~OD[680]~")", x = "Elapsed time (h)") +
   ggh4x::facet_nested(cols = vars(WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw() +
@@ -258,7 +258,7 @@ MultiCultiDataAll %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(PlotsPath, paste("GrowthCurve_SupPlot",".png",sep = "")), height=10, width= 8,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(PlotsPath, paste("GrowthCurve180_SupPlot",".png",sep = "")), height=10, width= 8,  dpi = 300, limitsize = TRUE)
 ```
 
 # Create preliminary plot - loop
