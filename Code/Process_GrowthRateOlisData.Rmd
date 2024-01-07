@@ -88,7 +88,7 @@ MultiCultiGrowth <- readRDS(MultiCultiGrowthFile)  %>%
 MultiCultiGrowth<-MultiCultiGrowth %>% 
   dplyr::select(c(Tube, ExpDate, MC, Run, SampleID, Strain, Par_ue, Photoperiod, WL, O2, LightShape, PARPhotonDose_day, OD720_Lmu_se, OD720_Lmu_corr, deltaOD_Lmu_se, deltaOD_Lmu_corr))
   
-MCGrowthRate<-MultiCultiGrowth %>% 
+MultiCultiGrowth<-MultiCultiGrowth %>% 
   mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
          Strain=="BA77G"~"PC-rich_077"))
 ```
@@ -96,30 +96,32 @@ MCGrowthRate<-MultiCultiGrowth %>%
 # Load processed Olis&Jaz RDS
 
 ```{r set project variables}
-# Project <- "BalticCCA"
-# DataIn <- file.path("..", "Data", "ProcessedData", "ProcessedOlisJazData", fsep = .Platform$file.sep)
+Project <- "BalticO2"
+DataIn <- file.path("..", "Data", "ProcessedData", "ProcessedOlisJazData", fsep = .Platform$file.sep)
 ```
 
 # List and read processed Olis and Jaz files
 
 ```{r exported Rmd only first time in session}
-# list.files(path = DataIn, pattern = Project, full.names = TRUE)
+list.files(path = DataIn, pattern = Project, full.names = TRUE)
 ```
 
 ```{r read imported Olis file}
-# OLISSpectraFile <- "../Data/ProcessedData/ProcessedOlisJazData/Baltic_Photoperiod_Processed_OlisSpectraTidy.Rds"
-# OLISSpectraFileName <- str_split(string = OLISSpectraFile, "/")[[1]][3] %>%
-#   str_remove(pattern = ".Rds")
-# OLISSpectra <- readRDS(OLISSpectraFile)  %>%
-#   ungroup()
+OLISSpectraFile <- "../Data/ProcessedData/ProcessedOlisJazData/BalticO2_Processed_OlisSpectraTidy.Rds"
+OLISSpectraFileName <- str_split(string = OLISSpectraFile, "/")[[1]][3] %>%
+  str_remove(pattern = ".Rds")
+OLISSpectra <- readRDS(OLISSpectraFile)  %>%
+  ungroup()
 ```
+
 
 # Combine growth rate and Tidy Olis to get PUR
 
 ```{r}
-# MCGrowthRate <- OLISSpectra %>% 
-#   left_join(., MultiCultiGrowth, by = c("Run" = "Run", "SampleID" = "SampleID","Strain" = "Strain", "Par_ue" = "Par_ue", "Photoperiod" = "Photoperiod",  "O2" = "O2", "WL" = "WL",  "MC" = "MC", "Tube" = "Tube", "ExpDate" = "ExpDate", "LightShape" = "LightShape", "PARPhotonDose_day" = "PARPhotonDose_day")) 
-#   rm(MultiCultiGrowth, OLISSpectra)
+MCGrowthRate <- OLISSpectra %>%
+  left_join(., MultiCultiGrowth, by = c("Run" = "Run", "SampleID" = "SampleID","Strain" = "Strain", "Par_ue" = "Par_ue", "Photoperiod" = "Photoperiod",  "O2" = "O2", "WL" = "WL",  "MC" = "MC", "Tube" = "Tube", "ExpDate" = "ExpDate", "LightShape" = "LightShape", "PARPhotonDose_day" = "PARPhotonDose_day"))
+  
+rm(MultiCultiGrowth, OLISSpectra)
 ```
 
 # Create preliminary plot
@@ -140,6 +142,7 @@ O2.labs <- c("Oxygen level: high", "Oxygen level: low", "Oxygen level: high")
 names(O2.labs) <- c("21", "0", "21")
 
 MCGrowthRate %>%
+  filter(Run!=118 & Run!= 119) %>% 
   filter(Par_ue!=30) %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
@@ -192,7 +195,7 @@ saveRDS(TukeyHSDTest_GrowthRate, file.path(RDSTablePath, paste(Project, "GrowthR
 # Removed unneccessary df from the environment
 
 ```{r}
-rm(MCGrowthRateStats, model, MultiCultiGrowth)
+rm(MCGrowthRateStats, model)
 ```
 
 # Save Rds for further analysis
