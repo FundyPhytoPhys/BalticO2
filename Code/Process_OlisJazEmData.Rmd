@@ -484,13 +484,14 @@ lab2=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24
 lab3=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("900 µE"))
 
 OLISAllPURTidy %>%
+  #filter(PURPARRatio<=1) %>% 
   filter(Par_ue!=30) %>% 
   ggplot() +
   geom_point(aes(x = E_hours, y = PURPARRatio, colour = as.factor(Strain)), alpha = 0.9, size = 3, show.legend = T) +
   scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
   scale_y_continuous(breaks=seq(0, 1.2, by = 0.4)) +
   coord_cartesian(ylim = c(0, 1.7)) +
-  ggh4x::facet_nested(cols = vars(WL), rows = vars(O2), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(O2, Strain), labeller = label_parsed) +
   theme_bw()
 ```
 # Save plot 
