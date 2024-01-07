@@ -104,8 +104,8 @@ mutate(ObsDate = ymd(ObsDate),
 # Select wavelength range from 400 to 700 nm
 
 ```{r select range of nm}
-JazSpecTrim <- JazSpec %>% 
-  subset(JazSpec$Wavelength >= 400 & JazSpec$Wavelength <= 701)
+JazSpecTrim <- JazSpec  
+  # subset(JazSpec$Wavelength >= 400 & JazSpec$Wavelength <= 701)
 ```
 
 # Remove all NA columns & empty rows, fix column types
@@ -135,6 +135,16 @@ JazSpecTrim<-JazSpecTrim %>%
   select(-c(CDateTime))
 
 colnames(JazSpecTrim)
+```
+
+# Preliminary plot
+
+```{r preliminary plot}
+JazSpecTrim %>%
+  ggplot() +
+  geom_point(aes(x = Wavelength, y = rollmeanCounts, colour = as.factor(Strain)), alpha = 0.9, size = 3, show.legend = T) +
+  ggh4x::facet_nested(cols = vars(Par_ue), rows = vars(WL), labeller = label_parsed) +
+  theme_bw() 
 ```
 
 ```{r removed unnecessary files from environment}

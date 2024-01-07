@@ -105,35 +105,185 @@ JazDataRound <- JazDataRound %>%
 #   filter(WavelengthRound >= 400 & WavelengthRound <= 700)
 ```
 
-405-400
-450-441
-470-469
-530-521
-620-612
-660-647
-730-701
 
 
-# Normalize Jaz emission to 439 nm
+# Normalize Jaz emission to 405 nm
 
-```{r Normalization Jaz emission at 439}
-EmissionJazWW <- JazDataRound %>%
+```{r Normalization Jaz emission at 405}
+EmissionJaz405 <- JazDataRound %>%
   group_by(WL, Strain, Par_ue) %>%
-  filter(WavelengthRound == 439) %>%
-  mutate(EmJaz439 = CountsMean) %>%
-  select(Strain, EmJaz439, Par_ue) %>%
+  filter(WavelengthRound == 393) %>%
+  mutate(EmJaz393 = CountsMean) %>%
+  select(Strain, EmJaz393, Par_ue) %>%
   ungroup()
 
-JazDataRoundMeta <- JazDataRound %>%
-  left_join(., EmissionJazWW) %>%
-  mutate(EmNormJaz439 = CountsMean / EmJaz439)
+JazDataRoundMeta405 <- JazDataRound %>%
+  filter(WL==405) %>% 
+  left_join(., EmissionJaz405) %>%
+  mutate(EmNormJaz393 = CountsMean / EmJaz393)
+
+rm(EmissionJaz405)
 ```
+
+# Normalize Jaz emission to 450 nm
+
+```{r Normalization Jaz emission at 450}
+EmissionJaz450 <- JazDataRound %>%
+  group_by(WL, Strain, Par_ue) %>%
+  filter(WavelengthRound == 441) %>%
+  mutate(EmJaz441 = CountsMean) %>%
+  select(Strain, EmJaz441, Par_ue) %>%
+  ungroup()
+
+JazDataRoundMeta450 <- JazDataRound %>%
+  filter(WL==450) %>% 
+  left_join(., EmissionJaz450) %>%
+  mutate(EmNormJaz441 = CountsMean / EmJaz441)
+
+rm(EmissionJaz450)
+```
+
+# Normalize Jaz emission to 470 nm
+
+```{r Normalization Jaz emission at 470}
+EmissionJaz470 <- JazDataRound %>%
+  group_by(WL, Strain, Par_ue) %>%
+  filter(WavelengthRound == 469) %>%
+  mutate(EmJaz469 = CountsMean) %>%
+  select(Strain, EmJaz469, Par_ue) %>%
+  ungroup()
+
+JazDataRoundMeta470 <- JazDataRound %>%
+  filter(WL==470) %>% 
+  left_join(., EmissionJaz470) %>%
+  mutate(EmNormJaz469 = CountsMean / EmJaz469)
+
+rm(EmissionJaz470)
+```
+
+# Normalize Jaz emission to 530 nm
+
+```{r Normalization Jaz emission at 530}
+EmissionJaz530 <- JazDataRound %>%
+  group_by(WL, Strain, Par_ue) %>%
+  filter(WavelengthRound == 521) %>%
+  mutate(EmJaz521 = CountsMean) %>%
+  select(Strain, EmJaz521, Par_ue) %>%
+  ungroup()
+
+JazDataRoundMeta530 <- JazDataRound %>%
+  filter(WL==530) %>% 
+  left_join(., EmissionJaz530) %>%
+  mutate(EmNormJaz521 = CountsMean / EmJaz521)
+
+rm(EmissionJaz530)
+```
+
+# Normalize Jaz emission to 620 nm
+
+```{r Normalization Jaz emission at 620}
+EmissionJaz620 <- JazDataRound %>%
+  group_by(WL, Strain, Par_ue) %>%
+  filter(WavelengthRound == 612) %>%
+  mutate(EmJaz612 = CountsMean) %>%
+  select(Strain, EmJaz612, Par_ue) %>%
+  ungroup()
+
+JazDataRoundMeta620 <- JazDataRound %>%
+  filter(WL==620) %>% 
+  left_join(., EmissionJaz620) %>%
+  mutate(EmNormJaz612 = CountsMean / EmJaz612)
+
+rm(EmissionJaz620)
+```
+
+# Normalize Jaz emission to 660 nm
+
+```{r Normalization Jaz emission at 660}
+EmissionJaz660 <- JazDataRound %>%
+  group_by(WL, Strain, Par_ue) %>%
+  filter(WavelengthRound == 647) %>%
+  mutate(EmJaz647 = CountsMean) %>%
+  select(Strain, EmJaz647, Par_ue) %>%
+  ungroup()
+
+JazDataRoundMeta660 <- JazDataRound %>%
+  filter(WL==660) %>% 
+  left_join(., EmissionJaz660) %>%
+  mutate(EmNormJaz647 = CountsMean / EmJaz647)
+
+rm(EmissionJaz660)
+```
+
+# Normalize Jaz emission to 730 nm
+
+```{r Normalization Jaz emission at 730}
+EmissionJaz730 <- JazDataRound %>%
+  group_by(WL, Strain, Par_ue) %>%
+  filter(WavelengthRound == 722) %>%
+  mutate(EmJaz722 = CountsMean) %>%
+  select(Strain, EmJaz722, Par_ue) %>%
+  ungroup()
+
+JazDataRoundMeta730 <- JazDataRound %>%
+  filter(WL==730) %>% 
+  left_join(., EmissionJaz730) %>%
+  mutate(EmNormJaz722 = CountsMean / EmJaz722)
+
+rm(EmissionJaz730)
+```
+
+# Normalize Jaz emission to WW
+
+```{r Normalization Jaz emission at WW}
+EmissionJazWW <- JazDataRound %>%
+  group_by(WL, Strain, Par_ue) %>%
+  filter(WavelengthRound == 600) %>%
+  mutate(EmJaz600 = CountsMean) %>%
+  select(Strain, EmJaz600, Par_ue) %>%
+  ungroup()
+
+JazDataRoundMetaWW <- JazDataRound %>%
+  filter(WL== "WW") %>% 
+  left_join(., EmissionJazWW) %>%
+  mutate(EmNormJaz600 = CountsMean / EmJaz600)
+
+rm(EmissionJazWW)
+```
+# Merge df to have all WL
+
+```{r}
+JazDataRoundMeta1 <- JazDataRoundMeta730 %>%
+  full_join(., JazDataRoundMetaWW, by = c("FilenameJaz"= "FilenameJaz", "Strain" = "Strain", "Par_ue" = "Par_ue", "WL" = "WL", "WavelengthRound" = "WavelengthRound", "CountsMean" = "CountsMean"))
+ 
+JazDataRoundMeta2 <- JazDataRoundMeta1 %>%
+  full_join(., JazDataRoundMeta660, by = c("FilenameJaz"= "FilenameJaz", "Strain" = "Strain", "Par_ue" = "Par_ue", "WL" = "WL", "WavelengthRound" = "WavelengthRound", "CountsMean" = "CountsMean")) 
+
+JazDataRoundMeta3 <- JazDataRoundMeta2 %>%
+  full_join(., JazDataRoundMeta620, by = c("FilenameJaz"= "FilenameJaz", "Strain" = "Strain", "Par_ue" = "Par_ue", "WL" = "WL", "WavelengthRound" = "WavelengthRound", "CountsMean" = "CountsMean")) 
+
+JazDataRoundMeta4 <- JazDataRoundMeta3 %>%
+  full_join(., JazDataRoundMeta530, by = c("FilenameJaz"= "FilenameJaz", "Strain" = "Strain", "Par_ue" = "Par_ue", "WL" = "WL", "WavelengthRound" = "WavelengthRound", "CountsMean" = "CountsMean")) 
+
+JazDataRoundMeta5 <- JazDataRoundMeta4 %>%
+  full_join(., JazDataRoundMeta470, by = c("FilenameJaz"= "FilenameJaz", "Strain" = "Strain", "Par_ue" = "Par_ue", "WL" = "WL", "WavelengthRound" = "WavelengthRound", "CountsMean" = "CountsMean")) 
+
+JazDataRoundMeta6 <- JazDataRoundMeta5 %>%
+  full_join(., JazDataRoundMeta450, by = c("FilenameJaz"= "FilenameJaz", "Strain" = "Strain", "Par_ue" = "Par_ue", "WL" = "WL", "WavelengthRound" = "WavelengthRound", "CountsMean" = "CountsMean")) 
+
+JazDataRoundMeta <- JazDataRoundMeta6 %>%
+  full_join(., JazDataRoundMeta405, by = c("FilenameJaz"= "FilenameJaz", "Strain" = "Strain", "Par_ue" = "Par_ue", "WL" = "WL", "WavelengthRound" = "WavelengthRound", "CountsMean" = "CountsMean")) 
+
+
+rm(JazDataRoundMeta1, JazDataRoundMeta2, JazDataRoundMeta3, JazDataRoundMeta4, JazDataRoundMeta5, JazDataRoundMeta6, JazDataRoundMeta405, JazDataRoundMeta450, JazDataRoundMeta470, JazDataRoundMeta530, JazDataRoundMeta620, JazDataRoundMeta660, JazDataRoundMeta730, JazDataRoundMetaWW)
+```
+
 
 # Merge Olis and Jaz data
 
 ```{r combine Olis spectra and Jaz data}
-OLISSpectraMeta <- OLISSpectra %>%
-  left_join(., JazDataRoundMeta, by = c("Par_ue" = "Par_ue", "nm" = "WavelengthRound", "Strain" = "Strain", "WL" = "WL")) %>%
+OLISSpectraMeta <- JazDataRoundMeta %>%
+  left_join(., OLISSpectra, by = c("Par_ue" = "Par_ue", "WavelengthRound" = "nm" , "Strain" = "Strain", "WL" = "WL")) %>%
   unique()
 ```
 
@@ -142,11 +292,15 @@ OLISSpectraMeta <- OLISSpectra %>%
 ```{r estimate PUR}
 OLISSpectraMetaPUR <- OLISSpectraMeta %>%
   mutate(PURNorm = (AbsNorm440*EmNormJaz439)) %>% 
-  group_by(WL, Strain, Par_ue, Photoperiod, E_days) %>%
+  group_by(WL, Strain, Par_ue, Photoperiod, E_days, O2) %>%
   mutate(PURNormSum = sum(PURNorm)) %>% 
   mutate(SumEmNormJaz439 = sum(EmNormJaz439)) %>% 
   mutate(PUR = Par_ue*(PURNormSum/SumEmNormJaz439)) %>% 
   ungroup() 
+
+
+
+
 ```
 
 # Calculate daily PUR photon dose
@@ -169,7 +323,7 @@ OLISSpectraMetaPUR2 <- OLISSpectraMetaPUR %>%
 ```{r filter unrevelant data}
 OLISSpectraMetaPUR<-OLISSpectraMetaPUR %>% 
   filter(PUR>=0) %>% 
-  filter(PUR<=900)
+  filter(PUR<=180)
 ```
 
 # Preparing df for creating representative plot
@@ -200,132 +354,37 @@ OLISSpectraMetaPURShort <- OLISSpectraMetaPURShortBA127R %>%
 ```{r Changes strain names}
 OLISSpectraMetaPURShort <- OLISSpectraMetaPURShort %>%
       mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-         Strain=="BA48R"~"PE-rich_048",
-        Strain=="BA56G"~"PC-rich_056",
          Strain=="BA77G"~"PC-rich_077"))
 ```
 
 # Create plot
 
-```{r Create plot, fig.height = 10, fig.width = 8}
-Par_ue.labs <- c("30 µE", "90 µE", "180 µE", "Phase of growth", "900 µE")
-names(Par_ue.labs) <- c("30", "90", "180", "300", "900")
+```{r Create plot}
 
-Photoperiod.labs <- c("8 h", "Photoperiod: 12 h", "16 h", "24 h")
-names(Photoperiod.labs) <- c("8", "12", "16", "24")
-
-E_days.labs <- c("Exponential", "Pre-stationary")
-names(E_days.labs) <- c("3", "7")
-
-Strain.labs <- c("PC-rich", "PE-rich")
-names(Strain.labs) <- c("PC-rich_077", "PE-rich_127")
-
-O2.labs <- c("Strain")
-names(O2.labs) <- c(21)
-
-data_textPUR0 <- data.frame(Par_ue = c(300, 300), E_days = c(3, 7), Strain  = c("PE-rich_127", "PE-rich_127"), Photoperiod = c(12), O2 = c(21), label = c('PAR = 300 µE', 'PAR = 300 µE'))
-
-data_textPUR00 <- data.frame(Par_ue = c(300, 300), E_days = c(3, 7), Strain  = c("PC-rich_077", "PC-rich_077"), Photoperiod = c(12), O2 = c(21), label = c('PAR = 300 µE', 'PAR = 300 µE'))
-
-data_textPUR1 <- data.frame(Par_ue = c(300, 300), E_days = c(3, 7), Strain  = c("PE-rich_127", "PE-rich_127"), Photoperiod = c(12), O2 = c(21), label = c('PUR = 176 µE', 'PUR = 129 µE'))
-
-data_textPUR2 <- data.frame(Par_ue = c(300, 300), E_days = c(3, 7), Strain  = c("PC-rich_077", "PC-rich_077"), Photoperiod = c(12), O2 = c(21), label = c('PUR = 139 µE', 'PUR = 128 µE'))
-
-data_textpigment1 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PC-rich_077"), Photoperiod = c(12), O2 = c(21), label = c('Chl a 440 nm'))
-data_textpigment3 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PC-rich_077"), Photoperiod = c(12), O2 = c(21), label = c('Chl a 680 nm'))
-data_textpigment4 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PC-rich_077"), Photoperiod = c(12), O2 = c(21), label = c('PC 620 nm'))
-data_textpigment5 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PC-rich_077"), Photoperiod = c(12), O2 = c(21), label = c('Car 480 nm'))
-data_textpigment6 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PC-rich_077"), Photoperiod = c(12), O2 = c(21), label = c('PUB 500 nm'))
-
-arrowdf1 <- tibble(Strain = "PC-rich_077", E_days = 3, Par_ue = 300, O2 = c(21))
-arrowdf3 <- tibble(Strain = "PC-rich_077", E_days = 3, Par_ue = 300, O2 = c(21))
-arrowdf4 <- tibble(Strain = "PC-rich_077", E_days = 3, Par_ue = 300, O2 = c(21))
-arrowdf5 <- tibble(Strain = "PC-rich_077", E_days = 3, Par_ue = 300, O2 = c(21))
-arrowdf6 <- tibble(Strain = "PC-rich_077", E_days = 3, Par_ue = 300, O2 = c(21))
-
-data_textpigment7 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PE-rich_127"), Photoperiod = c(12), O2 = c(21), label = c('Chl a 440 nm'))
-data_textpigment8 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PE-rich_127"), Photoperiod = c(12), O2 = c(21), label = c('Car 480 nm'))
-data_textpigment9 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PE-rich_127"), Photoperiod = c(12), O2 = c(21), label = c('PE 570 nm'))
-data_textpigment10 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PE-rich_127"), Photoperiod = c(12), O2 = c(21), label = c('Chl a 680 nm'))
-data_textpigment11 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PE-rich_127"), Photoperiod = c(12), O2 = c(21), label = c('PC 620 nm'))
-data_textpigment12 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PE-rich_127"), Photoperiod = c(12), O2 = c(21), label = c('PUB 500 nm'))
-
-arrowdf7 <- tibble(Strain = "PE-rich_127", E_days = 3, Par_ue = 300, O2 = c(21))
-arrowdf8 <- tibble(Strain = "PE-rich_127", E_days = 3, Par_ue = 300, O2 = c(21))
-arrowdf9 <- tibble(Strain = "PE-rich_127", E_days = 3, Par_ue = 300, O2 = c(21))
-arrowdf10 <- tibble(Strain = "PE-rich_127", E_days = 3, Par_ue = 300, O2 = c(21))
-arrowdf11 <- tibble(Strain = "PE-rich_127", E_days = 3, Par_ue = 300, O2 = c(21))
-arrowdf12 <- tibble(Strain = "PE-rich_127", E_days = 3, Par_ue = 300, O2 = c(21))
-
-OLISSpectraMetaPURShort %>%
-  filter(Photoperiod == "12") %>%
-  filter(Strain == "PC-rich_077" | Strain == "PE-rich_127") %>%
-  filter(Par_ue == 300) %>%
-  filter(E_days == "3" | E_days == "7") %>%
+OLISSpectraMeta %>%
+  filter(Par_ue!=30) %>% 
   ggplot() +
-
-  geom_area(aes(x = nm, y = EmNormJaz439, fill = "gray84"), alpha = 0.6, show.legend = F) +
-  geom_area(aes(x = nm, y = PURNormBA127R, fill = "brown4"), alpha = 0.5, show.legend = F) +
-  geom_area(aes(x = nm, y = PURNormBA77G, fill = "palegreen3"), alpha = 0.5, show.legend = F) +
-  geom_line(aes(x = nm, y = AbsNorm440, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F, size = 0.4) +
-
-  geom_text(data=data_textPUR0, aes(x=446, y=1.26, label=label), size=3.7) +
-  geom_text(data=data_textPUR00, aes(x=446, y=1.26, label=label), size=3.7) +
-  geom_text(data=data_textPUR1, aes(x=446, y=1.21, label=label), size=3.7) +
-  geom_text(data=data_textPUR2, aes(x=446, y=1.21, label=label), size=3.7) +
-
-  geom_text(data=data_textpigment1, aes(x=500, y=1.1, label=label), size=4, colour = "darkgreen") + #chla440
-  geom_text(data=data_textpigment5, aes(x=500, y=0.8, label=label), size=4, colour = "orange") + #Car
-  geom_text(data=data_textpigment3, aes(x=650, y=1.2, label=label), size=4, colour = "darkgreen") +#chla680
-  geom_text(data=data_textpigment4, aes(x=590, y=0.95, label=label), size=4, colour = "deepskyblue4") + #PC
-  geom_text(data=data_textpigment6, aes(x=485, y=0.25, label=label), size=4, colour = "sienna4") + #PUB
-  geom_segment(data = arrowdf1,
-               aes(x = 480, xend = 445, y = 1.05, yend = 1),
-               colour = "darkgreen", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #chla440
-  geom_segment(data = arrowdf5,
-               aes(x = 480, xend = 475, y = 0.75, yend = 0.54),
-               colour = "orange", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #Car
-  geom_segment(data = arrowdf3,
-               aes(x = 660, xend = 680, y = 1.14, yend = 0.95),
-               colour = "darkgreen", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #chla680
-  geom_segment(data = arrowdf4,
-               aes(x = 610, xend = 630, y = 0.90, yend = 0.82),
-               colour = "deepskyblue4", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #PC
-  geom_segment(data = arrowdf4,
-               aes(x = 480, xend = 494, y = 0.30, yend = 0.41),
-               colour = "sienna4", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #PUB
-  geom_text(data=data_textpigment7, aes(x=500, y=1.1, label=label), size=4, colour = "darkgreen") + #chla440
-  geom_text(data=data_textpigment8, aes(x=500, y=0.8, label=label), size=4, colour = "orange") + #Car
-  geom_text(data=data_textpigment9, aes(x=580, y=1.0, label=label), size=4, colour = "darkmagenta") + #PE
-  geom_text(data=data_textpigment10, aes(x=650, y=1.2, label=label), size=4, colour = "darkgreen") +#chla680
-  geom_text(data=data_textpigment11, aes(x=600, y=0.17, label=label), size=4, colour = "deepskyblue4") + #PC
-  geom_text(data=data_textpigment12, aes(x=495, y=0.30, label=label), size=4, colour = "sienna4") + #PUB
-  geom_segment(data = arrowdf7,
-               aes(x = 480, xend = 445, y = 1.05, yend = 1),
-               colour = "darkgreen", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #chla440
-  geom_segment(data = arrowdf8,
-               aes(x = 480, xend = 475, y = 0.75, yend = 0.55),
-               colour = "orange", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #Car
-  geom_segment(data = arrowdf9,
-               aes(x = 590, xend = 575, y = 0.95, yend = 0.85),
-               colour = "darkmagenta", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #PE
-  geom_segment(data = arrowdf10,
-               aes(x = 660, xend = 680, y = 1.14, yend = 0.85),
-               colour = "darkgreen", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #chla680
-  geom_segment(data = arrowdf11,
-               aes(x = 610, xend = 630, y = 0.2, yend = 0.3),
-               colour = "deepskyblue4", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #PC
-  geom_segment(data = arrowdf12,
-               aes(x = 490, xend = 500, y = 0.35, yend = 0.52),
-               colour = "sienna4", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #PUB
-  scale_color_manual(values = c("PC-rich_077" ="palegreen3", "PE-rich_127" ="brown4")) +
-  scale_linetype_manual(values = c("PC-rich_077" ="solid", "PE-rich_127" ="longdash")) +
+  geom_area(aes(x = nm, y = EmNormJaz722, fill = "gray84"), alpha = 0.6, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz600, fill = "gray84"), alpha = 0.6, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz647, fill = "gray84"), alpha = 0.6, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz612, fill = "gray84"), alpha = 0.6, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz521, fill = "gray84"), alpha = 0.6, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz469, fill = "gray84"), alpha = 0.6, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz441, fill = "gray84"), alpha = 0.6, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz393, fill = "gray84"), alpha = 0.6, show.legend = F) +
+  
+  # geom_area(aes(x = nm, y = PURNormBA127R, fill = "brown4"), alpha = 0.5, show.legend = F) +
+  # geom_area(aes(x = nm, y = PURNormBA77G, fill = "palegreen3"), alpha = 0.5, show.legend = F) +
+  geom_line(aes(x = nm, y = AbsNorm440, colour = as.factor(Strain)), show.legend = T, size = 0.4) +
+    scale_color_manual(values = c("BA77G" ="palegreen3", "BA127R" ="brown4")) +
+  # scale_color_manual(values = c("PC-rich_077" ="palegreen3", "PE-rich_127" ="brown4")) +
+  # scale_linetype_manual(values = c("PC-rich_077" ="solid", "PE-rich_127" ="longdash")) +
   stat_wl_strip(aes(x = nm), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   scale_fill_identity() +
   labs(y = "Normalized absorbance", x = "Wavelength (nm)") +
   scale_y_continuous(breaks=seq(0, 1.2, by = 0.4)) +
-  coord_cartesian(ylim = c (-0.01, 1.25)) +
-  ggh4x::facet_nested(cols = vars(Par_ue, E_days), rows = vars(O2, Strain),labeller = labeller(Ex_WL = label_both, WL = label_both, E_days = E_days.labs, Photoperiod = Photoperiod.labs, Par_ue = Par_ue.labs, Strain = Strain.labs, O2 = O2.labs, )) +
+  coord_cartesian(ylim = c (-0.01, 1.6)) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(Strain, O2),labeller = labeller(Ex_WL = label_value, WL = label_value)) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
@@ -353,109 +412,7 @@ OLISSpectraMetaPURShort %>%
 ggsave(file = file.path(PlotsPath, paste("OlisSpectra_Plot",".png",sep = "")), height=10, width= 8,  dpi = 300, limitsize = TRUE)
 ```
 
-```{r Create plot, fig.height = 6, fig.width = 8}
 
-Par_ue.labs <- c("30 µE", "90 µE", "180 µE", "Phase of growth", "900 µE")
-names(Par_ue.labs) <- c("30", "90", "180", "300", "900")
-
-Photoperiod.labs <- c("8 h", "Photoperiod: 12 h", "16 h", "24 h")
-names(Photoperiod.labs) <- c("8", "12", "16", "24")
-
-E_days.labs <- c("Exponential", "Pre-stationary")
-names(E_days.labs) <- c("3", "7")
-
-Strain.labs <- c("PE-rich_127", "PC-rich_077")
-names(Strain.labs) <- c("PE-rich_127", "PC-rich_077")
-
-data_textPUR0 <- data.frame(Par_ue = c(300, 300), E_days = c(3, 7), Strain  = c("PE-rich_127", "PE-rich_127"), Photoperiod = c(12), label = c('PAR = 300 µE', 'PAR = 300 µE'))
-
-data_textPUR1 <- data.frame(Par_ue = c(300, 300), E_days = c(3, 7), Strain  = c("PE-rich_127", "PE-rich_127"), Photoperiod = c(12), label = c('PUR (PE-rich) = 176 µE', 'PUR (PE-rich) = 129 µE'))
-
-data_textPUR2 <- data.frame(Par_ue = c(300, 300), E_days = c(3, 7), Strain  = c("PE-rich_127", "PE-rich_127"), Photoperiod = c(12), label = c('PUR (PC-rich) = 139 µE', 'PUR (PC-rich) = 128 µE'))
-
-data_textpigment1 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PE-rich_127"), Photoperiod = c(12), label = c('Chl a 440 nm'))
-data_textpigment2 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PE-rich_127"), Photoperiod = c(12), label = c('PE 570 nm'))
-data_textpigment3 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PE-rich_127"), Photoperiod = c(12), label = c('Chl a 680 nm'))
-data_textpigment4 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PE-rich_127"), Photoperiod = c(12), label = c('PC 620 nm'))
-data_textpigment5 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PE-rich_127"), Photoperiod = c(12), label = c('Car 480 nm'))
-data_textpigment6 <- data.frame(Par_ue = c(300), E_days = c(3), Strain  = c("PE-rich_127"), Photoperiod = c(12), label = c('PUB 500 nm'))
-
-arrowdf1 <- tibble(Strain = "PE-rich_127", E_days = 3, Par_ue = 300)
-arrowdf2 <- tibble(Strain = "PE-rich_127", E_days = 3, Par_ue = 300)
-arrowdf3 <- tibble(Strain = "PE-rich_127", E_days = 3, Par_ue = 300)
-arrowdf4 <- tibble(Strain = "PE-rich_127", E_days = 3, Par_ue = 300)
-arrowdf5 <- tibble(Strain = "PE-rich_127", E_days = 3, Par_ue = 300)
-arrowdf6 <- tibble(Strain = "PE-rich_127", E_days = 3, Par_ue = 300)
-
-
-OLISSpectraMetaPURShort %>%
-  filter(Photoperiod == "12") %>%
-  filter(Strain == "PE-rich_127" | Strain == "PC-rich_077") %>%
-  filter(Par_ue == 300) %>%
-  filter(E_days == "3" | E_days == "7") %>%
-  ggplot() +
-  geom_area(aes(x = nm, y = EmNormJaz439, fill = "gray84"), alpha = 0.6, show.legend = F) +
-  geom_area(aes(x = nm, y = PURNormBA127R, fill = "brown4"), alpha = 0.5, show.legend = F) +
-  geom_area(aes(x = nm, y = PURNormBA77G, fill = "palegreen3"), alpha = 0.5, show.legend = F) +
-  geom_line(aes(x = nm, y = AbsNorm440, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F, size = 0.7) +
-
-  geom_text(data=data_textPUR0, aes(x=435, y=1.26, label=label), size=3.5) +
-  geom_text(data=data_textPUR1, aes(x=462, y=1.21, label=label), size=3.5) +
-  geom_text(data=data_textPUR2, aes(x=462, y=1.16, label=label), size=3.5) +
-
-  geom_text(data=data_textpigment1, aes(x=450, y=1.07, label=label), size=4, colour = "darkgreen") + #chla440
-  geom_text(data=data_textpigment5, aes(x=430, y=0.36, label=label), size=4, colour = "coral3") + #Car
-  geom_text(data=data_textpigment2, aes(x=520, y=0.92, label=label), size=4, colour = "darkmagenta") + #PE
-  geom_text(data=data_textpigment3, aes(x=660, y=1.08, label=label), size=4, colour = "darkgreen") +#chla680
-  geom_text(data=data_textpigment4, aes(x=605, y=1.0, label=label), size=4, colour = "deepskyblue4") + #PC
-  geom_text(data=data_textpigment6, aes(x=485, y=0.08, label=label), size=4, colour = "sienna4") + #PUB
-
-  geom_segment(data = arrowdf1,
-               aes(x = 470, xend = 440, y = 1.04, yend = 1.02),
-               colour = "darkgreen", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #chla440
-  geom_segment(data = arrowdf5,
-               aes(x = 450, xend = 470, y = 0.4, yend = 0.48),
-               colour = "coral3", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #Car
-  geom_segment(data = arrowdf2,
-               aes(x = 538, xend = 568, y = 0.88, yend = 0.86),
-               colour = "darkmagenta", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #PE
-  geom_segment(data = arrowdf3,
-               aes(x = 697, xend = 680, y = 1.05, yend = 0.92),
-               colour = "darkgreen", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #chla680
-  geom_segment(data = arrowdf4,
-               aes(x = 632, xend = 630, y = 0.95, yend = 0.82),
-               colour = "deepskyblue4", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #PC
-  geom_segment(data = arrowdf4,
-               aes(x = 465, xend = 500, y = 0.12, yend = 0.52),
-               colour = "sienna4", size = 1, alpha=0.9, arrow = arrow(length=unit(0.2, 'cm'))) + #PUB
-  scale_color_manual(values = c("PE-rich_127" ="brown4", "PC-rich_077" ="palegreen3")) +
-  scale_linetype_manual(values = c("PE-rich_127" ="longdash", "PC-rich_077" ="solid")) +
-  stat_wl_strip(aes(x = nm), ymin = -Inf, ymax = -0.025, alpha = 0.5) + 
-  scale_fill_identity() +
-  labs(y = "Normalized absorbance", x = "Wavelength (nm)") +
-  scale_y_continuous(breaks=seq(0, 1.2, by = 0.4)) +
-  coord_cartesian(ylim = c (-0.01, 1.25)) +
-  ggh4x::facet_nested(cols = vars(Par_ue, E_days), labeller = labeller(Ex_WL = label_both, WL = label_both, E_days = E_days.labs, Photoperiod = Photoperiod.labs, Par_ue = Par_ue.labs, Strain = Strain.labs)) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.title = element_blank(),
-        legend.direction="horizontal",
-        legend.position = c(0.08,0.97),
-        legend.spacing.x = unit(0.01, 'cm'),
-        legend.text.align = 0,
-        legend.key.width= unit(0.3, 'cm'),
-        legend.text = element_text(size=10))
-```
 
 # Cleaning df before saving as rds and removed unnecessary files from the environment
 
