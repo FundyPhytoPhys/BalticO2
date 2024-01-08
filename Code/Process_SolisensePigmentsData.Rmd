@@ -71,7 +71,7 @@ list.files(path = DataIn, pattern = Project, full.names = TRUE)
 # Also, conteined mean sig - mean for replica measured on the same day
 
 ```{r read ProcessFile Sol}
-SolisenseFile <- "../Data/ImportedData/ImportedSolisenseData/BalticO2_Imported_SolisenseLight.Rds"  
+SolisenseFile <- "../Data/ImportedData/ImportedSolisenseData/BalticO2_Imported_SolisenseLightnew.Rds"  
 
 SolisenseFileName <- str_split(string = SolisenseFile, "/")[[1]][3] %>%
   str_remove(pattern = ".Rds")
@@ -84,7 +84,7 @@ SolFits <- readRDS(SolisenseFile)  %>%
 # Also, conteined mean for sig1s - mean for replica measured on the same day
 
 ```{r read ProcessFile Sol1s}
-Solisense1sFile <- "../Data/ImportedData/ImportedSolisenseData/BalticO2_Imported_SolisenseDarkafterLight.Rds"
+Solisense1sFile <- "../Data/ImportedData/ImportedSolisenseData/BalticO2_Imported_SolisenseDarkafterLightnew.Rds"
 
 Solisense1sFileName <- str_split(string = Solisense1sFile, "/")[[1]][3] %>%
   str_remove(pattern = ".Rds")
@@ -156,43 +156,16 @@ SolFits %>%
   facet_grid(rows = vars(Strain), cols = vars(WL)) +
   theme_bw()
 ```
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(PlotsPath, paste("Solisense3_SupPlot",".png",sep = "")), height=10, width= 8,  dpi = 300, limitsize = TRUE)
+```
 
 # Load tmaxAG catalog and create 4 df for vertical lines (coloured as Strain) contained tMaxAG values
 
-```{r}
-gs4_deauth()
-tmaxAG<- read_sheet("https://docs.google.com/spreadsheets/d/1ksY7xlg9wOsICOBRmZkHPKdd9KOislNwPDzyuJ3UIUI/edit#gid=0")
-as.data.frame(tmaxAG)
-tmaxAG <- tmaxAG
 
-tmaxAG<-tmaxAG %>% 
-  mutate(Par_ue = as.numeric(Par_ue)) %>%
-  mutate(Photoperiod = as.numeric(Photoperiod)) %>%
-  mutate(tMaxAG = as.numeric(tMaxAG)) %>%
-  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-         Strain=="BA48R"~"PE-rich_048",
-        Strain=="BA56G"~"PC-rich_056",
-         Strain=="BA77G"~"PC-rich_077"))
-```
 
-```{r select revelant columns}
-tMaxAGLines_056<-tmaxAG %>% 
-  filter(Strain == "PC-rich_056") %>% 
-  select(c(Par_ue, Photoperiod, tMaxAG)) %>% 
-  unique()
-tMaxAGLines_077<-tmaxAG %>% 
-  filter(Strain == "PC-rich_077") %>% 
-  select(c(Par_ue, Photoperiod, tMaxAG)) %>% 
-  unique()
-tMaxAGLines_048<-tmaxAG %>% 
-  filter(Strain == "PE-rich_048") %>% 
-  select(c(Par_ue, Photoperiod, tMaxAG)) %>% 
-  unique()
-tMaxAGLines_127<-tmaxAG %>% 
-  filter(Strain == "PE-rich_127") %>% 
-  select(c(Par_ue, Photoperiod, tMaxAG)) %>% 
-  unique()
-```
 
 # Choose only exp data for sigma and JVPSII in the corresponding light
 
