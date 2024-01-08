@@ -155,11 +155,20 @@ SolFits %>%
   geom_point(aes(x = Ex_WL, y = Sig, colour = as.factor(O2)), size = 3.5, show.legend = T) +
   facet_grid(rows = vars(Strain), cols = vars(WL)) +
   theme_bw()
+
+SolFits %>%
+  filter(Par_ue!=30) %>% 
+  filter(WL!= "WW") %>% 
+    filter(Ex_WL== 445) %>% 
+  ggplot() +
+  geom_point(aes(x = E_days, y = Sig, colour = as.factor(O2)), size = 3.5, show.legend = T) +
+  facet_grid(rows = vars(Strain), cols = vars(WL)) +
+  theme_bw()
 ```
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(PlotsPath, paste("Solisense3_SupPlot",".png",sep = "")), height=10, width= 8,  dpi = 300, limitsize = TRUE)
+# ggsave(file = file.path(PlotsPath, paste("Solisense3_SupPlot",".png",sep = "")), height=10, width= 8,  dpi = 300, limitsize = TRUE)
 ```
 
 # Load tmaxAG catalog and create 4 df for vertical lines (coloured as Strain) contained tMaxAG values
@@ -361,18 +370,15 @@ rm(O1, O2, O3, O4, O5)
 # Create preliminary plot
 
 ```{r preliminary plot}
-lab1=c(expression("PC-rich_056"), expression("PC-rich_077"), expression("PE-rich_048"), expression("PE-rich_127"))
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 lab2=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
 lab3=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("900 µE"))
 
 SolFits %>%
+  filter(Par_ue !=30) %>% 
   ggplot() +
   geom_point(aes(x = Time_h, y = Sig, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-  geom_vline(data = tMaxAGLines_056, aes(xintercept = tMaxAG), linetype="dotdash", colour = "brown4") +
-  geom_vline(data = tMaxAGLines_077, aes(xintercept = tMaxAG), linetype="dotdash", colour = "brown1") +
-  geom_vline(data = tMaxAGLines_048, aes(xintercept = tMaxAG), linetype="dotdash", colour = "seagreen4") +
-  geom_vline(data = tMaxAGLines_127, aes(xintercept = tMaxAG), linetype="dotdash", colour = "palegreen3") +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
   ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
   theme_bw() 
 
@@ -398,20 +404,7 @@ SolFitsSt %>%
   ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
   theme_bw() 
 ```
-# Combine Exp and St data
 
-```{r}
-  SolFitsExp$Phase <- 'Exponential'
-  SolFitsExp1s$Phase <- 'Exponential'
-  
-  SolFitsSt$Phase <- 'Pre-stationary'
-  SolFitsSt1s$Phase <- 'Pre-stationary'
-  
-  SolFitsExpSt <-rbind(SolFitsExp, SolFitsSt)
-  SolFitsExpSt1s <-rbind(SolFitsExp1s, SolFitsSt1s)
-  
-  rm(SolFitsExp, SolFitsSt, SolFitsExp1s, SolFitsSt1s, tmaxAG, tMaxAGLines_056, tMaxAGLines_077, tMaxAGLines_048, tMaxAGLines_127, SolFits, SolFits1s)
-```
 
 #Create preliminary plot
 
