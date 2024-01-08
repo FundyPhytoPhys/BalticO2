@@ -96,10 +96,10 @@ SolFits1s <- readRDS(Solisense1sFile)  %>%
 
 ```{r preliminary plot}
 SolFits %>%
-
+# filter(Par_ue!=30) %>% 
   ggplot() +
   geom_point(aes(x = Par_ue, y = Sig, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-  facet_grid(rows = vars(Ex_WL), cols = vars(WL, O2)) +
+  facet_grid(rows = vars(Strain, Ex_WL), cols = vars(WL, O2)) +
   theme_bw()
 ```
 

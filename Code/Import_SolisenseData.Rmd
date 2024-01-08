@@ -222,7 +222,7 @@ SolFitsTrimMetaOS <- CultureCatalog %>%
 ```{r estimate parameters, warning = FALSE, echo=FALSE}
 
 SolFitsTrimMetaOS_param <- SolFitsTrimMetaOS %>%
-  group_by(SourceDataFile, Filename, SampleID, ObsDate, Ex_WL, TempCont) %>%
+  group_by(SourceDataFile, Filename, SampleID, ObsDate, Ex_WL, TempCont, O2) %>%
   mutate(Sig_m2psii = Sig/A2_m2,
          Fodark = Fo[1],
          Fmdark = Fm[1],
@@ -503,7 +503,7 @@ SolFitsTrimMetaNS <- CultureCatalog %>%
 
 ```{r estimate parameters, warning = FALSE, echo=FALSE}
 SolFitsTrimMetaNS <- SolFitsTrimMetaNS %>%
-  group_by(SourceDataFile, Filename, SampleID, ObsDate, Ex_WL, TempCont) %>%
+  group_by(SourceDataFile, Filename, SampleID, ObsDate, Ex_WL, TempCont, O2) %>%
   mutate(Sig_m2psii = Sig/A2_m2,
          Fodark = Fo[1],
          Fmdark = Fm[1],
@@ -714,9 +714,9 @@ ggsave(file = file.path(PlotsPath, paste("Solisense2_SupPlot",".png",sep = "")),
 # Save rds for further analysis
 
 ```{r save rds}
-saveRDS(SolFitsMeta, file.path(DataOut, paste(Project, "Imported_SolisenseLight.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(SolFitsMeta, file.path(DataOut, paste(Project, "Imported_SolisenseLightnew.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 
-saveRDS(SolFitsMetaDarkafterLight, file.path(DataOut, paste(Project, "Imported_SolisenseDarkafterLight.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(SolFitsMetaDarkafterLight, file.path(DataOut, paste(Project, "Imported_SolisenseDarkafterLightnew.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 ```
 
 # Variable names used in Data Dictionary
