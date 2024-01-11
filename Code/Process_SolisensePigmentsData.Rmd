@@ -127,22 +127,22 @@ SolFits1s$facetsStrain = factor(SolFits1s$WL, labels = c("Strain"))
 # Filter unrevelant data and outliers
 
 ```{r filter outliers}
-# #Filter one unrevelant data point at 445nm, 16h, 900uE
-# SolFitsAll445<-SolFits %>%
-#   filter(Ex_WL == 445) %>%
-#   filter(Sig<250) 
-# SolFitsAll590<-SolFits %>%
-#   filter(Ex_WL == 590)
-# SolFits<-rbind(SolFitsAll445,SolFitsAll590)
-#   rm(SolFitsAll445,SolFitsAll590)
-#   
-# SolFitsAll4451s<-SolFits1s %>%
-#   filter(Ex_WL == 445) %>%
-#   filter(Sig1s<250) 
-# SolFitsAll5901s<-SolFits1s %>%
-#   filter(Ex_WL == 590)
-# SolFits1s<-rbind(SolFitsAll4451s,SolFitsAll5901s)
-#   rm(SolFitsAll4451s,SolFitsAll5901s)  
+#Filter one unrevelant data point at 445nm, 16h, 900uE
+SolFitsAll445<-SolFits %>%
+  filter(Ex_WL == 445) %>%
+  filter(Sig<250)
+SolFitsAll590<-SolFits %>%
+  filter(Ex_WL != 445)
+SolFits<-rbind(SolFitsAll445,SolFitsAll590)
+  rm(SolFitsAll445,SolFitsAll590)
+
+SolFitsAll4451s<-SolFits1s %>%
+  filter(Ex_WL == 445) %>%
+  filter(Sig1s<250)
+SolFitsAll5901s<-SolFits1s %>%
+  filter(Ex_WL != 445)
+SolFits1s<-rbind(SolFitsAll4451s,SolFitsAll5901s)
+  rm(SolFitsAll4451s,SolFitsAll5901s)
 ```
 
 # Create preliminary plots 
@@ -159,21 +159,25 @@ SolFits %>%
 SolFits %>%
   filter(Par_ue!=30) %>% 
   filter(WL!= "WW") %>% 
-    filter(Ex_WL== 445) %>% 
   ggplot() +
-  geom_point(aes(x = E_days, y = Sig, colour = as.factor(O2)), size = 3.5, show.legend = T) +
-  facet_grid(rows = vars(Strain), cols = vars(WL)) +
+  geom_point(aes(x = WL, y = Sig, colour = as.factor(O2)), size = 3.5, show.legend = T) +
+  facet_grid(rows = vars(Strain), cols = vars(Ex_WL)) +
   theme_bw()
+
+# SolFits %>%
+#   filter(Par_ue!=30) %>% 
+#   filter(WL!= "WW") %>% 
+#     filter(Ex_WL== 445) %>% 
+#   ggplot() +
+#   geom_point(aes(x = E_days, y = Sig, colour = as.factor(O2)), size = 3.5, show.legend = T) +
+#   facet_grid(rows = vars(Strain), cols = vars(WL)) +
+#   theme_bw()
 ```
 # Save plot 
 
 ```{r save plot}
-# ggsave(file = file.path(PlotsPath, paste("Solisense3_SupPlot",".png",sep = "")), height=10, width= 8,  dpi = 300, limitsize = TRUE)
+# ggsave(file = file.path(PlotsPath, paste("Solisense4_SupPlot",".png",sep = "")), height=10, width= 8,  dpi = 300, limitsize = TRUE)
 ```
-
-# Load tmaxAG catalog and create 4 df for vertical lines (coloured as Strain) contained tMaxAG values
-
-
 
 
 # Choose only exp data for sigma and JVPSII in the corresponding light
