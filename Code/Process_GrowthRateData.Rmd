@@ -91,8 +91,6 @@ MultiCultiGrowth<-MultiCultiGrowth %>%
   
 MultiCultiGrowth<-MultiCultiGrowth %>% 
   mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-         Strain=="BA48R"~"PE-rich_048",
-        Strain=="BA56G"~"PC-rich_056",
          Strain=="BA77G"~"PC-rich_077"))
 
 ```
@@ -128,19 +126,47 @@ MultiCultiGrowth<-MultiCultiGrowth %>%
 
 
 ```{r}
-MCGrowthRate %>%
+MultiCultiGrowth %>%
+  filter(Par_ue == 180) %>% 
+  filter(WL != "WW") %>% 
   ggplot() +
-  geom_point(aes(y = Par_ue, x = deltaOD_Lmu_corr*24,colour=as.factor(Strain)), size = 3.5, alpha = 0.9, show.legend = T) +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
+  geom_point(aes(x = WL, y = deltaOD_Lmu_corr*24,colour=as.factor(Strain)), size = 3.5, alpha = 0.9, show.legend = T) +
+  #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
   
   #ggh4x::facet_nested(rows = vars(Strain), cols = vars(Photoperiod)) +
   
-    ggh4x::facet_nested(cols = vars(Photoperiod)) +
+    ggh4x::facet_nested(cols = vars(O2), rows = vars(Strain)) +
   
   # ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(factor(Par_ue, levels=c("900","600","300","180","90","30"))), labeller = label_parsed) +
   
   theme_bw()
 ```
+
+
+
+```{r}
+O2.labs <- c("Oxygen level: high", "Oxygen level: low", "Oxygen level: high")
+names(O2.labs) <- c("21", "0", "21")
+
+MCGrowthRate %>%
+  filter(Run!=118 & Run!= 119) %>% 
+  filter(Par_ue!=30) %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  ggplot() +
+  geom_point(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = 'black'), size = 3) +
+  geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr), color = 'black') +
+labs(y = "Logistic Growth Rate" ~ "("~"Delta OD"~h^-1~")", x = "Wavelength (nm)") +
+  #scale_x_continuous(breaks=seq(0, 200, by = 50)) +
+  #coord_cartesian(xlim = c (0, 200)) +
+ coord_cartesian(xlim = c (400, 800)) +
+  guides(colour = FALSE) +
+ ggh4x::facet_nested(cols = vars(O2), rows = vars(Strain),
+                     labeller = labeller(Strain = label_value, Photoperiod = label_both, O2 = O2.labs)) +
+  theme_bw() 
+
+```
+
 
 
 
