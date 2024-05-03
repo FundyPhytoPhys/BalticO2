@@ -51,7 +51,7 @@ library("patchwork") # merging plots
 ```
 
 ```{r set project variables}
-Project <- "BalticPhotoperiod"
+Project <- "BalticO2"
 DataOut <- file.path("..", "Data", "ProcessedData", "ProcessedGrowthCurveData")
 
 FigPath <- file.path("..", "Output", "Figures")
@@ -114,51 +114,12 @@ MultiCultiDataAll$facetsPhotoperiod = factor(MultiCultiDataAll$WL, labels = c("P
 
 MultiCultiDataAll <- MultiCultiDataAll %>% 
     mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-         Strain=="BA48R"~"PE-rich_048",
-        Strain=="BA56G"~"PC-rich_056",
          Strain=="BA77G"~"PC-rich_077")) 
 ```
 
-# Load tmaxAG catalog and create 4 df for vertical lines (coloured as Strain) contained tMaxAG values
 
-```{r}
-gs4_deauth()
-tmaxAG<- read_sheet("https://docs.google.com/spreadsheets/d/1ksY7xlg9wOsICOBRmZkHPKdd9KOislNwPDzyuJ3UIUI/edit#gid=0")
-as.data.frame(tmaxAG)
-tmaxAG <- tmaxAG
 
-tmaxAG<-tmaxAG %>% 
-  mutate(Par_ue = as.numeric(Par_ue)) %>%
-  mutate(Photoperiod = as.numeric(Photoperiod)) %>%
-  mutate(tMaxAG = as.numeric(tMaxAG)) %>%
-  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-         Strain=="BA48R"~"PE-rich_048",
-        Strain=="BA56G"~"PC-rich_056",
-         Strain=="BA77G"~"PC-rich_077"))
 
-tmaxAG$facetsPar_ue = factor(tmaxAG$O2, labels = c("PAR~(µmol~photons~m^{-2}~s^{-1})"))
-tmaxAG$facetsPhotoperiod = factor(tmaxAG$WL, labels = c("Photoperiod~(h)"))
-tmaxAG$facetsStrain = factor(tmaxAG$O2, labels = c("Strain"))
-```
-
-```{r select revelant columns}
-tMaxAGLines_056<-tmaxAG %>% 
-    dplyr::filter(Strain == "PC-rich_056") %>% 
-    dplyr::select(c(Par_ue, Photoperiod, facetsPar_ue, facetsPhotoperiod, tMaxAG)) %>% 
-  unique()
-tMaxAGLines_077<-tmaxAG %>% 
-    dplyr::filter(Strain == "PC-rich_077") %>% 
-    dplyr::select(c(Par_ue, Photoperiod, facetsPar_ue, facetsPhotoperiod, tMaxAG)) %>% 
-  unique()
-tMaxAGLines_048<-tmaxAG %>% 
-    dplyr::filter(Strain == "PE-rich_048") %>% 
-    dplyr::select(c(Par_ue, Photoperiod, facetsPar_ue, facetsPhotoperiod, tMaxAG)) %>% 
-  unique()
-tMaxAGLines_127<-tmaxAG %>% 
-    dplyr::filter(Strain == "PE-rich_127") %>% 
-    dplyr::select(c(Par_ue, Photoperiod, facetsPar_ue, facetsPhotoperiod, tMaxAG)) %>% 
-  unique()
-```
 
 
 # Create GrowthCurve plot
@@ -167,24 +128,30 @@ tMaxAGLines_127<-tmaxAG %>%
 data_textA <- data.frame(facetsPar_ue = c("PAR~(µmol~photons~m^{-2}~s^{-1})"), Par_ue = c(900), Photoperiod  = c(8), facetsPhotoperiod = c("Photoperiod~(h)"), label = c('A'))
 
 OD680<-MultiCultiDataAll %>%
-  #filter(Par_ue != 600) %>% 
-  filter(Run != 77) %>% 
+  filter(Par_ue == 180) %>% 
+  filter(WL!= "WW") %>% 
+
   ggplot() +
-  geom_area(aes(x = Time_h/24, y = meanActinic_par_h), size = 0.1, fill = "tan1", alpha = 0.3) +
-  geom_line(aes(x = Time_h/24, y = meanOD680_h, colour = as.factor(Strain)), size = 0.5, show.legend = T) +
-  geom_vline(data = tMaxAGLines_056, aes(xintercept = tMaxAG/24), linetype="dotdash", colour = "seagreen4", size=0.4) +
-  geom_vline(data = tMaxAGLines_077, aes(xintercept = tMaxAG/24), linetype="dotdash", colour = "palegreen3", size=0.4) +
-  geom_vline(data = tMaxAGLines_048, aes(xintercept = tMaxAG/24), linetype="dotdash", colour = "brown4", size=0.4) +
-  geom_vline(data = tMaxAGLines_127, aes(xintercept = tMaxAG/24), linetype="dotdash", colour = "brown1", size=0.4) +
-  geom_text(data=data_textA, aes(x=2, y=0.75, label=label), size=6) +
   
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="") +
-  scale_y_continuous(breaks=seq(0, 1, by = 0.25)) +
-  scale_x_continuous(breaks=seq(0, 15, by = 3)) +
-  coord_cartesian(ylim = c(0, 1.0), xlim = c(0, 14)) +
-  labs(y = "Optical density ("~OD[680]~")", x = "Elapsed time (d)") +
-  # ggh4x::facet_nested(cols = vars(facetsPhotoperiod, Photoperiod), rows = vars(facetsPar_ue, Par_ue), labeller = label_parsed) +
-  ggh4x::facet_nested(cols = vars(facetsPhotoperiod, Photoperiod), rows = vars(facetsPar_ue, factor(Par_ue, levels=c("900","600","300","180","90","30"))), labeller = label_parsed) +
+  #geom_area(aes(x = Time_h, y = meanActinic_par_h), size = 0.1, fill = "tan1", alpha = 0.6) +
+  geom_line(aes(x = Time_h, y = meanOD680_h, colour = as.factor(O2)), size = 0.5, show.legend = T) +
+  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="") +
+  labs(y = "Optical density ("~OD[680]~")", x = "Elapsed time (h)") +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(Strain), labeller = label_parsed) +
+  
+  
+  
+  # geom_area(aes(x = Time_h/24, y = meanActinic_par_h), size = 0.1, fill = "tan1", alpha = 0.3) +
+  # geom_line(aes(x = Time_h/24, y = meanOD680_h, colour = as.factor(Strain)), size = 0.5, show.legend = T) +
+  # geom_text(data=data_textA, aes(x=2, y=0.75, label=label), size=6) +
+  # 
+  # scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="") +
+  # scale_y_continuous(breaks=seq(0, 1, by = 0.25)) +
+  # scale_x_continuous(breaks=seq(0, 15, by = 3)) +
+  # coord_cartesian(ylim = c(0, 1.0), xlim = c(0, 14)) +
+  # labs(y = "Optical density ("~OD[680]~")", x = "Elapsed time (d)") +
+  # # ggh4x::facet_nested(cols = vars(facetsPhotoperiod, Photoperiod), rows = vars(facetsPar_ue, Par_ue), labeller = label_parsed) +
+  # ggh4x::facet_nested(cols = vars(facetsPhotoperiod, Photoperiod), rows = vars(facetsPar_ue, factor(Par_ue, levels=c("900","600","300","180","90","30"))), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
@@ -192,10 +159,6 @@ OD680<-MultiCultiDataAll %>%
         axis.title = element_text(size=16),
         strip.background = element_rect(fill="white"),
         strip.text = element_text(size=12),
-        
-        strip.background.y = element_blank(),
-        strip.text.y = element_blank(),
-        
         axis.title.y = element_text(margin=margin(r=10)),
         axis.title.x = element_text(margin=margin(t=10)),
         legend.background = element_rect(fill="transparent"),
@@ -209,7 +172,7 @@ OD680
 # Save plot 
 
 ```{r save plot}
-# ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_OD680",".png",sep = "")), height=9, width= 7,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_OD680",".png",sep = "")), height=9, width= 7,  dpi = 300, limitsize = TRUE)
 ```
 
 # Create GrowthCurve plot
