@@ -1,0 +1,303 @@
+---
+title: "Process_GrowthRateOlisData"
+author:
+- Sylwia Sliwinska-Wilczewska
+- Douglas A. Campbell
+date: "`r format(Sys.Date())`"
+output:
+bookdown::html_document2:
+    code_folding: show
+    keep_md: yes
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 6
+    fig_caption: yes
+bibliography: BalticPhotoperiod.bib
+csl: plos-one.csl
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Set Chunk Options
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(fig.path='Figs/')
+```
+
+# Introduction
+
+Process_GrowthRateOlisData.Rmd processes and combines PICO_NestedFitsData.Rds from Data/CleanData/CleanedMCData folder and Baltic_Photoperiod_Processed_OlisSpectraTidy.Rds from Data/ProcessedData/ProcessedOlisJazData. This .Rmd generates Baltic_Photoperiod_Processed_GrowthRate.Rds (stored in Data/ProcessedData/ProcessesGrowthRateData folder) and GrowthRate_Plot.png (stored in Output/Plots folder).
+
+# Load Libraries and set Project Variables
+
+```{r load libraries} 
+library(lubridate)
+library(stringr)
+library(broom)
+library(knitr)
+library(OneR)
+library(zoo)
+library(strucchange)
+library(ggpubr)
+library(caret)
+library(reshape2)
+library(gcookbook)
+library(scales)
+library(minpack.lm) #Standard 'nls' framework that uses 'nls.lm' for fitting
+library(data.table)
+library(googledrive)
+library(googlesheets4)
+library(tidyverse)
+```
+
+```{r set project variables}
+Project <- "BalticO2"
+DataOut <- file.path("..", "Data", "ProcessedData", "ProcessedGrowthRateData")
+DataIn <- file.path("..", "Data", "CleanData", "CleanedMCData", fsep = .Platform$file.sep)
+
+PlotsPath <- file.path("..", "Output", "Plots")
+RDSPlotPath <- file.path("..", "Output", "PlotsRDS")
+RDSTablePath <- file.path("..", "Output", "TablesRDS")
+
+FileEncode <- "UTF-8" 
+Delimiter <- ""
+HeaderRows <- 0
+```
+
+# List and read files
+
+```{r Exported Rmd only first time in session}
+list.files(path = DataIn, full.names = TRUE)
+```
+
+```{r read file}
+MultiCultiGrowthFile <- "../Data/CleanData/CleanedMCData/PICO_NestedFitsData.Rds"
+
+MultiCultiGrowthFileName <- str_split(string = MultiCultiGrowthFile, "/")[[1]][3] %>%
+  str_remove(pattern = ".Rds") 
+
+MultiCultiGrowth <- readRDS(MultiCultiGrowthFile)  %>%
+  ungroup()
+```
+
+# Select revelant variables and preparing for further analysis
+
+```{r}
+MultiCultiGrowth<-MultiCultiGrowth %>% 
+  dplyr::select(c(Tube, ExpDate, MC, Run, SampleID, Strain, Par_ue, Photoperiod, WL, O2, LightShape, PARPhotonDose_day, OD720_Lmu_se, OD720_Lmu_corr, deltaOD_Lmu_se, deltaOD_Lmu_corr))
+  
+MultiCultiGrowth<-MultiCultiGrowth %>% 
+  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
+         Strain=="BA77G"~"PC-rich_077"))
+```
+
+# Load processed Olis&Jaz RDS
+
+```{r set project variables}
+Project <- "BalticO2"
+DataIn <- file.path("..", "Data", "ProcessedData", "ProcessedOlisJazData", fsep = .Platform$file.sep)
+```
+
+# List and read processed Olis and Jaz files
+
+```{r exported Rmd only first time in session}
+list.files(path = DataIn, pattern = Project, full.names = TRUE)
+```
+
+```{r read imported Olis file}
+OLISSpectraFile <- "../Data/ProcessedData/ProcessedOlisJazData/BalticO2_Processed_OlisSpectraTidy.Rds"
+OLISSpectraFileName <- str_split(string = OLISSpectraFile, "/")[[1]][3] %>%
+  str_remove(pattern = ".Rds")
+OLISSpectra <- readRDS(OLISSpectraFile)  %>%
+  ungroup()
+```
+
+
+# Combine growth rate and Tidy Olis to get PUR
+
+```{r}
+MCGrowthRate <- OLISSpectra %>%
+  left_join(., MultiCultiGrowth, by = c("Run" = "Run", "SampleID" = "SampleID","Strain" = "Strain", "Par_ue" = "Par_ue", "Photoperiod" = "Photoperiod",  "O2" = "O2", "WL" = "WL",  "MC" = "MC", "Tube" = "Tube", "ExpDate" = "ExpDate", "LightShape" = "LightShape", "PARPhotonDose_day" = "PARPhotonDose_day"))
+  
+rm(MultiCultiGrowth, OLISSpectra)
+```
+
+# Create preliminary plot
+
+```{r preliminary plot, warning = FALSE}
+MCGrowthRate %>%
+  ggplot() +
+  geom_point(aes(x = Par_ue, y = deltaOD_Lmu_corr,colour=as.factor(Strain)), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_errorbar(aes(x = Par_ue, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se), alpha = 0.5, width=0) +
+  scale_colour_discrete(type=c("palegreen3", "brown4")) +
+  ggh4x::facet_nested(rows = vars(Strain, O2), cols = vars(WL)) +
+  theme_bw()
+
+```
+
+```{r}
+O2.labs <- c("Oxygen level: high", "Oxygen level: low", "Oxygen level: high")
+names(O2.labs) <- c("21", "0", "21")
+
+MCGrowthRate %>%
+  filter(Run!=118 & Run!= 119) %>% 
+  filter(Par_ue!=30) %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  ggplot() +
+  geom_point(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = 'black'), size = 3) +
+  geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr), color = 'black') +
+labs(y = "Logistic Growth Rate" ~ "("~"Delta OD"~h^-1~")", x = "Wavelength (nm)") +
+  #scale_x_continuous(breaks=seq(0, 200, by = 50)) +
+  #coord_cartesian(xlim = c (0, 200)) +
+ coord_cartesian(xlim = c (400, 800)) +
+  guides(colour = FALSE) +
+ ggh4x::facet_nested(cols = vars(O2), rows = vars(Strain),
+                     labeller = labeller(Strain = label_value, Photoperiod = label_both, O2 = O2.labs)) +
+  theme_bw() 
+
+```
+
+
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(PlotsPath, paste("GrowthRate_Plot",".png",sep = "")), height=10, width= 8,  dpi = 300, limitsize = TRUE)
+```
+
+# Calculated Anova and Tukey test
+
+```{r calculated statistics}
+MCGrowthRateStats<-MCGrowthRate %>% 
+    filter(Par_ue!= 30) 
+
+MCGrowthRateStats$O2 <- factor(MCGrowthRateStats$O2)
+MCGrowthRateStats$WL <- factor(MCGrowthRateStats$WL)
+MCGrowthRateStats$Strain <- factor(MCGrowthRateStats$Strain)
+
+# Two way Anova with interactions
+model<-aov(deltaOD_Lmu_corr~Strain*O2*WL, data=MCGrowthRateStats)
+AnovaTest_GrowthRate<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+TukeyHSDTest_GrowthRate<-TukeyHSD(model, which = c("Strain", "O2", "WL"))
+```
+
+# Save RDS that create stats and tables
+
+```{r}
+saveRDS(AnovaTest_GrowthRate, file.path(RDSTablePath, paste(Project, "GrowthRateAnova.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
+saveRDS(TukeyHSDTest_GrowthRate, file.path(RDSTablePath, paste(Project, "GrowthRateTukey.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+```
+
+
+# Removed unneccessary df from the environment
+
+```{r}
+rm(MCGrowthRateStats, model)
+```
+
+# Save Rds for further analysis
+
+```{r save rds}
+saveRDS(MCGrowthRate, file.path(DataOut, paste(Project, "Processed_GrowthRate.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+```
+
+# Variable names used in Data Dictionary
+
+```{r}
+colnames(MCGrowthRate)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Other statistics
+
+The likelihood-ratio test in statistics compares the goodness of fit of two nested regression models based on the ratio of their likelihoods, specifically one obtained by maximization over the entire parameter space and another obtained after imposing some constraint.
+To see if these two models differ significantly, we can use a likelihood ratio test with the following null and alternative hypotheses.
+
+H0: Both the full and nested models fit the data equally well. As a result, you should employ the nested model. #jezeli nie ma roznic, to nie trzeba dodawac ekstra czynnika
+H1: The full model significantly outperforms the nested model in terms of data fit. As a result, you should use the entire model.
+
+```{r}
+# fullmodel <- lm(mpg ~ cyl + disp + hp + wt, data = mtcars)
+# reducedmodel <- lm(mpg ~ cyl + disp, data = mtcars)
+# 
+# library(lmtest) #Likelihood Ratio Test
+# lrtest(fullmodel, reducedmodel)
+```
+
+ANOVA testing whether the more complex model is significantly better at capturing the data than the simpler model. 
+
+```{r}
+# library(agricolae)
+# data("PlantGrowth")
+# plant.lm <- lm(weight ~ group, data = PlantGrowth)
+# plant.av <- aov(plant.lm)
+# #plant.av <- aov(weight ~ group, data = PlantGrowth) #gives the same result
+# summary(plant.av)
+# 
+# tukey.test <- TukeyHSD(plant.av)
+# tukey.test
+# 
+# summary(lm(weight ~ group, data = PlantGrowth))
+```
+
+# Stats with letters
+
+```{r}
+# library(agricolae)
+# data(sweetpotato)
+# model<-aov(yield~virus, data=sweetpotato)
+# out <- HSD.test(model,"virus", group=TRUE,console=TRUE)
+# plot(out)
+```
+
+# http://www.sthda.com/english/wiki/two-way-anova-test-in-r
+# https://cran.r-project.org/web/packages/multcomp/vignettes/multcomp-examples.pdf
+#https://r-graph-gallery.com/84-tukey-test.html
+#https://pyoflife.com/anova-and-tukeys-hsd-test-with-r-how-to-compare-multiple-means-pdf/
+multcomp statistic
+```{r}
+# library(multcomp) 
+# Multiple comparisons using multcomp package
+# For two-way ANOVA models, I compared the levels of the two factors simultaneously.
+# I used the function glht() [in multcomp package] to perform multiple comparison procedures for an ANOVA. glht stands for general linear hypothesis tests. 
+# lincft(): a specification of the linear hypotheses to be tested. Multiple comparisons in ANOVA models are specified by objects returned from the function mcp().
+# Use glht() to perform multiple pairwise-comparisons.
+
+# # Two way Anova
+# model<-aov(deltaOD_Lmu_corr~Strain*Par_ue*Photoperiod, data=MCGrowthRateStats)
+# Anovadf<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# # This compare the levels of each factor:
+# K1 <- glht(model, mcp(Strain = "Tukey"))$linfct
+# K2 <- glht(model, mcp(Par_ue = "Tukey"))$linfc
+# K3 <- glht(model, mcp(Photoperiod = "Tukey"))$linfc
+# summary(glht(model, linfct = rbind(K1, K2, K3)))
+# Tukey<-summary(glht(model, linfct = rbind(K1, K2, K3)))
+# detach("package:multcomp", unload = TRUE)
+```
+
+Compare non-linear model parameter estimates between conditions
+https://stats.stackexchange.com/questions/458195/compare-non-linear-model-parameter-estimates-between-conditions
+
+
+
+
+
+
+
+

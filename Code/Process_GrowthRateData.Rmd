@@ -44,6 +44,9 @@ library(ggpubr)
 library(caret)
 library(reshape2)
 library(gcookbook)
+library(ggspectra)
+library(photobiologyWavebands)
+library(photobiology)
 library(scales)
 library(minpack.lm) #Standard 'nls' framework that uses 'nls.lm' for fitting
 library(data.table)
@@ -51,6 +54,7 @@ library(googledrive)
 library(googlesheets4)
 library(tidyverse)
 library("patchwork") # merging plots
+
 ```
 
 ```{r set project variables}
@@ -95,33 +99,11 @@ MultiCultiGrowth<-MultiCultiGrowth %>%
 
 ```
 
-# Save Rds for further analysis
-
-```{r save rds}
-# saveRDS(MultiCultiGrowth, file.path(DataOut, paste(Project, "Processed_GrowthRateRaw.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
-```
-
-
-# Choosen only single run
+* Growth rate per day
 
 ```{r}
-# MultiCultiGrowth1<-MultiCultiGrowth %>% 
-#   filter(Run==77) %>% 
-#   filter(Strain =="PC-rich_077")
-# MultiCultiGrowth2<-MultiCultiGrowth %>% 
-#   filter(Run==121) %>% 
-#   filter(Strain !="PC-rich_077")
-# MultiCultiGrowth3<-MultiCultiGrowth %>% 
-#   filter(Run!=121 & Run!= 77) 
-# MCGrowthRate<-rbind(MultiCultiGrowth1, MultiCultiGrowth2, MultiCultiGrowth3)
-#   rm(MultiCultiGrowth, MultiCultiGrowth1, MultiCultiGrowth2, MultiCultiGrowth3)
-```
-
-```{r}
-# MCGrowthRate127<-MCGrowthRate %>% 
-#   filter(Strain == "PC-rich_056") %>% 
-#   select(c(Strain, Par_ue, Photoperiod, deltaOD_Lmu_corr)) %>% 
-#   mutate(deltaOD_Lmu_corr=deltaOD_Lmu_corr*24)
+MultiCultiGrowth<-MultiCultiGrowth %>% 
+  mutate(deltaOD_Lmu_corr=deltaOD_Lmu_corr*24)
 ```
 
 
@@ -130,7 +112,7 @@ MultiCultiGrowth %>%
   filter(Par_ue == 180) %>% 
   filter(WL != "WW") %>% 
   ggplot() +
-  geom_point(aes(x = WL, y = deltaOD_Lmu_corr*24,colour=as.factor(Strain)), size = 3.5, alpha = 0.9, show.legend = T) +
+  geom_point(aes(x = WL, y = deltaOD_Lmu_corr,colour=as.factor(Strain)), size = 3.5, alpha = 0.9, show.legend = T) +
   #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
   
   #ggh4x::facet_nested(rows = vars(Strain), cols = vars(Photoperiod)) +
@@ -145,29 +127,40 @@ MultiCultiGrowth %>%
 
 
 ```{r}
-O2.labs <- c("Oxygen level: high", "Oxygen level: low", "Oxygen level: high")
-names(O2.labs) <- c("21", "0", "21")
 
-MCGrowthRate %>%
+MultiCultiGrowth %>%
   filter(Run!=118 & Run!= 119) %>% 
   filter(Par_ue!=30) %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
   ggplot() +
-  geom_point(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = 'black'), size = 3) +
+  geom_point(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain)), size = 3) +
   geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr), color = 'black') +
-labs(y = "Logistic Growth Rate" ~ "("~"Delta OD"~h^-1~")", x = "Wavelength (nm)") +
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="") +
+  labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Wavelength (nm)") +
   #scale_x_continuous(breaks=seq(0, 200, by = 50)) +
   #coord_cartesian(xlim = c (0, 200)) +
- coord_cartesian(xlim = c (400, 800)) +
-  guides(colour = FALSE) +
- ggh4x::facet_nested(cols = vars(O2), rows = vars(Strain),
-                     labeller = labeller(Strain = label_value, Photoperiod = label_both, O2 = O2.labs)) +
+  coord_cartesian(xlim = c (400, 800)) +
+  # guides(colour = FALSE) +
+  #ggh4x::facet_nested(rows = vars(O2), cols = vars(Strain), labeller = label_parsed) +
+  
+  ggh4x::facet_nested(cols = vars(Strain), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  
   theme_bw() 
+
 
 ```
 
+# Save plot 
 
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_GrowthRate",".png",sep = "")), height=4, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+
+-----------------------------------------------------------------------------------------------------------
 
 
 # Create preliminary plot
