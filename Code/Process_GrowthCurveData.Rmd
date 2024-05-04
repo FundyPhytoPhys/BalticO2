@@ -175,6 +175,10 @@ OD680
 ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_OD680",".png",sep = "")), height=9, width= 7,  dpi = 300, limitsize = TRUE)
 ```
 
+
+-------------------------------------------------------------------------------------------------------------------
+
+
 # Create GrowthCurve plot
 
 ```{r create GrowthCurve plot, fig.height = 8, fig.width = 8, warning = FALSE}
