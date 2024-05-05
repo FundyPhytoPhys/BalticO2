@@ -1029,7 +1029,7 @@ OLISAllPURTidy %>%
   #labs(y = "PUR/PAR ratio", x = "Elapsed time (h)") +
   scale_y_continuous(breaks=seq(0, 1.2, by = 0.4)) +
   coord_cartesian(ylim = c(0, 1.5)) +
-    ggh4x::facet_nested(rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  ggh4x::facet_nested(rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
  #ggh4x::facet_nested(cols = vars(Strain), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   #ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
 
