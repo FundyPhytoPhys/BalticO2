@@ -165,8 +165,6 @@ tmaxAG<-tmaxAG %>%
   mutate(dayRound_tmaxAG=tMaxAG/24) %>% 
   mutate(dayRound_tmaxAG = round(dayRound_tmaxAG, digits = 0)) %>% 
   mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-         Strain=="BA48R"~"PE-rich_048",
-        Strain=="BA56G"~"PC-rich_056",
          Strain=="BA77G"~"PC-rich_077"))
 
 tmaxAG$facetsPar_ue = factor(tmaxAG$O2, labels = c("PAR~(µmol~photons~m^{-2}~s^{-1})"))

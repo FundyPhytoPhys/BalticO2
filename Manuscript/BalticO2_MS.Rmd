@@ -226,7 +226,7 @@ knitr::include_graphics(file.path(FiguresFP,"SFig_GrowthCurve_OD680.png"))
 
 ```{r GrowthRate, fig.cap = GrowthRatePhotoperiodPUR_cap, fig.height = 8, fig.width = 6, echo = FALSE}
 GrowthRatePhotoperiodPUR_cap<- glue("**Chlorophyll-specific exponential growth rates (d^−1^) vs. wavelength (nm)**. Growth rates (± SE falling within symbols) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for  PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
-knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRate.png"))
+knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRate4.png"))
 ```
 
 <br>
