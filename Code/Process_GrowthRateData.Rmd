@@ -99,14 +99,8 @@ MultiCultiGrowth<-MultiCultiGrowth %>%
 
 ```
 
-# Filter unused data
 
-```{r}
-MultiCultiGrowth<-MultiCultiGrowth %>% 
-  filter(Par_ue != 30) 
-```
-
-* Growth rate per day
+# Growth rate per day
 
 ```{r}
 MultiCultiGrowth<-MultiCultiGrowth %>% 
@@ -496,6 +490,7 @@ JazDataRoundMeta0<-JazDataRoundMeta
   JazDataRoundMeta0$Oxygen<-"2.5~µM"
 
 JazDataRoundMeta2<-rbind(JazDataRoundMeta21, JazDataRoundMeta0)
+rm(JazDataRoundMeta21, JazDataRoundMeta0)
 ```
 
 
