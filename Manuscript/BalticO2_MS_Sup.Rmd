@@ -89,28 +89,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Supporting Information {.unnumbered}
 
-
-
-<br>
-
-## PUR/PAR ratio vs. spectral bandwidth {.unnumbered}
-
-```{r PURPARRatio, fig.cap = PURPARRatio_cap, fig.height = 6, fig.width = 8, echo = FALSE}
-# PURPARRatio_cap<- glue("Changes in PUR/PAR ratio vs. wavelength (nm). PUR/PAR ratio was estimated for  PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
-# knitr::include_graphics(file.path(FiguresFP,"Fig_PURPARRatio.png"))
-```
-
-<br>
-
-## Effective absorption cross section of PSII of picocyanobacteria {.unnumbered}
-
-```{r Sigma590, fig.cap = Sigma590_cap, fig.height = 6, fig.width = 8, echo = FALSE}
-# Sigma590_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. cumulative diel PUR (µmol photons m^−2^d^−1^); blue solid line shows single phase exponential decay fit for data from each strain and growth phase. (**B**) Changes of \u03C3~PSII~ʹ measured under diel peak PAR growth light vs. the ratio of sum of µg phycobilins (PE, PC, APC protein, Phycobiliprotein) to µg Chl *a*; blue solid line shows linear model fit for data from each strain and growth phase. \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitation of phycobilisomes (Ex~590nm~, orange), for two PC-rich cultures (056; dark green, 077; light green) and two PE-rich cultures (048; light red, 127; dark red) of *Synechococcus* sp. grown at 30 (dark gray), 90 (light gray), 180 (purple), 300 (red), 600 (orange), or 900 (yellow) peak PAR µmol photons m^−2^s^−1^ (µE); and photoperiods of 8 (square), 12 (circle), 16 (triangle), or 24 (diamond) h. Figure presents data (smaller symbols) and means (bigger symbols) from exponential or pre-stationary phase of growth. Different lowercase letters indicate statistically significant differences between the fit models for different strains within a given phase of growth. Different uppercase letters indicate statistically significant differences between the fit models for different phases of growth within a given strain (*p* < 0.05).", .sep = " ")
-# knitr::include_graphics(file.path( FiguresFP,"Fig_Sigma590Merge.png"))
-```
-
-<br>
-
 ## Growth rates vs. cumulative diel PSII electron flux {.unnumbered}
 
 ```{r GrowthRateJVPSII, fig.cap = GrowthRateJVPSII_cap, fig.height = 8, fig.width = 6, echo = FALSE}
@@ -119,11 +97,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 <br>
-
-
-
-
-
 
 ```{r locally stored metadata from rds, echo = FALSE}
 # https://davidgohel.github.io/flextable/reference/index.html

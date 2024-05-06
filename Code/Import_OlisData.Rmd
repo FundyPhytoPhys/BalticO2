@@ -149,8 +149,8 @@ group_by(SampleID) %>%
   mutate(SumAb = sum(Absorbance)) %>% 
 ungroup()
 
-OLISSpectraMeta <- OLISSpectraMeta %>%
-  filter(nm >= 400 & nm <= 700)
+# OLISSpectraMeta <- OLISSpectraMeta %>%
+#   filter(nm >= 400 & nm <= 700)
 ```
 
 # Normalize spectra to 440 nm

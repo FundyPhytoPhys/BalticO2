@@ -165,122 +165,31 @@ MultiCultiGrowth %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_GrowthRate",".png",sep = "")), height=4, width= 6,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("Fig_GrowthRate",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
 -----------------------------------------------------------------------------------------------------------
 
 
-# Create preliminary plot
-
-```{r preliminary plot, warning = FALSE}
-MCGrowthRate %>%
-  ggplot() +
-  geom_point(aes(x = Par_ue, y = deltaOD_Lmu_corr*24,colour=as.factor(Strain)), size = 3.5, alpha = 0.9, show.legend = T) +
-  geom_errorbar(aes(x = Par_ue, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se), alpha = 0.5) +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-  ggh4x::facet_nested(rows = vars(Strain), cols = vars(Photoperiod)) +
-  theme_bw()
-
-# 
-# MCGrowthRate %>%
-#   ggplot() +
-#   geom_point(aes(x = Par_ue, y = Photoperiod, alpha = deltaOD_Lmu_corr, fill = as.factor(Strain), colour = as.factor(Strain), size = Par_ue * 0.5), shape = 22, show.legend = T) +
-#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   scale_fill_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   ggh4x::facet_nested(rows = vars(Strain)) +
-#   theme_bw()
-# 
-# MCGrowthRate %>%
-#   ggplot() +
-#   geom_point(aes(x = Par_ue, y = Photoperiod, alpha = deltaOD_Lmu_corr, fill = as.factor(Strain), colour = as.factor(Strain)), size = 5, show.legend = T) +
-#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   scale_fill_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   ggh4x::facet_nested(rows = vars(Strain)) +
-#   theme_bw()
-# 
-# MCGrowthRate %>%
-#   ggplot() +
-#   geom_raster(aes(x = Par_ue, y = Photoperiod, alpha = deltaOD_Lmu_corr, fill = as.factor(Strain), colour = as.factor(Strain)), interpolate = FALSE, show.legend = T) +
-#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   scale_fill_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   facet_wrap(vars(Strain)) +
-# #  ggh4x::facet_nested(rows = vars(Strain), cols = vars(Photoperiod)) +
-#   theme_bw()
-# 
-# MCGrowthRate %>%
-#   ggplot() +
-#   geom_raster(aes(x = as.factor(Par_ue), y = as.factor(Photoperiod), alpha = deltaOD_Lmu_corr, fill = as.factor(Strain), colour = as.factor(Strain)), interpolate = FALSE, show.legend = T) +
-#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   scale_fill_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   facet_wrap(vars(Strain)) +
-# #  ggh4x::facet_nested(rows = vars(Strain), cols = vars(Photoperiod)) +
-#   theme_bw()
-# 
-# MCGrowthRate %>%
-#   ggplot() +
-#   geom_tile(aes(x = Par_ue, y = Photoperiod, alpha = deltaOD_Lmu_corr, fill = as.factor(Strain), colour = as.factor(Strain)), height = 4, width = 60, interpolate = FALSE, show.legend = T) +
-#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   scale_fill_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   facet_wrap(vars(Strain)) +
-#   theme_bw() +
-#   theme(panel.grid.major = element_blank(),
-#         panel.grid.minor = element_blank())
-# 
-# MCGrowthRate %>%
-#   ggplot() +
-#   geom_tile(aes(x = log(Par_ue), y = Photoperiod, alpha = deltaOD_Lmu_corr, fill = Strain,  height = 4, width = log(Par_ue)/2),  interpolate = FALSE, show.legend = T) +
-#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   scale_fill_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   facet_wrap(vars(Strain)) +
-#   theme_bw() +
-#   theme(panel.grid.major = element_blank(),
-#         panel.grid.minor = element_blank())
-# 
-# #would be smarter to do ParNUM and PhotoNUM with kth function
-# MCGrowthRate %>%
-#   mutate(ParNUM = case_when(Par_ue == 30 ~ 1,
-#                             Par_ue == 90 ~ 2,
-#                             Par_ue == 180 ~ 3,
-#                             Par_ue == 300 ~ 4,
-#                             Par_ue == 600 ~ 5,
-#                             Par_ue == 900 ~ 6)) |>
-#   mutate(PhotoNUM = case_when(Photoperiod == 8 ~ 1,
-#                             Photoperiod == 12 ~ 2,
-#                             Photoperiod == 16 ~ 3,
-#                             Photoperiod == 24 ~ 4)) |>
-#   ggplot() +
-#   geom_tile(aes(x = ParNUM, y = PhotoNUM, alpha = deltaOD_Lmu_corr, fill = Strain),  interpolate = FALSE, show.legend = T) +
-#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   scale_fill_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   scale_x_continuous(breaks = c(1, 2, 3, 4, 5, 6),
-#                      labels = c(30, 90, 180, 300, 600, 900)) +
-#   scale_y_continuous(breaks = c(1, 2, 3, 4),
-#                      labels = c(8, 12, 16, 24)) +
-#  labs(x = "umol photons m-2 s-1",
-#       y = "Photoperiod (h)") +
-#   facet_wrap(vars(Strain)) +
-#   theme_bw() +
-#   theme(panel.grid.major = element_blank(),
-#         panel.grid.minor = element_blank())
-
-
-
-```
 # Calculated Anova and Tukey test
 
 ```{r calculated statistics}
-MCGrowthRateStats<-rbind(MCGrowthRate, MCGrowthRate) #I created double data here
+MultiCultiGrowth<-MultiCultiGrowth %>% 
+  filter(Run!=118 & Run!= 119) %>% 
+  filter(Par_ue!=30) %>% 
+  filter(WL != "WW")
 
-MCGrowthRateStats$Par_ue <- factor(MCGrowthRateStats$Par_ue)
-MCGrowthRateStats$Photoperiod <- factor(MCGrowthRateStats$Photoperiod)
+MCGrowthRateStats<-rbind(MultiCultiGrowth, MultiCultiGrowth) #I created double data here
+
+MCGrowthRateStats$O2 <- factor(MCGrowthRateStats$O2)
+MCGrowthRateStats$WL <- factor(MCGrowthRateStats$WL)
 MCGrowthRateStats$Strain <- factor(MCGrowthRateStats$Strain)
 
 # Two way Anova with interactions
-model<-aov(deltaOD_Lmu_corr~Par_ue*Photoperiod*Strain, data=MCGrowthRateStats)
+model<-aov(deltaOD_Lmu_corr~O2*WL*Strain, data=MCGrowthRateStats)
 AnovaTest_GrowthRate<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
-TukeyHSDTest_GrowthRate<-TukeyHSD(model, which = c("Par_ue", "Photoperiod", "Strain"))
+TukeyHSDTest_GrowthRate<-TukeyHSD(model, which = c("O2", "WL", "Strain"))
 ```
 
 
@@ -290,8 +199,23 @@ TukeyHSDTest_GrowthRate<-TukeyHSD(model, which = c("Par_ue", "Photoperiod", "Str
 ```{r}
 saveRDS(AnovaTest_GrowthRate, file.path(TableRdsPath, paste(Project, "Anova_GrowthRate.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 
-# saveRDS(TukeyHSDTest_GrowthRate, file.path(TableRdsPath, paste(Project, "HSD_GrowthRate.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(TukeyHSDTest_GrowthRate, file.path(TableRdsPath, paste(Project, "HSD_GrowthRate.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 ```
+
+
+# Save Rds for further analysis
+
+```{r save rds}
+saveRDS(MultiCultiGrowth, file.path(DataOut, paste(Project, "Processed_GrowthRate.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
+```
+
+
+------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------
+
+
+
 
 # Cleaning the environment
 
