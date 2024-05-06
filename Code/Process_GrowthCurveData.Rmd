@@ -213,6 +213,14 @@ ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_OD680",".png",sep = "")
 ```
 
 
+# Save Rds for further analysis
+
+```{r save rds}
+saveRDS(MultiCultiDataAll, file.path(DataOut, paste(Project, "Processed_GrowthCurve.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+```
+
+
+-------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------
 
 

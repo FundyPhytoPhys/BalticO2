@@ -1,5 +1,5 @@
 ---
-title: "Coastal picocyanobacteria exploit low oxygen habitats"
+title: "Coastal picocyanobacteria can exploit low oxygen habitats"
 
 author:
 - Sylwia Śliwińska-Wilczewska:
