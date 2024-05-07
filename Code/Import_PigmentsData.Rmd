@@ -281,7 +281,7 @@ rm(data_textPaersonBA77G_720, data_textPaersonBA127R_720)
 # Save RDS that create stats and tables
 
 ```{r save rds}
-saveRDS(TurnerGrowthCorrelation_Delta, file.path(RDSTablePath, paste(Project, "Tab_TurnerDeltaODCorrelation.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(TurnerGrowthCorrelation_Delta, file.path(TableRdsPath, paste(Project, "Tab_TurnerDeltaODCorrelation.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 ```
 
 
@@ -638,7 +638,7 @@ rm(MDPicoGrowthCorrelation_680, MDPicoGrowthCorrelation_720)
 # Save RDS that create stats and tables
 
 ```{r save rds}
-saveRDS(MDPicoGrowthCorrelation, file.path(RDSTablePath, paste(Project, "Tab_MDPicoMCODCorrelation.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(MDPicoGrowthCorrelation, file.path(TableRdsPath, paste(Project, "Tab_MDPicoMCODCorrelation.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 ```
 
 # Cleaning the environment
@@ -927,7 +927,7 @@ saveRDS(MC_cellmLPigment_MDPico, file.path(DataOut, paste(Project, "Imported_Pig
 # Variable names used in Data Dictionary
 
 ```{r}
-colnames(MC_cellmLPigment)
+colnames(MC_cellmLPigment_MDPico)
 ```
 
 # Correlations from Polish flowcytometer (BD Accuri) and Polish Spec if needed

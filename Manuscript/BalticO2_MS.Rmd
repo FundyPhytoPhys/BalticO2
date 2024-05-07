@@ -225,8 +225,8 @@ knitr::include_graphics(file.path(FiguresFP,"SFig_GrowthCurve_OD680.png"))
 <br>
 
 ```{r GrowthRate, fig.cap = GrowthRatePhotoperiodPUR_cap, fig.height = 8, fig.width = 6, echo = FALSE}
-GrowthRatePhotoperiodPUR_cap<- glue("**Chlorophyll-specific exponential growth rates (d^−1^) vs. wavelength (nm)**. Growth rates (± SE falling within symbols) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for  PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
-knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRate4.png"))
+GrowthRatePhotoperiodPUR_cap<- glue("**Chlorophyll-specific exponential growth rates (d^−1^) vs. growth wavelength (nm)**. Growth rates (± SE falling within symbols) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for PC-rich_077 (light green circle; solid line) and PE-rich_127 (dark red diamond; dashed line) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRate3.png"))
 ```
 
 <br>
@@ -235,9 +235,9 @@ knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRate4.png"))
 
 ```{r OlisSpectra, fig.cap = OlisSpectra_cap, fig.height = 6, fig.width = 8, echo = FALSE}
 
-OlisSpectra_cap<- glue("**Whole-cell absorbance spectra** of PC-rich_077 (solid light green lines) or PE-rich_127 (solid dark red lines) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM. Representative absorbance spectra, normalized to 440 nm (NormA~440~), were measured together with emission spectra of the white LED lamp used for PAR, normalized to their emission peak (light gray area). Estimated Photosynthetically Usable Radiation (PUR) is shown as a green area for the PC-rich_077 strain and a red area for the PE-rich_127 strain.", .sep = " ")
+OlisSpectra_cap<- glue("(A) **Whole-cell absorbance spectra** of PC-rich_077 (solid light green lines) or PE-rich_127 (dashed dark red lines) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM. Representative absorbance spectra, normalized to 440 nm (NormA~440~), were measured together with emission spectra of the white LED lamp used for PAR, normalized to their emission peak (light gray area). Estimated Photosynthetically Usable Radiation (PUR) is shown as a green area for the PC-rich_077 strain and a red area for the PE-rich_127 strain. (B) **Changes in PUR/PAR ratio vs. growth wavelength (nm)**. PUR/PAR ratio was estimated for PC-rich_077 (light green circle; solid line) and PE-rich_127 (dark red diamond; dashed line) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
 
-knitr::include_graphics(file.path( FiguresFP,"Fig_OlisSpectra.png")) 
+knitr::include_graphics(file.path( FiguresFP,"Fig_PURPARRatioSpectra.png")) 
 ```
 
 <br>
@@ -245,8 +245,8 @@ knitr::include_graphics(file.path( FiguresFP,"Fig_OlisSpectra.png"))
 ## PUR/PAR ratio vs. spectral bandwidth {.unnumbered}
 
 ```{r PURPARRatio, fig.cap = PURPARRatio_cap, fig.height = 6, fig.width = 8, echo = FALSE}
-PURPARRatio_cap<- glue("**Changes in PUR/PAR ratio vs. wavelength (nm)**. PUR/PAR ratio was estimated for PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
-knitr::include_graphics(file.path(FiguresFP,"Fig_PURPARRatio2.png"))
+PURPARRatio_cap<- glue("**Changes in PUR/PAR ratio vs. growth wavelength (nm)**. PUR/PAR ratio was estimated for PC-rich_077 (light green circle; solid line) and PE-rich_127 (dark red diamond; dashed line) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP,"Fig_PURPARRatio.png"))
 ```
 
 <br>
