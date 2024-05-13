@@ -54,6 +54,7 @@ library(googlesheets4)
 library(readxl)
 library(tidyverse)
 library(lubridate)
+library("patchwork") # merging plots
 ```
 
 ```{r set project variables}
@@ -574,7 +575,8 @@ OLISAllPURTidy %>%
 ```{r}
 #colnames(OLISAllPURTidy)
 OLISAllPURTidyChoosen<-OLISAllPURTidy %>% 
-  filter(E_days >=6 & E_days <=10) %>% 
+  #filter(E_days >=6 & E_days <=10) %>% 
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   group_by(Strain, Par_ue, WL, O2) %>%
   summarize(SampleID, Run, Strain, ExpDate, Par_ue, Photoperiod, Tube, O2, WL, LightShape, PARPhotonDose_day, PUR, PURPhotonDose_day, E_days, PURPARRatio, Oxygen,
             meanPURPARRatio = mean(PURPARRatio),
@@ -595,7 +597,7 @@ PURPAR<-OLISAllPURTidyChoosen %>%
   ggplot() +
   geom_point(aes(x = WLNum, y = meanPURPARRatio, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
   geom_line(aes(x = WLNum, y = meanPURPARRatio, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
-  geom_errorbar(aes(x = WLNum, ymin = meanPURPARRatio - sdPURPARRatio, ymax = meanPURPARRatio + sdPURPARRatio, colour = as.factor(Strain)), width=10, size=0.3, show.legend = F) +
+  geom_errorbar(aes(x = WLNum, ymin = meanPURPARRatio - sdPURPARRatio, ymax = meanPURPARRatio + sdPURPARRatio, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   scale_fill_identity() +
@@ -644,7 +646,7 @@ OLISAllPURTidyChoosen %>%
   ggplot() +
   geom_point(aes(x = WLNum, y = meanPURPARRatio, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
   geom_line(aes(x = WLNum, y = meanPURPARRatio, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
-  geom_errorbar(aes(x = WLNum, ymin = meanPURPARRatio - sdPURPARRatio, ymax = meanPURPARRatio + sdPURPARRatio, colour = as.factor(Strain)), size=0.3, show.legend = F) +
+  geom_errorbar(aes(x = WLNum, ymin = meanPURPARRatio - sdPURPARRatio, ymax = meanPURPARRatio + sdPURPARRatio, colour = as.factor(Strain)), width = 0, size=0.3, show.legend = F) +
   
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   scale_fill_identity() +
@@ -684,7 +686,7 @@ ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio2",".png",sep = "")), hei
 
 
 ```{r, warning = FALSE, fig.height = 9, fig.width = 12}
-ggp<- Spectra/PURPAR
+ggp<-Spectra/PURPAR
 ggp                           
 ```
 # Save plot 
