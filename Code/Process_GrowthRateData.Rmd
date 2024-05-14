@@ -134,7 +134,7 @@ MultiCultiGrowth %>%
   ggplot() +
   geom_point(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
   geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
-  # geom_errorbar(aes(x = WLNum, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=20, size=0.3, show.legend = F) +
+  geom_errorbar(aes(x = WLNum, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   scale_fill_identity() +
@@ -172,7 +172,7 @@ MultiCultiGrowth %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_GrowthRate",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+# ggsave(file = file.path(FigPath, paste("Fig_GrowthRate",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -185,7 +185,7 @@ MultiCultiGrowth %>%
   ggplot() +
   geom_point(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
   geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
-  # geom_errorbar(aes(x = WLNum, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=50, size=0.3, show.legend = F) +
+  geom_errorbar(aes(x = WLNum, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
   scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
@@ -218,7 +218,7 @@ MultiCultiGrowth %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_GrowthRate2",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+# ggsave(file = file.path(FigPath, paste("Fig_GrowthRate2",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -510,6 +510,9 @@ JazDataRoundMeta2 %>%
   
   geom_point(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T, MultiCultiGrowth1) +
   geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F, MultiCultiGrowth1) +
+  
+  geom_errorbar(aes(x = WLNum, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F, MultiCultiGrowth1) +
+  
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
   scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
@@ -563,6 +566,9 @@ JazDataRoundMeta2 %>%
   
   geom_point(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T, MultiCultiGrowth1) +
   geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F, MultiCultiGrowth1) +
+  
+  geom_errorbar(aes(x = WLNum, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F, MultiCultiGrowth1) +
+  
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
   scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
