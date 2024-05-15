@@ -1,0 +1,770 @@
+---
+title: "Process_SolisensePigmentsData"
+author:
+- Sylwia Sliwinska-Wilczewska
+- Douglas A. Campbell
+date: "`r format(Sys.Date())`"
+output:
+bookdown::html_document2:
+    code_folding: show
+    keep_md: yes
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 6
+    fig_caption: yes
+bibliography: BalticPhotoperiod.bib
+csl: plos-one.csl
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Set Chunk Options
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(fig.path='Figs/')
+```
+
+# Introduction
+
+Process_SolisensePigmentsData.Rmd processes and combines BalticPhotoperiod_Imported_SolisenseDarkafterLight.Rds and BalticPhotoperiod_Imported_SolisenseLight.Rds from Data/ImportedData/ImportedSolisenseData folder. This .Rmd generates BalticPhotoperiod_Processed_SolisenseData.Rds (stored in Data/ProcessedData/ProcessedSolisenseData folder), plots stored in Output/Figures folder, and tables stored in Output/TablesRds folder.
+
+# Load Libraries and set Project Variables
+
+```{r load libraries, warning = FALSE, echo=FALSE} 
+library(tidyverse)
+library(lubridate)
+library(stringr)
+library(broom)
+library(knitr)
+library(OneR)
+library(zoo)
+library(ggpubr)
+library(caret)
+library(reshape2)
+library(gcookbook)
+library(scales)
+library(Cairo) #for greek symbols
+library(googledrive)
+library(googlesheets4)
+library(readxl)
+library(multcompView)
+```
+
+```{r set project variables}
+Project <- "BalticO2"
+DataOut <- file.path("..", "Data", "ProcessedData", "ProcessedSolisenseData")
+DataIn <- file.path("..", "Data", "ImportedData", "ImportedSolisenseData", fsep = .Platform$file.sep)
+
+FigPath <- file.path("..", "Output", "Figures")
+FigRdsPath <- file.path("..", "Output", "FiguresRds")
+TableRdsPath <- file.path("..", "Output", "TablesRDS")
+```
+
+# List and read Imported_Solisense RDS
+
+```{r Exported Rmd}
+list.files(path = DataIn, pattern = Project, full.names = TRUE)
+```
+
+# This RDS contained only data from corresponding growth light 
+# Also, conteined mean sig - mean for replica measured on the same day
+
+```{r read ProcessFile Sol}
+SolisenseFile <- "../Data/ImportedData/ImportedSolisenseData/BalticO2_Imported_SolisenseLight_LRC.Rds"  
+
+SolisenseFileName <- str_split(string = SolisenseFile, "/")[[1]][3] %>%
+  str_remove(pattern = ".Rds")
+
+SolFits <- readRDS(SolisenseFile)  %>%
+  ungroup()
+
+SolFitsMeta <- SolFits %>% 
+  select(-c(nm445,nm470,nm505,nm535,nm590,IR, nm445Corr,nm470Corr, nm505Corr,nm535Corr,nm590Corr,IRCorr,JVPSII_aLHIIOxbomax, JVPSII_ETRtauav_FoSig, JVPSII_ETRtauav_aLHII_Sig, JVPSII_ETRqpOxbo_aLHII_Sig)) |>
+  rename(JVPSII_ETRqpOxbo_FoSigmax_m2psii = JVPSII_ETRqpOxbo_FoSig) |>
+  rename(FilenameSolisense=Filename) %>% 
+  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
+         Strain=="BA77G"~"PC-rich_077")) 
+
+```
+
+
+
+# Create preliminary plots 
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+
+SolFitsMeta %>%
+  # filter(Run!=118 & Run!= 119) %>% 
+  # filter(Par_ue!=30) %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  # filter(ActPAR== 80) %>%
+  filter(E_days>=4) %>% 
+  ggplot() +
+  geom_point(aes(x = WLNum, y = Sig, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+
+```
+# Choosen Sigma from corresponding light
+
+```{r data taken from corresponding light calibration}
+
+SolFitsMetaLight1 <- SolFitsMeta %>%
+  filter(Dark1s == 0) %>%
+  filter(Par_ue == 180) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>% 
+  filter(ActPAR == 80) # 158.1 for 445; 114.2 for 470; 79.6 for 505; 123.1 for 535; and 195.0 for 590
+
+
+SolFitsMetaLight2 <- SolFitsMeta %>%
+  filter(Dark1s == 0) %>%
+  filter(Par_ue == 180) %>%
+  filter(Ex_WL == 505 | Ex_WL == 470) %>% 
+  filter(ActPAR == 160) # 159.2 for 505; 228.4 for 470; 
+
+SolFitsMetaLight<-rbind(SolFitsMetaLight1, SolFitsMetaLight2)
+  rm(SolFitsMetaLight1, SolFitsMetaLight2)
+```
+
+# Convert Sig_m2psii to Sig_nm2psii and Sigdark_m2psii to Sigdark_nm2psii and calculated number of days when measurements were made
+
+```{r convert Sigma}
+SolFitsMetaLight <- SolFitsMetaLight %>%
+mutate(Sig_nm2psii=Sig_m2psii*1000000000000000000) %>%
+mutate(Sigdark_nm2psii=Sigdark_m2psii*1000000000000000000)
+```
+
+# Choosen Sigma measured from 1s in dark after corresponding light
+
+```{r data taken from 1s of dark after corresponding light calibration}
+
+SolFitsTrimMetaDarkafterLight1<- SolFitsMeta %>%
+  filter(Dark1s == 1) %>%
+  filter(ActPAR == 0) %>%
+  filter(Par_ue == 180) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>% 
+  filter(LR_s==40|LR_s==41|LR_s==42|LR_s==43|
+         LR_s==92|LR_s==93|LR_s==94|LR_s==95)
+
+SolFitsTrimMetaDarkafterLight2 <- SolFitsMeta %>%
+  filter(Dark1s == 1) %>%
+  filter(ActPAR == 0) %>%
+  filter(Par_ue == 180) %>%
+  filter(Ex_WL == 505 | Ex_WL == 470) %>% 
+  filter(LR_s==53|LR_s==54|LR_s==55|LR_s==56|
+         LR_s==79|LR_s==80|LR_s==81|LR_s==82)
+
+SolFitsTrimMetaDarkafterLight<-rbind(SolFitsTrimMetaDarkafterLight1, SolFitsTrimMetaDarkafterLight2)
+  rm(SolFitsTrimMetaDarkafterLight1, SolFitsTrimMetaDarkafterLight2)
+
+
+SolFitsTrimMetaDarkafterLight <- SolFitsTrimMetaDarkafterLight %>%
+  mutate(Sig1s=Sig*1) %>%
+  mutate(Sig1s_m2psii=Sig_m2psii*1) %>%
+  select(-c(Sig, Sig_m2psii))
+```
+
+# Convert Sig1s_m2psii to Sig1s_nm2psii and calculated number of days when measurements were made
+
+```{r convert Sigma}
+SolFitsTrimMetaDarkafterLight <- SolFitsTrimMetaDarkafterLight %>%
+# mutate(Sigdark_nm2psii=Sigdark_m2psii*1000000000000000000)  %>%
+mutate(Sig1s_nm2psii=Sig1s_m2psii*1000000000000000000)
+```
+
+
+# Create preliminary plots 
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+
+SolFitsMetaLight %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  # filter(ActPAR== 80) %>%
+  filter(E_days>=4) %>% 
+  ggplot() +
+  geom_point(aes(x = WLNum, y = Sig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  scale_fill_identity() +
+  labs(y = "Sig", x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+
+```
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_Sig",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
+```
+
+# Choosen corresponding Ex_WL
+
+```{r}
+SolFitsMetaLightCorr1<-SolFitsMetaLight %>% 
+  filter(WL== 405 | WL == 450) %>% 
+  filter(Ex_WL == 445)
+
+SolFitsMetaLightCorr2<-SolFitsMetaLight %>% 
+  filter(WL== 470) %>% 
+  filter(Ex_WL == 470)
+  
+SolFitsMetaLightCorr3<-SolFitsMetaLight %>% 
+  filter(WL== 530) %>% 
+  filter(Ex_WL == 535)
+
+SolFitsMetaLightCorr4<-SolFitsMetaLight %>% 
+  filter(WL== 620 | WL== 660 | WL == 730) %>% 
+  filter(Ex_WL == 590)
+
+SolFitsMetaLightCorr<-rbind(SolFitsMetaLightCorr1, SolFitsMetaLightCorr2, SolFitsMetaLightCorr3, SolFitsMetaLightCorr4)
+  rm(SolFitsMetaLightCorr1, SolFitsMetaLightCorr2, SolFitsMetaLightCorr3, SolFitsMetaLightCorr4)
+```
+
+
+```{r}
+SolFitsMetaLightCorr<-SolFitsMetaLightCorr %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>% 
+  mutate(Oxygen=case_when(O2==21~"250~µM",
+         O2==0~"2.5~µM"))
+
+SolFitsMetaLightCorr<-SolFitsMetaLightCorr %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>% 
+  mutate(Oxygen=case_when(O2==21~"250~µM",
+         O2==0~"2.5~µM"))
+```
+
+# Create preliminary plots 
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+
+SolFitsMetaLightCorr %>%
+  # mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  # filter(WL != "WW") %>%
+  # filter(ActPAR== 80) %>%
+  filter(E_days>=4) %>% 
+  ggplot() +
+  
+    geom_point(aes(x = WLNum, y = Sig_nm2psii, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
+    geom_line(aes(x = WLNum, y = Sig_nm2psii, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
+  
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  labs(y = "Sig", x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+
+```
+
+
+# Calculate Sigma mean from 3 replica measured on the same day
+# 6 replica b/c 3 replica * 2 values ("up" and "down")
+
+```{r calculate Sigma mean from 3 replica measured on the same day}
+SolFitsMetaLightCorr <- SolFitsMetaLightCorr %>%
+  filter(E_days>=4) %>% 
+  filter(E_days <=10) %>% 
+  group_by(Strain, Ex_WL, Par_ue, Photoperiod, WL, O2) %>%
+  
+  summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days,
+            meanSig_nm2psii = mean(Sig_nm2psii),
+            sdSig_nm2psii = sd(Sig_nm2psii),
+            meanSigdark_nm2psii = mean(Sigdark_nm2psii),
+            sdSigdark_nm2psii = sd(Sigdark_nm2psii)) %>%
+  ungroup() %>% 
+  mutate(Time_h = E_days*24)
+```
+# Create preliminary plots 
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+
+SolFitsMetaLightCorr %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  # filter(ActPAR== 80) %>%
+  #filter(E_days>=4) %>% 
+  ggplot() +
+  
+    geom_point(aes(x = WLNum, y = meanSig_nm2psii, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
+    geom_line(aes(x = WLNum, y = meanSig_nm2psii, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
+  
+    geom_errorbar(aes(x = WLNum, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+
+```
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_SigCorr",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
+```
+
+
+# Create preliminary plots 
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+
+SolFitsMetaLightCorr %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  # filter(ActPAR== 80) %>%
+  #filter(E_days>=4) %>% 
+  ggplot() +
+  
+    geom_point(aes(x = WLNum, y = meanSigdark_nm2psii, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
+    geom_line(aes(x = WLNum, y = meanSigdark_nm2psii, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
+  
+    geom_errorbar(aes(x = WLNum, ymin = meanSigdark_nm2psii - sdSigdark_nm2psii, ymax = meanSigdark_nm2psii + sdSigdark_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+
+```
+
+
+
+
+
+
+
+# Save rds for further analysis
+
+```{r save rds}
+# saveRDS(SolFitsMetaLightCorr, file.path(DataOut, paste(Project, "Processed_SolFitsMetaLightCorr.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
+# saveRDS(SolFitsTrimMetaDarkafterLight, file.path(DataOut, paste(Project, "Processed_SolFitsTrimMetaDarkafterLight.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
+```
+
+# Variable names used in Data Dictionary
+
+```{r}
+#colnames(MCPigmentChoosen)
+```
+
+
+
+
+
+
+
+
+
+
+# Calculate Sigma mean from 3 replica measured on the same day
+# 6 replica b/c 3 replica * 2 values ("up" and "down")
+
+```{r calculate Sigma mean from 3 replica measured on the same day}
+# SolFitsExpSt <- SolFitsExpSt %>%
+#   group_by(SampleID, Ex_WL, ObsDate, Par_ue, Photoperiod, WL, O2, Phase) %>%
+#   
+#   summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, Phase,  PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_aLHIIOxbomax, JVPSII_ETRtauav_FoSig, JVPSII_ETRqpOxbo_FoSig, JVPSII_ETRtauav_aLHII_Sig, JVPSII_ETRqpOxbo_aLHII_Sig, facetsPhotonDose_day, facetsExcitation, facetsStrain,
+#             meanSig_nm2psii = mean(Sig_nm2psii),
+#             sdSig_nm2psii = sd(Sig_nm2psii),
+#             meanSigdark_nm2psii = mean(Sigdark_nm2psii),
+#             sdSigdark_nm2psii = sd(Sigdark_nm2psii)) %>%
+#   ungroup()
+# 
+# SolFitsExpSt<- SolFitsExpSt %>%
+# group_by(SampleID) %>%
+#   arrange(ObsDate) %>%
+#   mutate(E_days = as.numeric((ObsDate - ExpDate[1]))) %>%
+# ungroup()
+# 
+# SolFitsExpSt<- SolFitsExpSt %>%
+#   mutate(Time_h = E_days*24)
+```
+
+
+Make "one big - All" mean to combine all days (divided by Exp and St) and all replica when samples were measured 
+(This give me only one value of JVPSII for further growth vs JVPSII plot and sig plot as well)
+
+
+# Calculate Sigma mean from all data measured on Exp or St phase 
+# Usually Allmean contains 12 replica - two different days of measurements * 3 replica * 2 values (up and down)
+
+```{r calculate Sigma mean from exp phase}
+
+# SolFitsExpSt<-SolFitsExpSt %>% 
+#   group_by(Strain, Ex_WL, Par_ue, Photoperiod, WL, O2, Phase) %>%
+#   
+#   summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, Phase,  PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, meanSig_nm2psii, sdSig_nm2psii, ActPARCorr_photonsm2s, Sigdark_nm2psii, meanSigdark_nm2psii, sdSigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_aLHIIOxbomax, JVPSII_ETRtauav_FoSig, JVPSII_ETRqpOxbo_FoSig, JVPSII_ETRtauav_aLHII_Sig, JVPSII_ETRqpOxbo_aLHII_Sig, facetsPhotonDose_day, facetsExcitation, facetsStrain, E_days, Time_h,
+#               
+#             AllmeanJVPSII_aLHIIOxbomax= mean(JVPSII_aLHIIOxbomax),
+#             AllmeanJVPSII_ETRtauav_FoSig= mean(JVPSII_ETRtauav_FoSig),
+#             AllmeanJVPSII_ETRqpOxbo_FoSig= mean(JVPSII_ETRqpOxbo_FoSig),
+#             AllmeanJVPSII_ETRtauav_aLHII_Sig = mean(JVPSII_ETRtauav_aLHII_Sig),
+#             AllmeanJVPSII_ETRqpOxbo_aLHII_Sig= mean(JVPSII_ETRqpOxbo_aLHII_Sig),
+#             AllmeanSig_nm2psii = mean(Sig_nm2psii),
+#             AllsdSig_nm2psii = sd(Sig_nm2psii),
+#             AllmeanSigdark_nm2psii = mean(Sigdark_nm2psii),
+#             AllsdSigdark_nm2psii = sd(Sigdark_nm2psii)) %>%
+#   ungroup()
+```
+
+
+# Calculated Anova and Tukey test from data points
+
+```{r calculated statistics}
+# SigFit445Stats <-SolFitsExpFitAll %>% 
+#   filter(Ex_WL == 445) 
+# 
+# SigFit445Stats$Par_ue <- factor(SigFit445Stats$Par_ue)
+# SigFit445Stats$Photoperiod <- factor(SigFit445Stats$Photoperiod)
+# SigFit445Stats$Strain <- factor(SigFit445Stats$Strain)
+# SigFit445Stats$Phase <- factor(SigFit445Stats$Phase)
+# SigFit445Stats$PARPhotonDose_day <- factor(SigFit445Stats$PARPhotonDose_day)
+# 
+# # Three way Anova with interactions
+# model<-aov(Sig_nm2psii~PARPhotonDose_day*Phase*Strain, data=SigFit445Stats)
+# Anova_Sig445<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# #TukeyHSDTest_Sig<-TukeyHSD(model, which = c("PARPhotonDose_day", "Phase", "Strain"))
+```
+
+# Save RDS that create stats and tables
+
+```{r}
+# saveRDS(Anova_Sig445, file.path(TableRdsPath, paste(Project, "Anova_Sig445.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+```
+
+
+------------------------------------------------------# Add Turner Catalog--------------------------------------------------
+
+# Load Turner catalog
+
+```{r load turner catalog, message = FALSE, warning = FALSE, echo=FALSE}
+gs4_deauth()
+Turnercatalog<- read_sheet("https://docs.google.com/spreadsheets/d/13mQm0B3siS65UuGjNdzvpHFomfuwn6aAg7dBoq1IqrM/edit#gid=0")
+
+as.data.frame(Turnercatalog)
+ChlData <- Turnercatalog 
+
+ChlData <- ChlData %>%  
+  mutate(TurChl_ugL = as.numeric(Reading_rfu) * as.numeric(Chl_slope) + as.numeric(Chl_intercept)) %>% 
+  mutate(DATE = ymd(`DATE`)) %>% 
+  rename(SampleID=CultureID) %>% 
+  rename(ObsDate=DATE) %>% 
+  select(c(SampleID, ObsDate, TurChl_ugL)) %>% 
+  filter(TurChl_ugL<212354.754)  #outliers
+
+```
+
+```{r}
+# ChlData <- ChlData %>%  
+#   filter(TurChl_ugL<1500)
+```
+
+
+# Calculate Chl mean from 3 technical replica
+
+```{r}
+ChlData <- ChlData %>%
+  group_by(SampleID, ObsDate) %>%
+  summarize(SampleID, ObsDate, TurChl_ugL,
+            meanTurChl_ugL = mean(TurChl_ugL),
+            sdTurChl_ugL = sd(TurChl_ugL)) %>%
+  ungroup()
+```
+
+
+# Merge Sigma with chlorophyll Turner data 
+It is "bigger" df than SolFitsPigmentExp, b/c I have 3 replica for Turner
+
+```{r}
+SolFitsExpStTurner <- ChlData %>%
+  full_join(., SolFitsMetaLightCorr, by = c("SampleID"="SampleID", "ObsDate"="ObsDate")) %>% 
+  drop_na(Strain)
+```
+
+# Filter only revelant strains
+
+```{r}
+# SolFitsExpStTurner<-SolFitsExpStTurner %>%   
+#   filter(Strain=="PC-rich_056" | Strain == "PC-rich_077" | Strain == "PE-rich_048" | Strain == "PE-rich_127")
+```
+
+
+# Create preliminary JVPSII vs Chl Turner (ug/L) plot
+
+```{r preliminary plots, warning = FALSE}
+
+SolFitsExpStTurner %>% 
+  ggplot() +
+  geom_point(aes(x = WL, y = JVPSII_ETRqpOxbo_FoSigmax_m2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  ggh4x::facet_nested(rows = vars(O2), labeller = label_parsed) +
+  theme_bw()
+
+```
+
+# Save Rds for further analysis
+
+```{r save rds}
+saveRDS(SolFitsExpStTurner, file.path(DataOut, paste(Project, "Processed_SolisenseData.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+```
+
+# Variable names used in Data Dictionary
+
+```{r}
+colnames(SolFitsExpStTurner)
+```
+
+
+
+
+
+
+The anova() function will take the model objects as arguments, and return an ANOVA testing whether the more complex model is significantly better at capturing the data than the simpler model. If the resulting p-value is sufficiently low (usually less than 0.05), we conclude that the more complex model is significantly better than the simpler model, and thus favor the more complex model. If the p-value is not sufficiently low (usually greater than 0.05), we should favor the simpler model.
+
+# Exstracting models for each fit - models were not all fitted to the same size of dataset
+
+```{r}
+# StatsSigLM<-SolFitsAllPigmentPCPE %>% 
+#   drop_na(Sig_nm2psii, AllmeanPhycoChlaRatio) 
+# 
+# StatsSigLM$Strain <- factor(StatsSigLM$Strain)
+# StatsSigLM$Phase <- factor(StatsSigLM$Phase)  
+# StatsSigLM$AllmeanPhycoChlaRatio <- factor(StatsSigLM$AllmeanPhycoChlaRatio) 
+# 
+# SolFitsBA56Exp<-StatsSigLM %>%
+#   filter(Strain == "PC-rich_056")
+#   SolFitsBA56Exp <- SolFitsBA56Exp[-c(883:990), ]
+# 
+# SolFitsBA77Exp<-StatsSigLM %>%
+#   filter(Strain == "PC-rich_077") 
+#   SolFitsBA77Exp <- SolFitsBA77Exp[-c(883:998), ]
+# 
+# SolFitsBA48Exp<-StatsSigLM %>%
+#   filter(Strain == "PE-rich_048") 
+#   SolFitsBA48Exp <- SolFitsBA48Exp[-c(883:883), ]
+# 
+# SolFitsBA127Exp<-StatsSigLM %>%
+#   filter(Strain == "PE-rich_127") 
+#   SolFitsBA127Exp <- SolFitsBA127Exp[-c(883:894), ]
+# 
+# model1 <- lm(Sig_nm2psii~AllmeanPhycoChlaRatio, data = SolFitsBA56Exp)
+# model2 <- lm(Sig_nm2psii~AllmeanPhycoChlaRatio, data = SolFitsBA77Exp)
+# ANOVA_LinModel<-anova(model1, model2, test="F")
+#   
+#   
+# model<-aov(Sig_nm2psii~AllmeanPhycoChlaRatio*Phase*Strain, data=StatsSigLM)
+# AnovaTest_SigLM<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# TukeyHSDTest_Sig<-TukeyHSD(model, which = c("Phase", "Strain"))
+
+
+#  diamonds.mod1 <- lm(Sig_nm2psii~PhycoChlaRatio, data = SolFitsAllExp)
+#   diamonds.mod2 <- lm(Sig_nm2psii~PhycoChlaRatio, data = SolFitsAllSt)
+#   anova(diamonds.mod1, diamonds.mod2, test="Chisq")
+
+```
+
+
+```{r}
+#108 value per 1 condition - b/c mean OD
+# Test<-SolFitsAllPigmentPCPETurner %>% 
+#   filter(Strain == "PC-rich_077") %>% 
+#   filter(Photoperiod == 12) %>% 
+#   filter(Par_ue == 90) %>% 
+#   filter(Ex_WL == 445)
+```
+
+
+dodawanie modeli zeby sprawdzic, czy sa istotne roznice pomiedzy szczepami i fazami wzrostu
+https://stats.stackexchange.com/questions/435644/is-there-a-method-to-look-for-significant-difference-between-two-linear-regressi
+
+```{r}
+# set.seed(123)
+# df = data.frame(Age=sample(1:100))
+# df$Height[1:50] = df$Age[1:50] + rpois(50,30)
+# df$Height[51:100] = 1.3*df$Age[51:100] + rpois(50,30)
+# df$Fladen = rep(c("A","B"),each=50)
+# 
+# summary(lm(Height ~ Age + Fladen + Age:Fladen,data=df))
+
+# So the last term, Age:FladenB shows a coefficient of 0.29, meaning the slope (Height vs Age) in Fladen B is .29 more than that in Fladen A
+
+# StatsExp590<-SolFitsAllPigmentPCPE %>%
+#   filter(Phase == "Exponential") %>%
+#   filter(Ex_WL == 590) %>%
+#   select(c(Strain, Sig_nm2psii, AllmeanPhycoChlaRatio))
+# summary(lm(Sig_nm2psii ~ AllmeanPhycoChlaRatio + Strain + AllmeanPhycoChlaRatio:Strain,data=StatsExp590))
+
+```
+
+# compact letter display
+```{r}
+# # analysis of variance
+# anova <- aov(weight ~ feed, data = chickwts)
+# 
+# # Tukey's test
+# tukey <- TukeyHSD(anova)
+# 
+# # compact letter display
+# cld <- multcompLetters4(anova, tukey)
+# 
+# # table with factors and 3rd quantile
+# dt <- group_by(chickwts, feed) %>%
+#   summarise(w=mean(weight), sd = sd(weight)) %>%
+#   arrange(desc(w))
+# 
+# # extracting the compact letter display and adding to the Tk table
+# cld <- as.data.frame.list(cld$feed)
+# dt$cld <- cld$Letters
+# 
+# print(dt)
+```
+
+
+
+
+
+
+Set up R codes for Greek letters
+
+\u0391  Α   Greek Capital Letter Alpha
+\u0392  Β   Greek Capital Letter Beta
+\u0393  Γ   Greek Capital Letter Gamma
+\u0394  Δ   Greek Capital Letter Delta
+\u0395  Ε   Greek Capital Letter Epsilon
+\u0396  Ζ   Greek Capital Letter Zeta
+\u0397  Η   Greek Capital Letter Eta
+\u0398  Θ   Greek Capital Letter Theta
+\u0399  Ι   Greek Capital Letter Iota
+\u039A  Κ   Greek Capital Letter Kappa
+\u039B  Λ   Greek Capital Letter Lambda
+\u039C  Μ   Greek Capital Letter Mu
+\u039D  Ν   Greek Capital Letter Nu
+\u039E  Ξ   Greek Capital Letter Xi
+\u039F  Ο   Greek Capital Letter Omicron
+\u03A0  Π   Greek Capital Letter Pi
+\u03A1  Ρ   Greek Capital Letter Rho
+\u03A3  Σ   Greek Capital Letter Sigma
+\u03A4  Τ   Greek Capital Letter Tau
+\u03A5  Υ   Greek Capital Letter Upsilon
+\u03A6  Φ   Greek Capital Letter Phi
+\u03A7  Χ   Greek Capital Letter Chi
+\u03A8  Ψ   Greek Capital Letter Psi
+\u03A9  Ω   Greek Capital Letter Omega
+\u03B1  α   Greek Small Letter alpha
+\u03B2  β   Greek Small Letter beta
+\u03B3  γ   Greek Small Letter gamma
+\u03B4  δ   Greek Small Letter delta
+\u03B5  ε   Greek Small Letter epsilon
+\u03B6  ζ   Greek Small Letter zeta
+\u03B7  η   Greek Small Letter eta
+\u03B8  θ   Greek Small Letter theta
+\u03B9  ι   Greek Small Letter iota
+\u03BA  κ   Greek Small Letter kappa
+\u03BB  λ   Greek Small Letter lambda
+\u03BC  μ   Greek Small Letter mu
+\u03BD  ν   Greek Small Letter nu
+\u03BE  ξ   Greek Small Letter xi
+\u03BF  ο   Greek Small Letter omicron
+\u03C0  π   Greek Small Letter pi
+\u03C1  ρ   Greek Small Letter rho
+\u03C2  ς   Greek Small Letter final sigma
+\u03C3  σ   Greek Small Letter sigma
+\u03C4  τ   Greek Small Letter tau
+\u03C5  υ   Greek Small Letter upsilon
+\u03C6  φ   Greek Small Letter phi
+\u03C7  χ   Greek Small Letter chi
+\u03C8  ψ   Greek Small Letter psi
+\u03C9  ω   Greek Small Letter omega
+
+
+
+
+

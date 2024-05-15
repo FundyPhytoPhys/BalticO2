@@ -81,30 +81,15 @@ SolFitsMeta <- readRDS(file = file.path("..", "Data", "ImportedData", "ImportedS
 SolFitsMeta <- SolFitsMeta |>
   select(-c(nm445,nm470,nm505,nm535,nm590,IR, nm445Corr,nm470Corr, nm505Corr,nm535Corr,nm590Corr,IRCorr,JVPSII_aLHIIOxbomax, JVPSII_ETRtauav_FoSig, JVPSII_ETRtauav_aLHII_Sig, JVPSII_ETRqpOxbo_aLHII_Sig)) |>
   rename(JVPSII_ETRqpOxbo_FoSigmax_m2psii = JVPSII_ETRqpOxbo_FoSig) |>
-  rename(FilenameSolisense=Filename)
+  rename(FilenameSolisense=Filename) %>% 
+  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
+         Strain=="BA77G"~"PC-rich_077")) 
 ```
 
 # Create preliminary plots 
 
 ```{r preliminary plot}
 lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
-
-
-SolFitsMeta %>%
-  filter(Run!=118 & Run!= 119) %>% 
-  filter(Par_ue!=30) %>% 
-  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  filter(WL != "WW") %>%
-  filter(ActPAR== 80) %>%
-  filter(E_days>=4) %>% 
-  ggplot() +
-  geom_point(aes(x = WLNum, y = Sig, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
-  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
-  scale_fill_identity() +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
-  theme_bw() 
-
 
 SolFitsMeta %>%
   filter(Run!=118 & Run!= 119) %>% 

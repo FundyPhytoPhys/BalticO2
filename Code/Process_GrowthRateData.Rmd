@@ -141,7 +141,7 @@ MultiCultiGrowth %>%
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
   scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
-  labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
+  #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
   #scale_x_continuous(breaks=seq(0, 200, by = 50)) +
   #coord_cartesian(xlim = c (0, 200)) +
   #coord_cartesian(xlim = c (400, 800)) +

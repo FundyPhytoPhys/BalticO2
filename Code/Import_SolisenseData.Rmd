@@ -382,7 +382,7 @@ rm(SolFitsMeta445, SolFitsMetaAll)
 # Create preliminary plots 
 
 ```{r preliminary plot}
-lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+#lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 
 SolFitsMeta %>%
@@ -391,7 +391,7 @@ SolFitsMeta %>%
     filter(ActPAR== 80) %>% #corresponding light
   ggplot() +
   geom_point(aes(x = Ex_WL, y = Sig, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
   #facet_grid(cols = vars(WL), rows = vars(O2)) +
   
   ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
@@ -421,7 +421,7 @@ ggsave(file = file.path(FigPath, paste("Fig_Sig",".png",sep = "")), height=5, wi
 
 
 ```{r preliminary plot}
-lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+#lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 
 SolFitsMeta %>%
@@ -435,7 +435,7 @@ SolFitsMeta %>%
   
   ggplot() +
   geom_point(aes(x = WLNum, y = Sig, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
 
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   scale_fill_identity() +
@@ -466,7 +466,7 @@ ggsave(file = file.path(FigPath, paste("Fig_Sig2",".png",sep = "")), height=5, w
 ```
 
 ```{r preliminary plot}
-lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+#lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 
 SolFitsMeta %>%
@@ -480,7 +480,7 @@ SolFitsMeta %>%
   
   ggplot() +
   geom_point(aes(x = WLNum, y = JVPSII_ETRqpOxbo_FoSig, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
 
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   scale_fill_identity() +

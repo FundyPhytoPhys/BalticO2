@@ -55,7 +55,7 @@ library(grid) #colour facets
 ```
 
 ```{r set project variables}
-Project <- "BalticPhotoperiod"
+Project <- "BalticO2"
 DataOut <- file.path("..", "Data", "ProcessedData", "ProcessedSolisensePigmentsData")
 DataIn <- file.path("..", "Data", "ProcessedData", "ProcessedSolisenseData", fsep = .Platform$file.sep)
 
@@ -74,7 +74,7 @@ list.files(path = DataIn, pattern = Project, full.names = TRUE)
 # Also, conteined mean sig - mean for replica measured on the same day
 
 ```{r read ProcessFile Sol}
-SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticPhotoperiod_Processed_SolisenseData.Rds"  
+SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseData.Rds"  
 
 SolisenseFileName <- str_split(string = SolisenseFile, "/")[[1]][3] %>%
   str_remove(pattern = ".Rds")
@@ -89,7 +89,7 @@ SolFits <- readRDS(SolisenseFile)  %>%
 Issue - not always pigment based on Olis correspond to Solisense data-> I choose the time (range) that pigments correspond to Sig measurements (for exp and st phase separately). Max 5 measurements for pigments. Then I made a mean for pigments to get one value.
 
 ```{r set project variables}
-Project <- "BalticPhotoperiod"
+Project <- "BalticO2"
 DataIn <- file.path("..", "Data", "ProcessedData", "ProcessedPigmentsData", fsep = .Platform$file.sep)
 ```
 
@@ -100,7 +100,7 @@ list.files(path = DataIn, pattern = Project, full.names = TRUE)
 ```{r read pigments File}
 #df ontained mean OD per day from Multiculti and Abs from Olis spectra for selected nm. Based on this I calculated pigments per mL and per cell (pg/cell)
 
-MCPigmentAllFile <- "../Data/ProcessedData/ProcessedPigmentsData/BalticPhotoperiod_Processed_PigmentsAll.Rds"
+MCPigmentAllFile <- "../Data/ProcessedData/ProcessedPigmentsData/BalticO2_Processed_Pigments.Rds"
 MCPigmentAllFileName <- str_split(string = MCPigmentAllFile, "/")[[1]][3] %>%
   str_remove(pattern = ".Rds")
 MCPigmentAll <- readRDS(MCPigmentAllFile)  %>%
@@ -108,127 +108,8 @@ MCPigmentAll <- readRDS(MCPigmentAllFile)  %>%
 ```
 
 ```{r}
-MCPigmentAll <- MCPigmentAll %>% 
-  filter(ToD==10) # When I choose 12 (peak) then I loose a few data point from 12h and 900UE
-```
-
-
-# Altrough MCPigmentAll already contain Exp and St phase, I took exactly the same parameters (settings) like Sig, b/c MCPigmentAll do not contain information on 600 uE. 
-
-# Choose only exp data
-
-```{r choose only exp data}
-O1 <- MCPigmentAll %>%
-  filter(Par_ue == 300 | Par_ue == 90 | Par_ue == 180 | Par_ue == 600 | Par_ue == 900) %>%
-  filter(Photoperiod == 24) %>%
-  filter(E_days <= 4)
-
-O2 <- MCPigmentAll %>%
-  filter(Par_ue == 90 | Par_ue == 180 | Par_ue == 300) %>%
-  filter(Photoperiod == 16) %>%
-  filter(E_days < 9)
-
-O3 <- MCPigmentAll %>%
-  filter(Par_ue == 900 | Par_ue == 600) %>%
-  filter(Photoperiod == 16) %>%
-  filter(E_days <= 4)
-
-O4 <- MCPigmentAll %>%
-  filter(Par_ue == 30) %>%
-  filter(Photoperiod == 16) %>%
-  filter(E_days <= 14)
-
-O5 <- MCPigmentAll %>%
-  filter(Par_ue == 30) %>%
-  filter(Photoperiod == 8 | Photoperiod == 12) %>%
-  filter(E_days <=14)
-
-O6 <- MCPigmentAll %>%
-  filter(Par_ue == 90) %>%
-  filter(Photoperiod == 8) %>%
-  filter(E_days <=14)
-
-O7 <- MCPigmentAll %>%
-  filter(Par_ue == 90) %>%
-  filter(Photoperiod == 12) %>%
-  filter(E_days <=10)
-
-O8 <- MCPigmentAll %>%
-  filter(Par_ue == 180 | Par_ue == 300) %>%
-  filter(Photoperiod == 8 | Photoperiod == 12) %>%
-  filter(E_days <=10)
-
-O9 <- MCPigmentAll %>%
-  filter(Par_ue == 900 | Par_ue == 600) %>%
-  filter(Photoperiod == 8 | Photoperiod == 12) %>%
-  filter(E_days <=7)
-
-O10 <- MCPigmentAll %>%
-  filter(Par_ue == 30) %>%
-  filter(Photoperiod == 24) %>%
-  filter(E_days <= 8)
-
-MCPigmentAllExp <-rbind(O1, O2, O3, O4, O5, O6, O7, O8, O9, O10)
-
-rm(O1, O2, O3, O4, O5, O6, O7, O8, O9, O10)
-```
-
-# Choose only Stationary data 
-
-```{r choose only St data}
-O1 <- MCPigmentAll %>%
-  filter(Par_ue == 300 | Par_ue == 90 | Par_ue == 180 | Par_ue == 600 | Par_ue == 900) %>%
-  filter(Photoperiod == 24) %>%
-  filter(E_days > 4)
-
-O2 <- MCPigmentAll %>%
-  filter(Par_ue == 30) %>%
-  filter(Photoperiod == 12 | Photoperiod == 16) %>%
-  filter(E_days >14)
-
-O3 <- MCPigmentAll %>%
-  filter(Par_ue == 90) %>%
-  filter(Photoperiod == 12 | Photoperiod == 16) %>%
-  filter(E_days >10)
-
-O4 <- MCPigmentAll %>%
-  filter(Par_ue == 180 | Par_ue == 300) %>%
-  filter(Photoperiod == 8 | Photoperiod == 12 | Photoperiod == 16) %>%
-  filter(E_days >10)
-
-O5 <- MCPigmentAll %>%
-  filter(Par_ue == 900 | Par_ue == 600) %>%
-  filter(Photoperiod == 16) %>%
-  filter(E_days >=6)
-
-O6 <- MCPigmentAll %>%
-  filter(Par_ue == 900 | Par_ue == 600) %>%
-  filter(Photoperiod == 12) %>%
-  filter(E_days >=4)
-
-O6 <- MCPigmentAll %>%
-  filter(Par_ue == 900 | Par_ue == 600) %>%
-  filter(Photoperiod == 8) %>%
-  filter(E_days >7)
-
-MCPigmentAllSt <-rbind(O1, O2, O3, O4, O5, O6)
-
-rm(O1, O2, O3, O4, O5, O6)
-```
-
-# Combine Exp and St data
-
-```{r}
-MCPigmentAllExp<-MCPigmentAllExp %>%
-  select(-c(Phase)) # Removed previous Phase b/c do not contained 600uE data
-
-MCPigmentAllSt<-MCPigmentAllSt %>%
-  select(-c(Phase)) # Removed previous Phase b/c do not contained 600uE data
-
-  MCPigmentAllExp$Phase <- 'Exponential'
-  MCPigmentAllSt$Phase <- 'Pre-stationary'
-
-  MCPigmentAllExpSt <-rbind(MCPigmentAllExp, MCPigmentAllSt)
+# MCPigmentAll <- MCPigmentAll %>% 
+#   filter(ToD==12) # When I choose 12 (peak) then I loose a few data point from 12h and 900UE
 ```
 
 
@@ -236,175 +117,20 @@ MCPigmentAllSt<-MCPigmentAllSt %>%
 # Create preliminary plot
 
 ```{r preliminary plot}
-lab1=c(expression("PC-rich_056"), expression("PC-rich_077"), expression("PE-rich_048"), expression("PE-rich_127"))
-lab2=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
-lab3=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("600 µE"), expression("900 µE"))
 
 MCPigmentAll %>%
   ggplot() +
-  geom_point(aes(x = Time_h, y = PhycoChlaRatio, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-  # geom_vline(data = tMaxAGLines_056, aes(xintercept = tMaxAG), linetype="dotdash", colour = "brown4") +
-  # geom_vline(data = tMaxAGLines_077, aes(xintercept = tMaxAG), linetype="dotdash", colour = "brown1") +
-  # geom_vline(data = tMaxAGLines_048, aes(xintercept = tMaxAG), linetype="dotdash", colour = "seagreen4") +
-  # geom_vline(data = tMaxAGLines_127, aes(xintercept = tMaxAG), linetype="dotdash", colour = "palegreen3") +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
+  geom_point(aes(x = WL, y = PhycoChlaRatio, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+
+  ggh4x::facet_nested(cols = vars(E_days), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
-MCPigmentAllExp %>%
-  ggplot() +
-  geom_point(aes(x = Time_h, y = PhycoChlaRatio, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-  # geom_vline(data = tMaxAGLines_056, aes(xintercept = tMaxAG), linetype="dotdash", colour = "brown4") +
-  # geom_vline(data = tMaxAGLines_077, aes(xintercept = tMaxAG), linetype="dotdash", colour = "brown1") +
-  # geom_vline(data = tMaxAGLines_048, aes(xintercept = tMaxAG), linetype="dotdash", colour = "seagreen4") +
-  # geom_vline(data = tMaxAGLines_127, aes(xintercept = tMaxAG), linetype="dotdash", colour = "palegreen3") +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
-  theme_bw() 
 
-MCPigmentAllSt %>%
-  ggplot() +
-  geom_point(aes(x = Time_h, y = PhycoChlaRatio, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-  # geom_vline(data = tMaxAGLines_056, aes(xintercept = tMaxAG), linetype="dotdash", colour = "brown4") +
-  # geom_vline(data = tMaxAGLines_077, aes(xintercept = tMaxAG), linetype="dotdash", colour = "brown1") +
-  # geom_vline(data = tMaxAGLines_048, aes(xintercept = tMaxAG), linetype="dotdash", colour = "seagreen4") +
-  # geom_vline(data = tMaxAGLines_127, aes(xintercept = tMaxAG), linetype="dotdash", colour = "palegreen3") +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
-  theme_bw() 
 ```
 
-# Not always E_days from Sig and Phyco/Chla ratio matches. Thus, I took only pigments from the range of days when Sig was measured. Later I made a mean from the pigment value taken from choosem pig value
-
-# Choose only pigment data when Sig was measured (time range)
-
-```{r choose pigment data when Sig was measured}
-O2 <- MCPigmentAllExpSt %>%
-  filter(Phase == "Exponential") %>% 
-  filter(Photoperiod == 24)
-O3 <- MCPigmentAllExpSt %>%
-  filter(Phase == "Exponential") %>% 
-  filter(Photoperiod == 8) %>% 
-  filter(E_days>5)
-O4 <- MCPigmentAllExpSt %>%
-  filter(Phase == "Exponential") %>% 
-  filter(Photoperiod == 12) %>% 
-  filter(E_days>3)
-O5 <- MCPigmentAllExpSt %>%
-  filter(Phase == "Exponential") %>% 
-  filter(Photoperiod == 16) %>% 
-  filter(Par_ue == 30 | Par_ue == 90 | Par_ue == 180 | Par_ue == 300) %>% 
-  filter(E_days>5)
-O6 <- MCPigmentAllExpSt %>%
-  filter(Phase == "Exponential") %>% 
-  filter(Photoperiod == 16) %>% 
-  filter(Par_ue == 600 | Par_ue == 900)
-
-MCPigmentAllExpStChoosen_1 <-rbind(O2, O3, O4, O5, O6)
-
-O7 <- MCPigmentAllExpStChoosen_1 %>% 
-  filter(Phase == "Exponential") %>% 
-  filter(Par_ue == 180 | Par_ue == 300) %>% 
-  filter(E_days<=8)
-O8 <- MCPigmentAllExpStChoosen_1 %>% 
-  filter(Phase == "Exponential") %>% 
-  filter(Par_ue == 30 | Par_ue == 90 | Par_ue == 600 | Par_ue == 900) 
-  #filter(E_days<=8)
-O1 <- MCPigmentAllExpSt %>%
-  filter(Phase == "Pre-stationary")
-
-MCPigmentAllExpStChoosen <-rbind(O1, O7, O8)
-
-rm(O1, O2, O3, O4, O5, O6, O7, O8, MCPigmentAllExpStChoosen_1)
-```
-
-# Filter lag or very early exp phase and unrevelant value
-
-```{r}
-MCPigmentAllExpStChoosen<-MCPigmentAllExpStChoosen %>% 
-  filter(E_days >1) 
-```
-
-# Create preliminary plot
-
-```{r preliminary plot}
-lab1=c(expression("PC-rich_056"), expression("PC-rich_077"), expression("PE-rich_048"), expression("PE-rich_127"))
-lab2=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
-lab3=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("600 µE"), expression("900 µE"))
-
-MCPigmentAllExpStChoosen %>%
-  filter(Phase == "Exponential") %>% 
-  ggplot() +
-  geom_point(aes(x = Time_h, y = PhycoChlaRatio, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-  # geom_vline(data = tMaxAGLines_056, aes(xintercept = tMaxAG), linetype="dotdash", colour = "brown4") +
-  # geom_vline(data = tMaxAGLines_077, aes(xintercept = tMaxAG), linetype="dotdash", colour = "brown1") +
-  # geom_vline(data = tMaxAGLines_048, aes(xintercept = tMaxAG), linetype="dotdash", colour = "seagreen4") +
-  # geom_vline(data = tMaxAGLines_127, aes(xintercept = tMaxAG), linetype="dotdash", colour = "palegreen3") +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
-  theme_bw() 
-
-MCPigmentAllExpStChoosen %>%
-  filter(Phase == "Pre-stationary") %>% 
-  ggplot() +
-  geom_point(aes(x = Time_h, y = PhycoChlaRatio, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-  # geom_vline(data = tMaxAGLines_056, aes(xintercept = tMaxAG), linetype="dotdash", colour = "brown4") +
-  # geom_vline(data = tMaxAGLines_077, aes(xintercept = tMaxAG), linetype="dotdash", colour = "brown1") +
-  # geom_vline(data = tMaxAGLines_048, aes(xintercept = tMaxAG), linetype="dotdash", colour = "seagreen4") +
-  # geom_vline(data = tMaxAGLines_127, aes(xintercept = tMaxAG), linetype="dotdash", colour = "palegreen3") +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
-  theme_bw() 
-```
-
-```{r}
-#rm(tmaxAG, tMaxAGLines_056, tMaxAGLines_077, tMaxAGLines_048, tMaxAGLines_127, MCPigmentAllSt, MCPigmentAllExp)
-```
-
-#Create preliminary plot
-
-```{r preliminary plot}
-lab1=c(expression("PC-rich_056"), expression("PC-rich_077"), expression("PE-rich_048"), expression("PE-rich_127"))
-lab2=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
-lab3=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("600 µE"), expression("900 µE"))
-
-MCPigmentAllExpSt %>%
-  ggplot() +
-  geom_point(aes(x = PARPhotonDose_day, y = PhycoChlaRatio, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)),  alpha = 0.8, size = 3, show.legend = T) +
-  #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  scale_shape_manual(values = c(15, 16, 17,18), name="", labels = lab2) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab3) +
-  ggh4x::facet_nested(cols = vars(Phase), rows = vars(Strain), labeller = label_parsed) +
-  theme_bw() 
-
-MCPigmentAllExpStChoosen %>%
-  ggplot() +
-  geom_point(aes(x = PARPhotonDose_day, y = PhycoChlaRatio, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)),  alpha = 0.8, size = 3, show.legend = T) +
-  #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  scale_shape_manual(values = c(15, 16, 17,18), name="", labels = lab2) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab3) +
-  ggh4x::facet_nested(cols = vars(Phase), rows = vars(Strain), labeller = label_parsed) +
-  theme_bw() 
 
 
-MCPigmentAllExpSt %>%
-  ggplot() +
-  geom_point(aes(x = PARPhotonDose_day, y = PURPARRatio, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)),  alpha = 0.8, size = 3, show.legend = T) +
-  #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  scale_shape_manual(values = c(15, 16, 17,18), name="", labels = lab2) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab3) +
-  ggh4x::facet_nested(cols = vars(Phase), rows = vars(Strain), labeller = label_parsed) +
-  theme_bw() 
 
-MCPigmentAllExpStChoosen %>%
-  ggplot() +
-  geom_point(aes(x = PARPhotonDose_day, y = PURPARRatio, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)),  alpha = 0.8, size = 3, show.legend = T) +
-  #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  scale_shape_manual(values = c(15, 16, 17,18), name="", labels = lab2) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab3) +
-  ggh4x::facet_nested(cols = vars(Phase), rows = vars(Strain), labeller = label_parsed) +
-  theme_bw() 
-```
 # Make "one big - All" mean to combine all days (divided by Exp and St) and all replica when samples were measured 
 (This give me only one value of Phyco/Chla ratio for sig plot)
 
@@ -413,155 +139,116 @@ MCPigmentAllExpStChoosen %>%
 ```{r calculate Sigma mean from exp phase}
 #E_days, Time_h, caused problem
 
-MCPigmentAllExpStChoosen<-MCPigmentAllExpStChoosen %>%
-  drop_na(PhycoChlaRatio) %>% 
-  group_by(Strain, Par_ue, Photoperiod, WL, O2, Phase) %>%
-
-  summarize(SampleID, ToD, Run, Strain, ExpDate, FilenameMC, Tube, Par_ue, Photoperiod, O2, WL, MC, LightShape, ExpEndDate, meanActinic_par_h, meanOD680_h, meanOD720_h, meanDeltaOD_h, facetsPar_ue, facetsPhotoperiod, cellmL_OD680, PARPhotonDose_day, ObsDateOlis, PUR, PURPhotonDose_day, ChlaugmL, CarugmL, PEugmL, PCugmL, APCugmL, Chlapgcell, Carpgcell, PEpgcell, PCpgcell, APCpgcell, Phycopgcell, CarChlaRatio, PhycoChlaRatio, PEPCRatio, cellL_OD680, tMaxAG, AchivePreStationary, MaxDG, MaxAG, dayRound_tmaxAG, facetsStrain, facetsPARPhotonDose_day, PURPARRatio, Phase,
-
-            AllmeanPhycoChlaRatio = mean(PhycoChlaRatio),
-            AllsdPhycoChlaRatio = sd(PhycoChlaRatio),
-            AllmeanPURPARRatio = mean(PURPARRatio),
-            AllsdPURPARRatio = sd(PURPARRatio), 
-            AllmeancellL_OD680 = mean(cellL_OD680),
-            AllsdcellL_OD680 = sd(cellL_OD680)) %>%
-  ungroup()
+# MCPigmentAllExpStChoosen<-MCPigmentAllExpStChoosen %>%
+#   drop_na(PhycoChlaRatio) %>% 
+#   group_by(Strain, Par_ue, Photoperiod, WL, O2, Phase) %>%
+# 
+#   summarize(SampleID, ToD, Run, Strain, ExpDate, FilenameMC, Tube, Par_ue, Photoperiod, O2, WL, MC, LightShape, ExpEndDate, meanActinic_par_h, meanOD680_h, meanOD720_h, meanDeltaOD_h, facetsPar_ue, facetsPhotoperiod, cellmL_OD680, PARPhotonDose_day, ObsDateOlis, PUR, PURPhotonDose_day, ChlaugmL, CarugmL, PEugmL, PCugmL, APCugmL, Chlapgcell, Carpgcell, PEpgcell, PCpgcell, APCpgcell, Phycopgcell, CarChlaRatio, PhycoChlaRatio, PEPCRatio, cellL_OD680, tMaxAG, AchivePreStationary, MaxDG, MaxAG, dayRound_tmaxAG, facetsStrain, facetsPARPhotonDose_day, PURPARRatio, Phase,
+# 
+#             AllmeanPhycoChlaRatio = mean(PhycoChlaRatio),
+#             AllsdPhycoChlaRatio = sd(PhycoChlaRatio),
+#             AllmeanPURPARRatio = mean(PURPARRatio),
+#             AllsdPURPARRatio = sd(PURPARRatio), 
+#             AllmeancellL_OD680 = mean(cellL_OD680),
+#             AllsdcellL_OD680 = sd(cellL_OD680)) %>%
+#   ungroup()
 ```
 
 
 ----------------------------# Merge Solisense data with Pigment data---------------------------------------------------
 
 ```{r Joining Solisense and pig data}
+
+MCPigmentAll<-MCPigmentAll %>% 
+  select(-c(E_days))
+
 SolFitsPigmentExp <- SolFits %>% 
-  left_join(., MCPigmentAllExpStChoosen, by = c("SampleID" = "SampleID", "Strain"="Strain", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", "Run"="Run", "WL"="WL", "O2"="O2", "Phase"="Phase", "PARPhotonDose_day"="PARPhotonDose_day", "ExpDate"="ExpDate", "facetsStrain" = "facetsStrain")) 
- SolFitsPigmentExp$facetsPhase <- "Phase~of~growth"
+  full_join(., MCPigmentAll, by = c("SampleID" = "SampleID", "Strain"="Strain", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", "Run"="Run", "WL"="WL", "O2"="O2", "PARPhotonDose_day"="PARPhotonDose_day", "ExpDate"="ExpDate", "Oxygen"="Oxygen")) 
 
-# SolFitsPigmentExp1s <- SolFitsExpSt1s %>% 
-#   left_join(., MCPigmentAllExpStChoosen, by = c("SampleID" = "SampleID", "Strain"="Strain", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", "Run"="Run", "WL"="WL", "O2"="O2", "Phase"="Phase", "PARPhotonDose_day"="PARPhotonDose_day", "ExpDate"="ExpDate", "facetsStrain" = "facetsStrain")) 
-# SolFitsPigmentExp1s$facetsPhase <- "Phase~of~growth"
-
- 
-rm(SolFitsExpSt, MCPigmentAllExpStChoosen)
-#rm(SolFitsExpSt, SolFitsExpSt1s, MCPigmentExp)
 ```
-
-```{r Joining Solisense and pig exp data}
-# SolFitsPigmentExp <- SolFitsExpSt %>% 
-#   left_join(., MCPigmentAllExpSt, by = c("Strain"="Strain","Par_ue"="Par_ue","Photoperiod"="Photoperiod")) 
-# 
-# SolFitsPigmentExp1s <- SolFitsExpSt1s %>% 
-#   left_join(., MCPigmentAllExpSt, by = c("Strain"="Strain","Par_ue"="Par_ue","Photoperiod"="Photoperiod")) 
-
-#rm(SolFitsExpSt, SolFitsExpSt1s, MCPigmentExp)
-```
-
-# Filter unrevelant data
+# make smaller df
 
 ```{r}
-# SolFitsPigmentExp <- SolFitsPigmentExp %>% 
-#   filter(AllmeanPhycoChlaRatio>0)
-# 
-# SolFitsPigmentExp1s <- SolFitsPigmentExp1s %>% 
-#   filter(AllmeanPhycoChlaRatio>0)
+#colnames(SolFitsPigmentExpChoose)
+
+SolFitsPigmentExpChoose<-SolFitsPigmentExp %>% 
+  select(-c(ToD, MC, ExpEndDate, ChlaugmL, CarugmL, PEugmL, PCugmL, APCugmL, Chlapgcell, Carpgcell, PEpgcell, PCpgcell, APCpgcell, Phycopgcell, CarChlaRatio, PhycoChlaRatio, PEPCRatio, cellL_OD680, cellmL_OD680_MDPico, PURPARRatio, FilenameMC, FilenameSolisense, facetsPar_ue, facetsPhotoperiod, PUR, meanOD680_h, meanOD720_h, meanDeltaOD_h, meanActinic_par_h)) %>% 
+  unique()
 ```
+
 
 
 # Create preliminary plots
 
 ```{r preliminary plots}
-scientific_10 <- function(x) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(x))) }
-lab1=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
-lab2=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("600 µE"), expression("900 µE"))
-
 SolFitsPigmentExp %>% 
   ggplot() +
-  geom_point(aes(x = AllmeanPhycoChlaRatio, y = AllmeanSig_nm2psii, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)), size = 3.5, show.legend = T) +
-  # geom_errorbar(aes(x = AllmeanPhycoChlaRatio, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour=as.factor(Par_ue))) +
-  scale_shape_manual(values = c(15, 16, 17,18), name="", labels = lab1) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3","goldenrod2", "khaki2"), name="", labels = lab2) +
-  ggh4x::facet_nested(cols = vars(Phase, Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(O2), labeller = label_parsed) +
   theme_bw()
 
-SolFitsPigmentExp %>% 
+SolFitsPigmentExpChoose %>% 
   ggplot() +
-  geom_point(aes(x = AllmeanPhycoChlaRatio, y = AllmeanSigdark_nm2psii, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)), size = 3.5, show.legend = T) +
-  geom_errorbar(aes(x = AllmeanPhycoChlaRatio, ymin = AllmeanSigdark_nm2psii - AllsdSigdark_nm2psii, ymax = AllmeanSigdark_nm2psii + AllsdSigdark_nm2psii, colour=as.factor(Par_ue))) +
-  scale_shape_manual(values = c(15, 16, 17,18), name="", labels = lab1) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3","goldenrod2", "khaki2"), name="", labels = lab2) +
-  ggh4x::facet_nested(cols = vars(Phase, Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(O2), labeller = label_parsed) +
   theme_bw()
 
-SolFitsPigmentExp %>% 
+```
+
+# Create preliminary plots
+
+```{r preliminary plots}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+SolFitsPigmentExpChoose %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
   ggplot() +
-  geom_point(aes(x = AllmeanPhycoChlaRatio, y = AllmeanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-  geom_errorbar(aes(x = AllmeanPhycoChlaRatio, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour=as.factor(Strain))) +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-  ggh4x::facet_nested(cols = vars(Phase, Ex_WL), rows = vars(Par_ue), labeller = label_parsed) +
-  theme_bw() 
+  #geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
+  geom_line(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
+  geom_errorbar(aes(x = meanPhycoChlaRatio, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  # stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  # scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+   #ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
 
-SolFitsPigmentExp %>% 
-  ggplot() +
-  geom_point(aes(x = AllmeanPhycoChlaRatio, y = AllmeanSigdark_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-  geom_errorbar(aes(x = AllmeanPhycoChlaRatio, ymin = AllmeanSigdark_nm2psii - AllsdSigdark_nm2psii, ymax = AllmeanSigdark_nm2psii + AllsdSigdark_nm2psii, colour=as.factor(Strain))) +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-  ggh4x::facet_nested(cols = vars(Phase, Ex_WL), rows = vars(Par_ue), labeller = label_parsed) +
-  theme_bw() 
-
-
-# SolFitsPigmentExp1s %>% 
-#   ggplot() +
-#   geom_point(aes(x = AllmeanPhycoChlaRatio, y = Sig1s_nm2psii, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)), size = 3.5, show.legend = T) +
-#   # geom_errorbar(aes(x = AllmeanPhycoChlaRatio, ymin = meanSig1s_nm2psii - sdSig1s_nm2psii, ymax = meanSig1s_nm2psii + sdSig1s_nm2psii, colour=as.factor(Par_ue))) +
-#   scale_shape_manual(values = c(15, 16, 17,18), name="", labels = lab1) +
-#   scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3","goldenrod2", "khaki2"), name="", labels = lab2) +
-#   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
-#   theme_bw() 
-# 
-# 
-# SolFitsPigmentExp1s %>% 
-#   ggplot() +
-#   geom_point(aes(x = AllmeanPhycoChlaRatio, y = Sig1s_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-#     # geom_errorbar(aes(x = AllmeanPhycoChlaRatio, ymin = meanSig1s_nm2psii - sdSig1s_nm2psii, ymax = meanSig1s_nm2psii + sdSig1s_nm2psii, colour=as.factor(Strain))) +
-#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-#   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Par_ue), labeller = label_parsed) +
-#   theme_bw()
 ```
 
-# Combine PC and PE-rich strains together
+# Save plot 
 
-```{r combine PC and PE-rich strains}
-SolFitsAllPigmentPC<-SolFitsPigmentExp %>% 
-  filter(Strain == "PC-rich_056" | Strain == "PC-rich_077") 
-SolFitsAllPigmentPC$StrainGroup = "PC-rich"
-SolFitsAllPigmentPE<-SolFitsPigmentExp %>% 
-  filter(Strain == "PE-rich_048" | Strain == "PE-rich_127")  
-SolFitsAllPigmentPE$StrainGroup = "PE-rich"
-
-SolFitsAllPigmentPCPE<-rbind(SolFitsAllPigmentPC, SolFitsAllPigmentPE)
-rm(SolFitsAllPigmentPC, SolFitsAllPigmentPE)
-
-
-# SolFitsAllPigmentPC1s<-SolFitsPigmentExp1s %>% 
-#   filter(Strain == "PC-rich_056" | Strain == "PC-rich_077") 
-# SolFitsAllPigmentPC1s$StrainGroup = "PC-rich"
-# SolFitsAllPigmentPE1s<-SolFitsPigmentExp1s %>% 
-#   filter(Strain == "PE-rich_048" | Strain == "PE-rich_127")  
-# SolFitsAllPigmentPE1s$StrainGroup = "PE-rich"
-#   
-# SolFitsAllPigmentPCPE1s<-rbind(SolFitsAllPigmentPC1s, SolFitsAllPigmentPE1s)
-
-#rm(SolFitsAllPigmentPC1s, SolFitsAllPigmentPE1s)
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_SigPig",".png",sep = "")), height=8, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
-# Filtering data measured from log and very early exponential phase of growth
 
-```{r filtering data from log phase}
-SolFitsAllPigmentPCPE<-SolFitsAllPigmentPCPE %>%
-  filter(E_days>=2) 
 
-# SolFitsAllPigmentPCPE1s<-SolFitsAllPigmentPCPE1s %>%
-#   filter(E_days>=2) 
-```
+
+
+
 
 
 

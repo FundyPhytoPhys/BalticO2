@@ -248,11 +248,11 @@ MCPigmentPlot %>%
 
 
 
-# Make "one big - All" mean to combine all days (divided by Exp and St) and all replica when samples were measured 
+# Make mean to combine all days (divided by Exp and St) and all replica when samples were measured 
 (This give me only one value of Phyco/Chla ratio JVPSII plot and sig plot as well)
 
 # Calculate one "big" mean from Phyco/Chla ratio from all data measured on Exp or St phase 
-# AllmeanPhycoChlaRatio contains 1-7 measurements (different days)
+# AllmeanPhycoChlaRatio contains max 5 measurements (different days)
 
 ```{r calculate Sigma mean from exp phase}
 #E_days, Time_h, caused problem
