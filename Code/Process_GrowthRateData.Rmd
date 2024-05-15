@@ -104,7 +104,11 @@ MultiCultiGrowth<-MultiCultiGrowth %>%
 
 ```{r}
 MultiCultiGrowth<-MultiCultiGrowth %>% 
-  mutate(deltaOD_Lmu_corr=deltaOD_Lmu_corr*24)
+  mutate(OD720_Lmu_corr = OD720_Lmu_corr*24) %>% 
+  mutate(OD720_Lmu_se = OD720_Lmu_se*24) %>% 
+  mutate(deltaOD_Lmu_corr = deltaOD_Lmu_corr*24) %>% 
+  mutate(deltaOD_Lmu_se = deltaOD_Lmu_se*24) 
+
 ```
 
 # Adding facets labels
@@ -129,6 +133,7 @@ MultiCultiGrowth %>%
 lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 MultiCultiGrowth %>%
+  filter(deltaOD_Lmu_se<0.2) %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
   ggplot() +
@@ -136,7 +141,7 @@ MultiCultiGrowth %>%
   geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
   geom_errorbar(aes(x = WLNum, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   
-  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.08, alpha = 0.5) +
   scale_fill_identity() +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
   scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
@@ -180,6 +185,7 @@ MultiCultiGrowth %>%
 lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 MultiCultiGrowth %>%
+  filter(deltaOD_Lmu_se<0.2) %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
   ggplot() +
@@ -190,7 +196,7 @@ MultiCultiGrowth %>%
   scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
   
-  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.04, alpha = 0.5) +
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.1, alpha = 0.5) +
   scale_fill_identity() +
   labs(y = "µ " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
   # scale_x_continuous(breaks=seq(0, 1.2, by = 0.4)) +
@@ -493,11 +499,17 @@ JazDataRoundMeta2<-rbind(JazDataRoundMeta21, JazDataRoundMeta0)
 rm(JazDataRoundMeta21, JazDataRoundMeta0)
 ```
 
+```{r}
+MultiCultiGrowth1<-MultiCultiGrowth1 %>% 
+  filter(deltaOD_Lmu_se<0.2) 
+```
+
+
 
 ```{r Create plot}
 lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
-JazDataRoundMeta2 %>%
+  JazDataRoundMeta2 %>%
   ggplot() +
   geom_area(aes(x = nm, y = EmNormJaz722, fill = "indianred4"), alpha = 0.1, show.legend = F) +
   #geom_area(aes(x = nm, y = EmNormJaz600, fill = "gray84"), alpha = 0.6, show.legend = F) +
@@ -517,7 +529,7 @@ JazDataRoundMeta2 %>%
   scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
   
-  stat_wl_strip(aes(x = nm), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  stat_wl_strip(aes(x = nm), ymin = -Inf, ymax = -0.080, alpha = 0.5) +
   scale_fill_identity() +
   labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth wavelength (nm)") +
   #labs(y = "Normalized absorbance", x = "Wavelength (nm)") +
@@ -573,7 +585,7 @@ JazDataRoundMeta2 %>%
   scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
   
-  stat_wl_strip(aes(x = nm), ymin = -Inf, ymax = -0.04, alpha = 0.5) +
+  stat_wl_strip(aes(x = nm), ymin = -Inf, ymax = -0.1, alpha = 0.5) +
   scale_fill_identity() +
   coord_flip()+
   
@@ -635,7 +647,7 @@ Olis <- readRDS(OlisFile)  %>%
 
 ```{r}
 MCGrowthRate <- MultiCultiGrowth %>% 
-  left_join(., Olis, by = c("Run" = "Run", "SampleID" = "SampleID","Strain" = "Strain", "Par_ue" = "Par_ue", "Photoperiod" = "Photoperiod",  "O2" = "O2", "WL" = "WL", "Tube" = "Tube", "ExpDate" = "ExpDate", "LightShape" = "LightShape", "PARPhotonDose_day" = "PARPhotonDose_day")) 
+  left_join(., Olis, by = c("Run" = "Run", "SampleID" = "SampleID","Strain" = "Strain", "Par_ue" = "Par_ue", "Photoperiod" = "Photoperiod",  "O2" = "O2", "WL" = "WL", "Tube" = "Tube", "ExpDate" = "ExpDate", "LightShape" = "LightShape", "PARPhotonDose_day" = "PARPhotonDose_day", "Oxygen"="Oxygen")) 
   
 ```
 

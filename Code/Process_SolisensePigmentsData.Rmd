@@ -1,0 +1,629 @@
+---
+title: "Process_SolisensePigmentsData"
+author:
+- Sylwia Sliwinska-Wilczewska
+- Douglas A. Campbell
+date: "`r format(Sys.Date())`"
+output:
+bookdown::html_document2:
+    code_folding: show
+    keep_md: yes
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 6
+    fig_caption: yes
+bibliography: BalticPhotoperiod.bib
+csl: plos-one.csl
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Set Chunk Options
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(fig.path='Figs/')
+```
+
+# Introduction
+
+Process_SolisensePigmentsData.Rmd processes and combines BalticPhotoperiod_Processed_SolisenseData.Rds from Data/ProcessedData/ProcessedSolisenseData folder and BalticPhotoperiod_Processed_PigmentsAll.Rds from Data/ProcessedData/ProcessedPigmentsData folder. This .Rmd generates BalticPhotoperiod_Processed_SolisensePigmentsAll.Rds (stored in Data/ProcessedData/ProcessedSolisenseData folder) and plots stored in Output/Figures folder.
+
+# Load Libraries and set Project Variables
+
+```{r load libraries, warning = FALSE, echo=FALSE} 
+library(tidyverse)
+library(lubridate)
+library(stringr)
+library(broom)
+library(knitr)
+library(OneR)
+library(zoo)
+library(ggpubr)
+library(caret)
+library(reshape2)
+library(gcookbook)
+library(scales)
+library(Cairo) #for greek symbols
+library(googledrive)
+library(googlesheets4)
+library(readxl)
+library(multcompView)
+library("patchwork") # merging plots
+library(grid) #colour facets
+```
+
+```{r set project variables}
+Project <- "BalticO2"
+DataOut <- file.path("..", "Data", "ProcessedData", "ProcessedSolisensePigmentsData")
+DataIn <- file.path("..", "Data", "ProcessedData", "ProcessedSolisenseData", fsep = .Platform$file.sep)
+
+FigPath <- file.path("..", "Output", "Figures")
+FigRdsPath <- file.path("..", "Output", "FiguresRds")
+TableRdsPath <- file.path("..", "Output", "TablesRDS")
+```
+
+# List and read Imported_Solisense RDS
+
+```{r Exported Rmd}
+list.files(path = DataIn, pattern = Project, full.names = TRUE)
+```
+
+# This RDS contained only data from corresponding growth light and dark
+# Also, conteined mean sig - mean for replica measured on the same day
+
+```{r read ProcessFile Sol}
+SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseData.Rds"  
+
+SolisenseFileName <- str_split(string = SolisenseFile, "/")[[1]][3] %>%
+  str_remove(pattern = ".Rds")
+
+SolFits <- readRDS(SolisenseFile)  %>%
+  ungroup()
+```
+
+
+# Sig per phyco/chla ratio
+
+Issue - not always pigment based on Olis correspond to Solisense data-> I choose the time (range) that pigments correspond to Sig measurements (for exp and st phase separately). Max 5 measurements for pigments. Then I made a mean for pigments to get one value.
+
+```{r set project variables}
+Project <- "BalticO2"
+DataIn <- file.path("..", "Data", "ProcessedData", "ProcessedPigmentsData", fsep = .Platform$file.sep)
+```
+
+```{r Exported Rmd}
+list.files(path = DataIn, pattern = Project, full.names = TRUE)
+```
+
+```{r read pigments File}
+#df ontained mean OD per day from Multiculti and Abs from Olis spectra for selected nm. Based on this I calculated pigments per mL and per cell (pg/cell)
+
+MCPigmentAllFile <- "../Data/ProcessedData/ProcessedPigmentsData/BalticO2_Processed_Pigments.Rds"
+MCPigmentAllFileName <- str_split(string = MCPigmentAllFile, "/")[[1]][3] %>%
+  str_remove(pattern = ".Rds")
+MCPigmentAll <- readRDS(MCPigmentAllFile)  %>%
+  ungroup()
+```
+
+```{r}
+# MCPigmentAll <- MCPigmentAll %>% 
+#   filter(ToD==12) # When I choose 12 (peak) then I loose a few data point from 12h and 900UE
+```
+
+
+
+# Create preliminary plot
+
+```{r preliminary plot}
+
+MCPigmentAll %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = PhycoChlaRatio, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+
+  ggh4x::facet_nested(cols = vars(E_days), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw() 
+
+
+```
+
+
+
+
+# Make "one big - All" mean to combine all days (divided by Exp and St) and all replica when samples were measured 
+(This give me only one value of Phyco/Chla ratio for sig plot)
+
+# AllmeanPhycoChlaRatio contains 1-6 measurements (different days)
+
+```{r calculate Sigma mean from exp phase}
+#E_days, Time_h, caused problem
+
+# MCPigmentAllExpStChoosen<-MCPigmentAllExpStChoosen %>%
+#   drop_na(PhycoChlaRatio) %>% 
+#   group_by(Strain, Par_ue, Photoperiod, WL, O2, Phase) %>%
+# 
+#   summarize(SampleID, ToD, Run, Strain, ExpDate, FilenameMC, Tube, Par_ue, Photoperiod, O2, WL, MC, LightShape, ExpEndDate, meanActinic_par_h, meanOD680_h, meanOD720_h, meanDeltaOD_h, facetsPar_ue, facetsPhotoperiod, cellmL_OD680, PARPhotonDose_day, ObsDateOlis, PUR, PURPhotonDose_day, ChlaugmL, CarugmL, PEugmL, PCugmL, APCugmL, Chlapgcell, Carpgcell, PEpgcell, PCpgcell, APCpgcell, Phycopgcell, CarChlaRatio, PhycoChlaRatio, PEPCRatio, cellL_OD680, tMaxAG, AchivePreStationary, MaxDG, MaxAG, dayRound_tmaxAG, facetsStrain, facetsPARPhotonDose_day, PURPARRatio, Phase,
+# 
+#             AllmeanPhycoChlaRatio = mean(PhycoChlaRatio),
+#             AllsdPhycoChlaRatio = sd(PhycoChlaRatio),
+#             AllmeanPURPARRatio = mean(PURPARRatio),
+#             AllsdPURPARRatio = sd(PURPARRatio), 
+#             AllmeancellL_OD680 = mean(cellL_OD680),
+#             AllsdcellL_OD680 = sd(cellL_OD680)) %>%
+#   ungroup()
+```
+
+
+----------------------------# Merge Solisense data with Pigment data---------------------------------------------------
+
+```{r Joining Solisense and pig data}
+
+MCPigmentAll<-MCPigmentAll %>% 
+  select(-c(E_days))
+
+SolFitsPigmentExp <- SolFits %>% 
+  full_join(., MCPigmentAll, by = c("SampleID" = "SampleID", "Strain"="Strain", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", "Run"="Run", "WL"="WL", "O2"="O2", "PARPhotonDose_day"="PARPhotonDose_day", "ExpDate"="ExpDate", "Oxygen"="Oxygen")) 
+
+```
+# make smaller df
+
+```{r}
+#colnames(SolFitsPigmentExpChoose)
+
+SolFitsPigmentExpChoose<-SolFitsPigmentExp %>% 
+  select(-c(ToD, MC, ExpEndDate, ChlaugmL, CarugmL, PEugmL, PCugmL, APCugmL, Chlapgcell, Carpgcell, PEpgcell, PCpgcell, APCpgcell, Phycopgcell, CarChlaRatio, PhycoChlaRatio, PEPCRatio, cellL_OD680, cellmL_OD680_MDPico, PURPARRatio, FilenameMC, FilenameSolisense, facetsPar_ue, facetsPhotoperiod, PUR, meanOD680_h, meanOD720_h, meanDeltaOD_h, meanActinic_par_h)) %>% 
+  unique()
+```
+
+
+
+# Create preliminary plots
+
+```{r preliminary plots}
+SolFitsPigmentExp %>% 
+  ggplot() +
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(O2), labeller = label_parsed) +
+  theme_bw()
+
+SolFitsPigmentExpChoose %>% 
+  ggplot() +
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(O2), labeller = label_parsed) +
+  theme_bw()
+
+```
+
+# Create preliminary plots
+
+```{r preliminary plots}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+SolFitsPigmentExpChoose %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  ggplot() +
+  #geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
+  #geom_line(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
+  geom_errorbar(aes(x = meanPhycoChlaRatio, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  # stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  # scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Phycobiliprotein to Chl" ~italic(a)~ "ratio (µg:µg)") +
+  #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+   #ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+
+```
+
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_SigPig",".png",sep = "")), height=4, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+
+
+# Create preliminary plots
+
+```{r preliminary plots}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+SolFitsPigmentExpChoose %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  ggplot() +
+  #geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
+  #geom_line(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
+  geom_errorbar(aes(x = meanPhycoChlaRatio, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  # stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  # scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Phycobiliprotein to Chl" ~italic(a)~ "ratio (µg:µg)") +
+  #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+   #ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+
+```
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_SigPig2",".png",sep = "")), height=4, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+
+
+
+
+# Linear fit per par_ue
+
+```{r linear fit}
+
+# SolFitsAllPigmentfitPhycoChlalinear <- SolFitsAllPigmentPCPE %>%   
+#   drop_na(Par_ue, Ex_WL, Phase, meanSig_nm2psii, AllmeanPhycoChlaRatio) %>% 
+#   select(c(Strain, Par_ue, Photoperiod, Ex_WL, meanSig_nm2psii, AllmeanPhycoChlaRatio, O2, WL, Phase)) %>%  
+#   nest(data = -c("Par_ue", "Ex_WL", "Phase")) %>%   
+#   mutate(Linear_Model = map(data, ~lm(meanSig_nm2psii ~ AllmeanPhycoChlaRatio, data = .x))) %>%     
+#   mutate(Linear_Model_Param = map(Linear_Model, tidy),          
+#          Linear_Model_Predict = map(Linear_Model, possibly(augment)),          
+#          Linear_Model_Glance = map(Linear_Model, possibly(glance)))
+
+```
+
+# Create preliminary plot
+
+```{r preliminary plot}
+
+# lab1=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
+# lab2=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("600 µE"), expression("900 µE"))
+# 
+# SolFitsAllPigmentfitPhycoChlalinear %>% 
+#   unnest(Linear_Model_Predict) %>% 
+#   ggplot() +
+#   geom_point(aes(x = AllmeanPhycoChlaRatio, y = meanSig_nm2psii, colour=as.factor(Strain)), size = 3.5, show.legend = T, SolFitsAllPigmentPCPE) + 
+#   geom_errorbar(aes(x = AllmeanPhycoChlaRatio, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour=as.factor(Strain)), SolFitsAllPigmentPCPE) +
+#   geom_line(aes(x = AllmeanPhycoChlaRatio, y = `.fitted`), show.legend = F) +   
+#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
+#   #labs(y=expression(paste(sigma,""["PSII"]*"'(nm"^"2"*")")), x = "Total phycobilins/Chl" ~italic(a)~ "ratio") +
+#   ggh4x::facet_nested(cols = vars(Ex_WL, Phase), rows = vars(Par_ue), labeller = label_parsed) +
+#   theme_bw() 
+
+```
+
+
+# Calculated Anova and Tukey test from data points
+
+```{r calculated statistics}
+# SigFit590Stats <-SolFitsAllPigmentPCPE %>% 
+#   filter(Ex_WL == 590) 
+# 
+# SigFit590Stats$Par_ue <- factor(SigFit590Stats$Par_ue)
+# SigFit590Stats$Photoperiod <- factor(SigFit590Stats$Photoperiod)
+# SigFit590Stats$Strain <- factor(SigFit590Stats$Strain)
+# SigFit590Stats$Phase <- factor(SigFit590Stats$Phase)
+# #SigFit590Stats$AllmeanPhycoChlaRatio <- factor(SigFit590Stats$AllmeanPhycoChlaRatio)
+# 
+# # Three way Anova with interactions
+# model<-aov(Sig_nm2psii~AllmeanPhycoChlaRatio*Phase*Strain, data=SigFit590Stats)
+# Anova_SigPig590<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# #TukeyHSDTest_SigPig<-TukeyHSD(model, which = c("AllmeanPhycoChlaRatio", "Phase", "Strain"))
+```
+
+# Save RDS that create stats and tables
+
+```{r}
+# saveRDS(Anova_SigPig590, file.path(TableRdsPath, paste(Project, "Anova_SigPig590.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+```
+
+# Anova from the linear model 
+https://stackoverflow.com/questions/24527116/write-regression-summary-to-the-csv-file-in-r
+
+t-test from the linear model 
+```{r}
+
+# Stats56_77Exp<-SolFitsAllPigmentPCPE %>%
+#   filter(Phase == "Exponential") %>%
+#   filter(Ex_WL == 590) %>%
+#   filter(Strain == "PC-rich_056" | Strain == "PC-rich_077") 
+#   fit <- lm(Sig_nm2psii ~ AllmeanPhycoChlaRatio + Strain + AllmeanPhycoChlaRatio:Strain,data=Stats56_77Exp)
+# x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[4, 4])), t(as.numeric(summary(fit)$coefficients[4, 3])), t(as.numeric(summary(fit)$coefficients[4, 2])))
+# model_56_77Exp<-data.frame(unclass(x), check.names = FALSE, stringsAsFactors = FALSE) %>% 
+#   rename("Estimate" = "4", "Std.Error" = "7", "t_value" = "6", "p_value" = "5") %>% 
+#   select(c("Estimate", "Std.Error", "t_value", "p_value"))
+#   model_56_77Exp$FitComparison <- '056_077_Exp'
+# 
+# SolFits56_48Exp<-SolFitsAllPigmentPCPE %>%
+#   filter(Phase == "Exponential") %>%
+#   filter(Ex_WL == 590) %>%
+#   filter(Strain == "PC-rich_056" | Strain == "PE-rich_048") 
+#   fit <- lm(Sig_nm2psii ~ AllmeanPhycoChlaRatio + Strain + AllmeanPhycoChlaRatio:Strain,data=SolFits56_48Exp)
+# x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[4, 4])), t(as.numeric(summary(fit)$coefficients[4, 3])), t(as.numeric(summary(fit)$coefficients[4, 2])))
+# model_56_48Exp<-data.frame(unclass(x), check.names = FALSE, stringsAsFactors = FALSE) %>% 
+#   rename("Estimate" = "4", "Std.Error" = "7", "t_value" = "6", "p_value" = "5") %>% 
+#   select(c("Estimate", "Std.Error", "t_value", "p_value"))
+#   model_56_48Exp$FitComparison <- '056_048_Exp'
+# 
+# SolFits56_127Exp<-SolFitsAllPigmentPCPE %>%
+#   filter(Phase == "Exponential") %>%
+#   filter(Ex_WL == 590) %>%
+#   filter(Strain == "PC-rich_056" | Strain == "PE-rich_127")  
+#   fit <- lm(Sig_nm2psii ~ AllmeanPhycoChlaRatio + Strain + AllmeanPhycoChlaRatio:Strain,data=SolFits56_127Exp)
+# x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[4, 4])), t(as.numeric(summary(fit)$coefficients[4, 3])), t(as.numeric(summary(fit)$coefficients[4, 2])))
+# model_56_127Exp<-data.frame(unclass(x), check.names = FALSE, stringsAsFactors = FALSE) %>% 
+#   rename("Estimate" = "4", "Std.Error" = "7", "t_value" = "6", "p_value" = "5") %>% 
+#   select(c("Estimate", "Std.Error", "t_value", "p_value"))
+#   model_56_127Exp$FitComparison <- '056_127_Exp'
+# 
+# SolFits48_127Exp<-SolFitsAllPigmentPCPE %>%
+#   filter(Phase == "Exponential") %>%
+#   filter(Ex_WL == 590) %>%
+#   filter(Strain == "PE-rich_048" | Strain == "PE-rich_127")  
+#   fit <- lm(Sig_nm2psii ~ AllmeanPhycoChlaRatio + Strain + AllmeanPhycoChlaRatio:Strain,data=SolFits48_127Exp)
+# x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[4, 4])), t(as.numeric(summary(fit)$coefficients[4, 3])), t(as.numeric(summary(fit)$coefficients[4, 2])))
+# model_48_127Exp<-data.frame(unclass(x), check.names = FALSE, stringsAsFactors = FALSE) %>% 
+#   rename("Estimate" = "4", "Std.Error" = "7", "t_value" = "6", "p_value" = "5") %>% 
+#   select(c("Estimate", "Std.Error", "t_value", "p_value"))
+#   model_48_127Exp$FitComparison <- '048_127_Exp'
+# 
+# SolFits77_48Exp<-SolFitsAllPigmentPCPE %>%
+#   filter(Phase == "Exponential") %>%
+#   filter(Ex_WL == 590) %>%
+#   filter(Strain == "PC-rich_077" | Strain == "PE-rich_048") 
+#   fit <- lm(Sig_nm2psii ~ AllmeanPhycoChlaRatio + Strain + AllmeanPhycoChlaRatio:Strain,data=SolFits77_48Exp)
+# x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[4, 4])), t(as.numeric(summary(fit)$coefficients[4, 3])), t(as.numeric(summary(fit)$coefficients[4, 2])))
+# model_77_48Exp<-data.frame(unclass(x), check.names = FALSE, stringsAsFactors = FALSE) %>% 
+#   rename("Estimate" = "4", "Std.Error" = "7", "t_value" = "6", "p_value" = "5") %>% 
+#   select(c("Estimate", "Std.Error", "t_value", "p_value"))
+#   model_77_48Exp$FitComparison <- '077_048_Exp'
+# 
+# SolFits77_127Exp<-SolFitsAllPigmentPCPE %>%
+#   filter(Phase == "Exponential") %>%
+#   filter(Ex_WL == 590) %>%
+#   filter(Strain == "PC-rich_077" | Strain == "PE-rich_127") 
+#   fit <- lm(Sig_nm2psii ~ AllmeanPhycoChlaRatio + Strain + AllmeanPhycoChlaRatio:Strain,data=SolFits77_127Exp)
+# x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[4, 4])), t(as.numeric(summary(fit)$coefficients[4, 3])), t(as.numeric(summary(fit)$coefficients[4, 2])))
+# model_77_127Exp<-data.frame(unclass(x), check.names = FALSE, stringsAsFactors = FALSE) %>% 
+#   rename("Estimate" = "4", "Std.Error" = "7", "t_value" = "6", "p_value" = "5") %>% 
+#   select(c("Estimate", "Std.Error", "t_value", "p_value"))
+#   model_77_127Exp$FitComparison <- '077_127_Exp'
+# 
+# modelExp<-rbind(model_56_77Exp, model_56_48Exp, model_56_127Exp, model_48_127Exp, model_77_48Exp, model_77_127Exp)
+#   rm(model_56_77Exp, model_56_48Exp, model_56_127Exp, model_48_127Exp, model_77_48Exp, model_77_127Exp)
+```
+
+
+# Save RDS that create stats and tables
+
+```{r}
+# saveRDS(Anova_SigPig590_Model, file.path(TableRdsPath, paste(Project, "Anova_SigPig590_Model.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+```
+
+
+
+
+# Create preliminary JVPSII vs Chl Turner (ug/L) plot
+
+```{r preliminary plots, warning = FALSE}
+# SolFitsPigmentExp %>% 
+#   ggplot() +
+#   geom_point(aes(x = TurChl_ugL, y = JVPSII_ETRqpOxbo_aLHII_Sig, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)), size = 3.5, show.legend = T) +
+#   scale_shape_manual(values = c(15, 16, 17,18), name="", labels = lab1) +
+#   scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3","goldenrod2", "khaki2"), name="", labels = lab2) +
+#   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+#   theme_bw()
+
+```
+
+
+
+# Save rds for further analysis
+
+```{r save rds}
+saveRDS(SolFitsPigmentExpChoose, file.path(DataOut, paste(Project, "Processed_SolisensePigmentsData.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+```
+
+# Variable names used in Data Dictionary
+
+```{r}
+colnames(SolFitsPigmentExpChoose)
+```
+
+
+The anova() function will take the model objects as arguments, and return an ANOVA testing whether the more complex model is significantly better at capturing the data than the simpler model. If the resulting p-value is sufficiently low (usually less than 0.05), we conclude that the more complex model is significantly better than the simpler model, and thus favor the more complex model. If the p-value is not sufficiently low (usually greater than 0.05), we should favor the simpler model.
+
+# Exstracting models for each fit - models were not all fitted to the same size of dataset
+
+```{r}
+# StatsSigLM<-SolFitsAllPigmentPCPE %>% 
+#   drop_na(Sig_nm2psii, AllmeanPhycoChlaRatio) 
+# 
+# StatsSigLM$Strain <- factor(StatsSigLM$Strain)
+# StatsSigLM$Phase <- factor(StatsSigLM$Phase)  
+# StatsSigLM$AllmeanPhycoChlaRatio <- factor(StatsSigLM$AllmeanPhycoChlaRatio) 
+# 
+# SolFitsBA56Exp<-StatsSigLM %>%
+#   filter(Strain == "PC-rich_056")
+#   SolFitsBA56Exp <- SolFitsBA56Exp[-c(883:990), ]
+# 
+# SolFitsBA77Exp<-StatsSigLM %>%
+#   filter(Strain == "PC-rich_077") 
+#   SolFitsBA77Exp <- SolFitsBA77Exp[-c(883:998), ]
+# 
+# SolFitsBA48Exp<-StatsSigLM %>%
+#   filter(Strain == "PE-rich_048") 
+#   SolFitsBA48Exp <- SolFitsBA48Exp[-c(883:883), ]
+# 
+# SolFitsBA127Exp<-StatsSigLM %>%
+#   filter(Strain == "PE-rich_127") 
+#   SolFitsBA127Exp <- SolFitsBA127Exp[-c(883:894), ]
+# 
+# model1 <- lm(Sig_nm2psii~AllmeanPhycoChlaRatio, data = SolFitsBA56Exp)
+# model2 <- lm(Sig_nm2psii~AllmeanPhycoChlaRatio, data = SolFitsBA77Exp)
+# ANOVA_LinModel<-anova(model1, model2, test="F")
+#   
+#   
+# model<-aov(Sig_nm2psii~AllmeanPhycoChlaRatio*Phase*Strain, data=StatsSigLM)
+# AnovaTest_SigLM<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# TukeyHSDTest_Sig<-TukeyHSD(model, which = c("Phase", "Strain"))
+
+
+#  diamonds.mod1 <- lm(Sig_nm2psii~PhycoChlaRatio, data = SolFitsAllExp)
+#   diamonds.mod2 <- lm(Sig_nm2psii~PhycoChlaRatio, data = SolFitsAllSt)
+#   anova(diamonds.mod1, diamonds.mod2, test="Chisq")
+
+```
+
+
+
+
+dodawanie modeli zeby sprawdzic, czy sa istotne roznice pomiedzy szczepami i fazami wzrostu
+https://stats.stackexchange.com/questions/435644/is-there-a-method-to-look-for-significant-difference-between-two-linear-regressi
+
+```{r}
+# set.seed(123)
+# df = data.frame(Age=sample(1:100))
+# df$Height[1:50] = df$Age[1:50] + rpois(50,30)
+# df$Height[51:100] = 1.3*df$Age[51:100] + rpois(50,30)
+# df$Fladen = rep(c("A","B"),each=50)
+# 
+# summary(lm(Height ~ Age + Fladen + Age:Fladen,data=df))
+
+# So the last term, Age:FladenB shows a coefficient of 0.29, meaning the slope (Height vs Age) in Fladen B is .29 more than that in Fladen A
+
+# StatsExp590<-SolFitsAllPigmentPCPE %>%
+#   filter(Phase == "Exponential") %>%
+#   filter(Ex_WL == 590) %>%
+#   select(c(Strain, Sig_nm2psii, AllmeanPhycoChlaRatio))
+# summary(lm(Sig_nm2psii ~ AllmeanPhycoChlaRatio + Strain + AllmeanPhycoChlaRatio:Strain,data=StatsExp590))
+
+```
+
+# compact letter display
+```{r}
+# # analysis of variance
+# anova <- aov(weight ~ feed, data = chickwts)
+# 
+# # Tukey's test
+# tukey <- TukeyHSD(anova)
+# 
+# # compact letter display
+# cld <- multcompLetters4(anova, tukey)
+# 
+# # table with factors and 3rd quantile
+# dt <- group_by(chickwts, feed) %>%
+#   summarise(w=mean(weight), sd = sd(weight)) %>%
+#   arrange(desc(w))
+# 
+# # extracting the compact letter display and adding to the Tk table
+# cld <- as.data.frame.list(cld$feed)
+# dt$cld <- cld$Letters
+# 
+# print(dt)
+```
+
+https://www.geeksforgeeks.org/t-test-approach-in-r-programming/
+
+
+
+
+Set up R codes for Greek letters
+
+\u0391  Α   Greek Capital Letter Alpha
+\u0392  Β   Greek Capital Letter Beta
+\u0393  Γ   Greek Capital Letter Gamma
+\u0394  Δ   Greek Capital Letter Delta
+\u0395  Ε   Greek Capital Letter Epsilon
+\u0396  Ζ   Greek Capital Letter Zeta
+\u0397  Η   Greek Capital Letter Eta
+\u0398  Θ   Greek Capital Letter Theta
+\u0399  Ι   Greek Capital Letter Iota
+\u039A  Κ   Greek Capital Letter Kappa
+\u039B  Λ   Greek Capital Letter Lambda
+\u039C  Μ   Greek Capital Letter Mu
+\u039D  Ν   Greek Capital Letter Nu
+\u039E  Ξ   Greek Capital Letter Xi
+\u039F  Ο   Greek Capital Letter Omicron
+\u03A0  Π   Greek Capital Letter Pi
+\u03A1  Ρ   Greek Capital Letter Rho
+\u03A3  Σ   Greek Capital Letter Sigma
+\u03A4  Τ   Greek Capital Letter Tau
+\u03A5  Υ   Greek Capital Letter Upsilon
+\u03A6  Φ   Greek Capital Letter Phi
+\u03A7  Χ   Greek Capital Letter Chi
+\u03A8  Ψ   Greek Capital Letter Psi
+\u03A9  Ω   Greek Capital Letter Omega
+\u03B1  α   Greek Small Letter alpha
+\u03B2  β   Greek Small Letter beta
+\u03B3  γ   Greek Small Letter gamma
+\u03B4  δ   Greek Small Letter delta
+\u03B5  ε   Greek Small Letter epsilon
+\u03B6  ζ   Greek Small Letter zeta
+\u03B7  η   Greek Small Letter eta
+\u03B8  θ   Greek Small Letter theta
+\u03B9  ι   Greek Small Letter iota
+\u03BA  κ   Greek Small Letter kappa
+\u03BB  λ   Greek Small Letter lambda
+\u03BC  μ   Greek Small Letter mu
+\u03BD  ν   Greek Small Letter nu
+\u03BE  ξ   Greek Small Letter xi
+\u03BF  ο   Greek Small Letter omicron
+\u03C0  π   Greek Small Letter pi
+\u03C1  ρ   Greek Small Letter rho
+\u03C2  ς   Greek Small Letter final sigma
+\u03C3  σ   Greek Small Letter sigma
+\u03C4  τ   Greek Small Letter tau
+\u03C5  υ   Greek Small Letter upsilon
+\u03C6  φ   Greek Small Letter phi
+\u03C7  χ   Greek Small Letter chi
+\u03C8  ψ   Greek Small Letter psi
+\u03C9  ω   Greek Small Letter omega
+
+
+
+
+

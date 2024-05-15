@@ -52,15 +52,11 @@ library(googlesheets4)
 ```
 
 ```{r set project variables}
-Project <- "BalticPhotoperiod"
+Project <- "BalticO2"
 DataOut <- file.path("..", "Data", "ProcessedData", "ProcessedGrowthRateSolisenseData")
 
 DataInGrowthRate <- file.path("..", "Data", "ProcessedData", "ProcessedGrowthRateData", fsep = .Platform$file.sep)
 DataInSolisense <- file.path("..", "Data", "ProcessedData", "ProcessedSolisenseData", fsep = .Platform$file.sep)
-#DataInGrowthRateRaw <- file.path("..", "Data", "CleanedData", "CleanedMCData", fsep = .Platform$file.sep)
-#DataInGrowthRate_h <- file.path("..", "Data", "ProcessedData", "ProcessedMCDielLightData", fsep = .Platform$file.sep)
-#DataInPigment <- file.path("..", "Data", "ImportedData", "ImportedPigmentsData", fsep = .Platform$file.sep)
-
 
 FigPath <- file.path("..", "Output", "Figures")
 FigRdsPath <- file.path("..", "Output", "FiguresRds")
@@ -76,55 +72,26 @@ HeaderRows <- 0
 ```{r Exported Rmd}
 list.files(path = DataInGrowthRate, pattern = Project, full.names = TRUE)
 list.files(path = DataInSolisense, pattern = Project, full.names = TRUE)
-#list.files(path = DataInGrowthRateRaw, pattern = Project, full.names = TRUE)
-#list.files(path = DataInGrowthRate_h, pattern = Project, full.names = TRUE)
 ```
 
 ```{r read ProcessFile}
-GrowthRateFile <- "../Data/ProcessedData/ProcessedGrowthRateData/BalticPhotoperiod_Processed_GrowthRateAll.Rds"
+GrowthRateFile <- "../Data/ProcessedData/ProcessedGrowthRateData/BalticO2_Processed_GrowthRatePUR.Rds"
 GrowthRateFileName <- str_split(string = GrowthRateFile, "/")[[1]][3] %>%
   str_remove(pattern = ".Rds")
 
 GrowthRate <- readRDS(GrowthRateFile)  %>%
   ungroup()
 
+GrowthRate<-GrowthRate %>%
+  select(-c(E_days)) 
+
 # GrowthRate<-GrowthRate %>% 
-#   select(c(SampleID, Run, Strain, Tube, MC, ExpDate, Par_ue, Photoperiod, O2, WL, LightShape, PARPhotonDose_day, FilenameMC, ExpEndDate, OD720_Lmu_se, OD720_Lmu_corr, deltaOD_Lmu_se, deltaOD_Lmu_corr)) %>% 
+#   select(c(Strain, Par_ue, Photoperiod, O2, WL, LightShape, PARPhotonDose_day, OD720_Lmu_se, OD720_Lmu_corr, deltaOD_Lmu_se, deltaOD_Lmu_corr)) %>% 
 #   unique()
 
-GrowthRate<-GrowthRate %>% 
-  select(c(Strain, Par_ue, Photoperiod, O2, WL, LightShape, PARPhotonDose_day, OD720_Lmu_se, OD720_Lmu_corr, deltaOD_Lmu_se, deltaOD_Lmu_corr)) %>% 
-  unique()
-
-```
-
-# Growth rate per day
-
-```{r}
-GrowthRate<-GrowthRate %>%
-  mutate(OD720_Lmu_corr = OD720_Lmu_corr*24) %>% 
-  mutate(OD720_Lmu_se = OD720_Lmu_se*24) %>% 
-  mutate(deltaOD_Lmu_corr = deltaOD_Lmu_corr*24) %>% 
-  mutate(deltaOD_Lmu_se = deltaOD_Lmu_se*24) 
-  
 ```
 
 
-```{r read ProcessFile}
-# GrowthRate_hFile <- "../Data/ProcessedData/ProcessedMCDielLightData/BalticPhotoperiod_Processed_MCDielLightData.Rds"
-# GrowthRate_hFileName <- str_split(string = GrowthRate_hFile, "/")[[1]][3] %>%
-#   str_remove(pattern = ".Rds")
-# 
-# GrowthRate_h <- readRDS(GrowthRate_hFile)  %>%
-#   ungroup()
-# 
-# GrowthRate_h <- GrowthRate_h %>% 
-#   filter(Strain == "BA127R" | Strain == "BA48R" | Strain == "BA56G" | Strain == "BA77G") %>% 
-#   mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-#          Strain=="BA48R"~"PE-rich_048",
-#         Strain=="BA56G"~"PC-rich_056",
-#          Strain=="BA77G"~"PC-rich_077")) 
-```
 
 # Merge Growth rate and Growth rate_h
 
@@ -133,57 +100,36 @@ GrowthRate<-GrowthRate %>%
 #   full_join(., GrowthRate, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "Tube" = "Tube",  "Par_ue"="Par_ue","Photoperiod"="Photoperiod", "O2"="O2", "WL"="WL")) 
 ```
 
-# Growth Rate - all - from Merge - to get all data points
-
-```{r read ProcessFile}
-# GrowthRateRawFile <- "../Data/CleanedData/CleanedMCData/PICO_Cleaned_MCData.Rds"
-# GrowthRateRawFileName <- str_split(string = GrowthRateRawFile, "/")[[1]][3] %>%
-#   str_remove(pattern = ".Rds")
-# 
-# GrowthRateRaw <- readRDS(GrowthRateRawFile)  %>%
-#   ungroup()
-# 
-# GrowthRateRaw<-GrowthRateRaw %>% 
-#   dplyr::select(c(Tube, ExpDate, MC, Run, SampleID, Strain, Par_ue, Photoperiod, WL, O2, LightShape, PARPhotonDose_day, OD720_Lmu_se, OD720_Lmu_corr, deltaOD_Lmu_se, deltaOD_Lmu_corr))
-#   
-# GrowthRateRaw<-GrowthRateRaw %>% 
-#   mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-#          Strain=="BA48R"~"PE-rich_048",
-#         Strain=="BA56G"~"PC-rich_056",
-#          Strain=="BA77G"~"PC-rich_077"))
-# 
-# GrowthRateRaw1<-GrowthRateRaw %>% 
-#   filter(Run==77) %>% 
-#   filter(Strain =="PC-rich_077" | Strain == "PC-rich_056")
-# GrowthRateRaw2<-GrowthRateRaw %>% 
-#   filter(Run!=77) %>% 
-#   filter(Strain !="PC-rich_077" & Strain != "PC-rich_056")
-# GrowthRateRaw<-rbind(GrowthRateRaw1, GrowthRateRaw2)
-# 
-# GrowthRateRaw<-GrowthRateRaw %>%
-#   mutate(OD720_Lmu_corr = OD720_Lmu_corr*24) %>% 
-#   mutate(OD720_Lmu_se = OD720_Lmu_se*24) %>% 
-#   mutate(deltaOD_Lmu_corr = deltaOD_Lmu_corr*24) %>% 
-#   mutate(deltaOD_Lmu_se = deltaOD_Lmu_se*24) 
-```
-
 
 # Create preliminary plot 
 
 ```{r preliminary plot, warning = FALSE}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
 GrowthRate %>%
+  #filter(deltaOD_Lmu_se<0.2) %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
   ggplot() +
-  geom_point(aes(x = Par_ue, y = deltaOD_Lmu_corr,colour=as.factor(Strain)), size = 3.5, alpha = 0.9, show.legend = T) +
-  geom_errorbar(aes(x = Par_ue, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se), alpha = 0.5) +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-  ggh4x::facet_nested(rows = vars(Strain), cols = vars(Photoperiod)) +
-  theme_bw()
+  geom_point(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
+  geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
+  # geom_errorbar(aes(x = WLNum, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.08, alpha = 0.5) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
+  labs(y = "µ " ~ "("~d^-1~")", x = "Wavelength (nm)") +
+  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw() 
 
 ```
 
 
 ```{r read ProcessFile}
-SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticPhotoperiod_Processed_SolisenseJVPSII_2.Rds"
+SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseJVPSII.Rds"
 SolisenseFileName <- str_split(string = SolisenseFile, "/")[[1]][3] %>%
   str_remove(pattern = ".Rds")
 
@@ -191,115 +137,94 @@ Solisense <- readRDS(SolisenseFile)  %>%
   ungroup()
 ```
 
-# Add proper value of JVPSII
+# Add proper value of cell L
 
 ```{r}
 colnames(Solisense)
 Solisense<-Solisense %>%
   mutate(meanCellL_MDPico=meanCellmL_MDPico*1000) %>% 
-  select(-c(data))
+  select(-c(data, TurChl_ugL)) %>% 
+  unique()
 ```
+# Adding facets labels
 
+```{r}
+Solisense<-Solisense %>%
+  mutate(Oxygen=case_when(O2==21~"250~µM",
+         O2==0~"2.5~µM"))
+```
 
 # Create preliminary plot
 
 ```{r preliminary plot}
-lab1=c(expression("PC-rich_056"), expression("PC-rich_077"), expression("PE-rich_048"), expression("PE-rich_127"))
-lab2=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
-lab3=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("900 µE"))
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 Solisense %>%
-  filter(Ex_WL == 445) %>% 
-  filter(Phase == "Exponential") %>% 
   ggplot() +
   geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Phase, Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
 Solisense %>%
-  filter(Ex_WL == 445) %>% 
-  filter(Phase == "Exponential") %>% 
   ggplot() +
   geom_point(aes(x = meanTurChl_ugL, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Phase, Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
 Solisense %>%
-  filter(Ex_WL == 445) %>% 
-  filter(Phase == "Exponential") %>% 
   ggplot() +
   geom_point(aes(x = meanCellL_MDPico, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Phase, Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 ```
-
+E_days - check!
 
 ```{r Joining growth rate and Solisense exp data}
 GrowthRateSol <- GrowthRate %>% 
-  full_join(., Solisense, by = c("Strain"="Strain", "Par_ue"="Par_ue","Photoperiod"="Photoperiod",  "LightShape"="LightShape", "O2"="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) 
+  full_join(., Solisense, by = c("Strain"="Strain", "Par_ue"="Par_ue","Photoperiod"="Photoperiod",  "LightShape"="LightShape", "O2"="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day", "Oxygen"="Oxygen", "SampleID"="SampleID", "Run"="Run", "ExpDate"="ExpDate", "Tube"="Tube")) 
 ```
 
 
 # Growth rate vs JVPSII
 
 ```{r warning = FALSE}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
-lab1=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
-lab2=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("600 µE"), expression("900 µE"))
-scientific_10 <- function(x) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(x))) }
-
-GrowthRateSol %>% 
-  filter(Ex_WL==445) %>% 
-  filter(Phase == "Exponential") %>% 
-ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_Par_ue, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-  #scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  #labs(y = "Logistic growth rate " ~ "("~h^-1~")", x = ""~italic(JV)~""["PSII"]*" ( µmol"~e^-~""~L^-1~""~s^-1~")") +
-    ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
-  theme_bw() 
-
-GrowthRateSol %>% 
-  filter(Ex_WL==445) %>% 
-  filter(Phase == "Exponential") %>% 
-ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_HalfPar_ue, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-  #scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  #labs(y = "Logistic growth rate " ~ "("~h^-1~")", x = ""~italic(JV)~""["PSII"]*" ( µmol"~e^-~""~L^-1~""~s^-1~")") +
-    ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
-  theme_bw() 
+GrowthRateSol %>%
+  filter(WL!="WW") %>% 
+  ggplot() +
+  geom_point(aes(x = JVPSII_umol_eLs_Par_ue, y = deltaOD_Lmu_corr, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw()
 
 ```
 # Delete a few unrelevant columns 
 
 ```{r}
 GrowthRateSol<-GrowthRateSol %>% 
-  select(-c(CellmL_MDPico, TurChl_ugL)) %>% 
+  select(-c(CellmL_MDPico)) %>% 
   unique()
 ```
 
 # Calculate umol chl a
 
 ```{r}
-GrowthRateSol<-GrowthRateSol %>% 
-  mutate(meanTurChl_umolL=meanTurChl_ugL*0.00112)
+# GrowthRateSol<-GrowthRateSol %>% 
+#   mutate(meanTurChl_umolL=meanTurChl_ugL*0.00112)
 ```
 
-
-# Choosen only 445 and exp phase of growth
-
-```{r}
-GrowthRateSol445<-GrowthRateSol %>% 
-  filter(Ex_WL==445) %>% 
-  filter(Phase == "Exponential") %>% 
-  filter(E_days >1)
-```
 
 # Filter Time of Day when was night (no measurements)
 
@@ -314,7 +239,8 @@ JVPSII per Turner Chl ug/L and per cell/L (meanCellmL_MDPico; meanTurChl_ugL)
 ```{r}
 # JVPSII_ETRqpOxbo_FoSig = JVPSII_Par_ue
 
-GrowthRateSoliExp<-GrowthRateSol445 %>% 
+GrowthRateSoliExp2<-GrowthRateSol %>%
+  filter(WL!="WW") %>% 
   #Turner
   mutate(JVPSII_umol_eLs_Par_ue_ugChl = JVPSII_umol_eLs_Par_ue/meanTurChl_ugL) %>% #umol e/ug ch/s
   mutate(JVPSII_umol_eLs_HalfPar_ue_ugChl = JVPSII_umol_eLs_HalfPar_ue/meanTurChl_ugL) %>% 
@@ -327,68 +253,29 @@ GrowthRateSoliExp<-GrowthRateSol445 %>%
   mutate(JVPSII_umol_eLs_HalfPar_ue_cell = JVPSII_umol_eLs_HalfPar_ue/meanCellL_MDPico)  
 ```
 
-# Filter 4 data points - outliers
-```{r}
-GrowthRateSoliExp127<-GrowthRateSoliExp %>%
-  filter(Photoperiod == 12) %>%
-  filter(Par_ue != 900) %>% 
-  filter(Strain == "PE-rich_127") %>% 
-  filter(E_days == 14)
-
-GrowthRateSoliExp127rest<-GrowthRateSoliExp %>%
-  filter(Photoperiod == 12) %>%
-  filter(Par_ue == 900) %>%
-  filter(Strain == "PE-rich_127")
-
-GrowthRateSoliExp127rest2<-GrowthRateSoliExp %>%
-  filter(Photoperiod != 12) %>%
-  filter(Strain == "PE-rich_127")
-
-GrowthRateSoliExpRest<-GrowthRateSoliExp %>%
-  filter(Strain != "PE-rich_127") 
-
-GrowthRateSoliExp2<-rbind(GrowthRateSoliExp127, GrowthRateSoliExp127rest, GrowthRateSoliExp127rest2, GrowthRateSoliExpRest)
-
-```
-
 
 
 Growth rate vs JVPSII per Chl Turner and cell_L - taken from the same day as JVPSII
 
 ```{r warning = FALSE}
-
-lab1=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
-lab2=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("600 µE"), expression("900 µE"))
-scientific_10 <- function(x) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(x))) }
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 GrowthRateSoliExp2 %>% 
 ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_Par_ue_ugChl, deltaOD_Lmu_corr, colour=as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.9, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_linetype_manual(values=c("equal900" = "dotted", "less900" = "solid"), breaks=c('8', '12', '16', "24", "", "")) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600", "900")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-    ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(JVPSII_umol_eLs_Par_ue_ugChl, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
 GrowthRateSoliExp2 %>% 
 ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_Par_ue_umolChl, deltaOD_Lmu_corr, colour=as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.9, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_linetype_manual(values=c("equal900" = "dotted", "less900" = "solid"), breaks=c('8', '12', '16', "24", "", "")) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600", "900")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-    ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Strain), labeller = label_parsed) +
-  theme_bw() 
-
-GrowthRateSoliExp2 %>% 
-ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_Par_ue_cell, deltaOD_Lmu_corr, colour=as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.9, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_linetype_manual(values=c("equal900" = "dotted", "less900" = "solid"), breaks=c('8', '12', '16', "24", "", "")) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600", "900")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-    ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(JVPSII_umol_eLs_Par_ue_cell, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
 ```
@@ -398,8 +285,7 @@ calculate JVPSII per day
 
 # JVPSII_ETRqpOxbo_FoSig
 
-SolFitsAllPigmentTurnerDay81216<-GrowthRateSoliExp2 %>% 
-  filter(Photoperiod !=24) %>% 
+GrowthRateSoliExpDay<-GrowthRateSoliExp2 %>% 
   mutate(JVPSII_umol_eLs_Par_ue_ugChl_day = JVPSII_umol_eLs_Par_ue_ugChl*3600*Photoperiod/2) %>%
   mutate(JVPSII_umol_eLs_HalfPar_ue_ugChl_day = JVPSII_umol_eLs_HalfPar_ue_ugChl*3600*Photoperiod/2) %>%
   mutate(JVPSII_umol_eLs_Par_ue_umolChl_day = JVPSII_umol_eLs_Par_ue_umolChl*3600*Photoperiod/2) %>% 
@@ -407,90 +293,67 @@ SolFitsAllPigmentTurnerDay81216<-GrowthRateSoliExp2 %>%
   mutate(JVPSII_umol_eLs_Par_ue_cell_day = JVPSII_umol_eLs_Par_ue_cell*3600*Photoperiod/2) %>% 
   mutate(JVPSII_umol_eLs_HalfPar_ue_cell_day = JVPSII_umol_eLs_HalfPar_ue_cell*3600*Photoperiod/2) 
 
-SolFitsAllPigmentTurnerDay900<-GrowthRateSoliExp2 %>% 
-  filter(Photoperiod ==24) %>% 
-  mutate(JVPSII_umol_eLs_Par_ue_ugChl_day = JVPSII_umol_eLs_Par_ue_ugChl*3600*Photoperiod) %>%
-  mutate(JVPSII_umol_eLs_HalfPar_ue_ugChl_day = JVPSII_umol_eLs_HalfPar_ue_ugChl*3600*Photoperiod) %>%
-  mutate(JVPSII_umol_eLs_Par_ue_umolChl_day = JVPSII_umol_eLs_Par_ue_umolChl*3600*Photoperiod) %>% 
-  mutate(JVPSII_umol_eLs_HalfPar_ue_umolChl_day = JVPSII_umol_eLs_HalfPar_ue_umolChl*3600*Photoperiod) %>% 
-  mutate(JVPSII_umol_eLs_Par_ue_cell_day = JVPSII_umol_eLs_Par_ue_cell*3600*Photoperiod) %>% 
-  mutate(JVPSII_umol_eLs_HalfPar_ue_cell_day = JVPSII_umol_eLs_HalfPar_ue_cell*3600*Photoperiod) 
-  
-GrowthRateSoliExpDay<-rbind(SolFitsAllPigmentTurnerDay81216, SolFitsAllPigmentTurnerDay900)
-  rm(SolFitsAllPigmentTurnerDay81216, SolFitsAllPigmentTurnerDay900)
+
 ```
 
 
 
 Growth rate vs JVPSII per day
 ```{r warning = FALSE}
-
-lab1=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
-lab2=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("600 µE"), expression("900 µE"))
-scientific_10 <- function(x) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(x))) }
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 GrowthRateSoliExpDay %>% 
 ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_Par_ue_ugChl_day, deltaOD_Lmu_corr, colour=as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.9, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  #scale_linetype_manual(values=c("equal900" = "dotted", "less900" = "solid"), breaks=c('8', '12', '16', "24", "", "")) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600", "900")) +
-  #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(JVPSII_umol_eLs_Par_ue_ugChl_day, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
 GrowthRateSoliExpDay %>% 
 ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_HalfPar_ue_ugChl_day, deltaOD_Lmu_corr, colour=as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.9, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  #scale_linetype_manual(values=c("equal900" = "dotted", "less900" = "solid"), breaks=c('8', '12', '16', "24", "", "")) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600", "900")) +
-  #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(JVPSII_umol_eLs_HalfPar_ue_ugChl_day, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
 GrowthRateSoliExpDay %>% 
 ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour=as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.9, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  #scale_linetype_manual(values=c("equal900" = "dotted", "less900" = "solid"), breaks=c('8', '12', '16', "24", "", "")) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600", "900")) +
-  #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(JVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
 GrowthRateSoliExpDay %>% 
 ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_HalfPar_ue_umolChl_day, deltaOD_Lmu_corr, colour=as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.9, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  #scale_linetype_manual(values=c("equal900" = "dotted", "less900" = "solid"), breaks=c('8', '12', '16', "24", "", "")) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600", "900")) +
-  #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
-  theme_bw() 
+  geom_point(aes(JVPSII_umol_eLs_HalfPar_ue_umolChl_day, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw()  
 
 GrowthRateSoliExpDay %>% 
 ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_Par_ue_cell_day, deltaOD_Lmu_corr, colour=as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.9, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600", "900")) +
-  #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
-  theme_bw() 
+  geom_point(aes(JVPSII_umol_eLs_Par_ue_cell_day, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw()  
 
 GrowthRateSoliExpDay %>% 
 ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_HalfPar_ue_cell_day, deltaOD_Lmu_corr, colour=as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.9, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600", "900")) +
-  #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(JVPSII_umol_eLs_HalfPar_ue_cell_day, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 ```
 
@@ -502,10 +365,10 @@ ggplot() +
 MCGrowthJVPSIISPmean<-GrowthRateSoliExpDay %>% 
   drop_na(JVPSII_umol_eLs_Par_ue_ugChl_day) %>%
   drop_na(JVPSII_umol_eLs_Par_ue_cell_day) %>%
-  select(c(Strain, Par_ue, Photoperiod, O2, WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, JVPSII_umol_eLs_HalfPar_ue_cell_day)) %>% 
+  select(c(Strain, Par_ue, Photoperiod, O2, Oxygen, WL, Ex_WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, JVPSII_umol_eLs_HalfPar_ue_cell_day)) %>% 
   
-  group_by(Strain, Par_ue, Photoperiod, O2, WL) %>%
-  summarize(Strain, Par_ue, Photoperiod, O2, WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, JVPSII_umol_eLs_HalfPar_ue_cell_day,
+  group_by(Strain, Par_ue, Photoperiod, O2, WL, Ex_WL) %>%
+  summarize(Strain, Par_ue, Photoperiod, O2, Oxygen, WL, Ex_WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, JVPSII_umol_eLs_HalfPar_ue_cell_day,
     
             meanJVPSII_umol_eLs_Par_ue_ugChl_day = mean(JVPSII_umol_eLs_Par_ue_ugChl_day),
             sdJVPSII_umol_eLs_Par_ue_ugChl_day = sd(JVPSII_umol_eLs_Par_ue_ugChl_day),
@@ -523,76 +386,66 @@ MCGrowthJVPSIISPmean$facetsStrain <- 'Strain'
 # Preliminary plot
 
 ```{r warning = FALSE}
-lab1=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
-lab2=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("600 µE"), expression("900 µE"))
-lab4=c(expression(""), expression(""), expression(""), expression(""))
-scientific_10 <- function(x) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(x))) }
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 MCGrowthJVPSIISPmean %>% 
 ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_Par_ue_ugChl_day, deltaOD_Lmu_corr, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.8, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600","900")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  #labs(y = "Logistic growth rate " ~ "("~d^-1~")", x = "Photon dose ( µmol photons "~m^-2~""~d^-1~")") +
-  #labs(y = "Chlorophyll specific exponential growth rate " ~ "("~d^-1~")") +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(JVPSII_umol_eLs_Par_ue_ugChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain)), alpha = 0.8, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
 MCGrowthJVPSIISPmean %>% 
 ggplot() +
-  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_ugChl_day, deltaOD_Lmu_corr, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.8, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600","900")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  #labs(y = "Logistic growth rate " ~ "("~d^-1~")", x = "Photon dose ( µmol photons "~m^-2~""~d^-1~")") +
-  #labs(y = "Chlorophyll specific exponential growth rate " ~ "("~d^-1~")") +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_ugChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain)), alpha = 0.8, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
 MCGrowthJVPSIISPmean %>% 
 ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.8, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600","900")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  #labs(y = "Logistic growth rate " ~ "("~d^-1~")", x = "Photon dose ( µmol photons "~m^-2~""~d^-1~")") +
-  #labs(y = "Chlorophyll specific exponential growth rate " ~ "("~d^-1~")") +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(JVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain)), alpha = 0.8, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
 MCGrowthJVPSIISPmean %>% 
 ggplot() +
-  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.8, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600","900")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  #labs(y = "Logistic growth rate " ~ "("~d^-1~")", x = "Photon dose ( µmol photons "~m^-2~""~d^-1~")") +
-  #labs(y = "Chlorophyll specific exponential growth rate " ~ "("~d^-1~")") +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain)), alpha = 0.8, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
 MCGrowthJVPSIISPmean %>% 
 ggplot() +
-  geom_point(aes(JVPSII_umol_eLs_Par_ue_cell_day, deltaOD_Lmu_corr, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.8, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600","900")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
-  #labs(y = "Logistic growth rate " ~ "("~d^-1~")", x = "Photon dose ( µmol photons "~m^-2~""~d^-1~")") +
-  #labs(y = "Chlorophyll specific exponential growth rate " ~ "("~d^-1~")") +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  geom_point(aes(JVPSII_umol_eLs_Par_ue_cell_day, deltaOD_Lmu_corr, colour = as.factor(Strain)), alpha = 0.8, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
 MCGrowthJVPSIISPmean %>% 
 ggplot() +
-  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_cell_day, deltaOD_Lmu_corr, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.8, size = 3.5, show.legend = T) +
-  scale_x_continuous(label=scientific_10) +
-  scale_colour_manual(values = c("darkslategray", "lightblue4", "hotpink4", "indianred3", "goldenrod2", "khaki2"), name="", labels = lab2, breaks=c('30', "90", "180", "300", "600","900")) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab1) +
+  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_cell_day, deltaOD_Lmu_corr, colour = as.factor(Strain)), alpha = 0.8, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw() 
+
+
+
   #labs(y = "Logistic growth rate " ~ "("~d^-1~")", x = "Photon dose ( µmol photons "~m^-2~""~d^-1~")") +
   #labs(y = "Chlorophyll specific exponential growth rate " ~ "("~d^-1~")") +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
-  theme_bw() 
 ```
 
 
