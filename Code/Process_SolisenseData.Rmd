@@ -570,7 +570,7 @@ ChlDataMeta <- CultureCatalog %>%
 colnames(ChlDataMeta)
 
 ChlDataMeta <- ChlDataMeta %>%
-  group_by(Strain, WL) %>%
+  group_by(Strain, WL, O2) %>%
   summarize(SampleID, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, PARPhotonDose_day, ObsDate, TurChl_ugL,
             meanTurChl_ugL = mean(TurChl_ugL),
             sdTurChl_ugL = sd(TurChl_ugL)) %>%
@@ -589,7 +589,6 @@ ChlDataMeta %>%
 ```
 
 
-
 # Merge Sigma with chlorophyll Turner data 
 It is "bigger" df than SolFitsPigmentExp, b/c I have 3 replica for Turner
 
@@ -597,9 +596,9 @@ It is "bigger" df than SolFitsPigmentExp, b/c I have 3 replica for Turner
 SolFitsExpStTurner <- ChlDataMeta %>%
   full_join(., SolFitsMetaLightCorr, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) 
 
-
 #"ObsDate"="ObsDate"
 ```
+
 # Removed TurChl_ugL b/c I have already mean from 3 technical replica - smaller df
 
 ```{r}
@@ -762,7 +761,7 @@ MDPicoAll %>%
 
 MDPicoAll <- MDPicoAll %>%
   filter(E_days>4) %>% 
-group_by(Strain, WL) %>%
+group_by(Strain, WL, O2) %>%
 
 summarize(Well.Name, Cell.Count, Filename, ObsDate, PlateNr, PlateID, SampleID, Date, Date_count, Time_count, media_inocul_L, culture_inocul_L, CapAreaPercentage, Run, Strain, ExpDate, Par_ue, Photoperiod, PARPhotonDose_day, Tube, O2, WL, LightShape, ExpEndDate, E_days, CellmL_MDPico, 
           meanCellmL_MDPico = mean(CellmL_MDPico), 
@@ -806,6 +805,7 @@ SolFitsExpStTurnerMD <- MDPicoAll %>%
   unique()
 
 ```
+
 ```{r preliminary plot}
 #colnames(SolFitsExpStTurner)
 
@@ -830,6 +830,7 @@ SolFitsExpStTurnerMD %>%
   theme_bw()
 
 ```
+
 # Calculate cell per L - for JVPSII
 
 ```{r}

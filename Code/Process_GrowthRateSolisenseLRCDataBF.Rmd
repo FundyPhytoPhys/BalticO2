@@ -145,8 +145,7 @@ Solisense <- readRDS(SolisenseFile)  %>%
 ```{r}
 colnames(Solisense)
 Solisense<-Solisense %>%
-  mutate(meanCellL_MDPico=meanCellmL_MDPico*1000) %>% 
-  select(-c(data, TurChl_ugL)) %>% 
+  select(-c(meanCellmL_MDPico, sdCellmL_MDPico, MC, Tube, LightShape, ExpEndDate, data, lrcplatt_Model, estimate_a, estimate_b, estimate_Pmax, std.error_a, std.error_b, std.error_Pmax)) %>% 
   unique()
 ```
 # Adding facets labels
@@ -189,11 +188,12 @@ Solisense %>%
   ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 ```
-E_days - check!
+
 
 ```{r Joining growth rate and Solisense exp data}
 GrowthRateSol <- GrowthRate %>% 
-  full_join(., Solisense, by = c("Strain"="Strain", "Par_ue"="Par_ue","Photoperiod"="Photoperiod",  "LightShape"="LightShape", "O2"="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day", "Oxygen"="Oxygen", "SampleID"="SampleID", "Run"="Run", "ExpDate"="ExpDate", "Tube"="Tube")) 
+  full_join(., Solisense, by = c("Strain"="Strain", "Par_ue"="Par_ue","Photoperiod"="Photoperiod",  "O2"="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day", "Oxygen"="Oxygen", "SampleID"="SampleID", "Run"="Run", "ExpDate"="ExpDate")) %>% 
+    unique()
 ```
 
 
@@ -213,28 +213,16 @@ GrowthRateSol %>%
   theme_bw()
 
 ```
-# Delete a few unrelevant columns 
 
-```{r}
-GrowthRateSol<-GrowthRateSol %>% 
-  select(-c(CellmL_MDPico)) %>% 
-  unique()
-```
 
 # Calculate umol chl a
 
 ```{r}
-# GrowthRateSol<-GrowthRateSol %>% 
-#   mutate(meanTurChl_umolL=meanTurChl_ugL*0.00112)
+GrowthRateSol<-GrowthRateSol %>%
+  mutate(meanTurChl_umolL=meanTurChl_ugL*0.00112)
 ```
 
 
-# Filter Time of Day when was night (no measurements)
-
-```{r}
-# GrowthRateSol445<-GrowthRateSol445 %>% 
-#   filter(ToD != 21 & ToD != 22 & ToD != 23 & ToD != 0 & ToD !=1 & ToD !=2 & ToD != 3 & ToD != 4 & ToD != 5 & ToD != 6) 
-```
 
 
 JVPSII per Turner Chl ug/L and per cell/L (meanCellmL_MDPico; meanTurChl_ugL)
@@ -242,7 +230,7 @@ JVPSII per Turner Chl ug/L and per cell/L (meanCellmL_MDPico; meanTurChl_ugL)
 ```{r}
 # JVPSII_ETRqpOxbo_FoSig = JVPSII_Par_ue
 
-GrowthRateSoliExp2<-GrowthRateSol %>%
+GrowthRateSol<-GrowthRateSol %>%
   filter(WL!="WW") %>% 
   #Turner
   mutate(JVPSII_umol_eLs_Par_ue_ugChl = JVPSII_umol_eLs_Par_ue/meanTurChl_ugL) %>% #umol e/ug ch/s
@@ -263,7 +251,7 @@ Growth rate vs JVPSII per Chl Turner and cell_L - taken from the same day as JVP
 ```{r warning = FALSE}
 lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
-GrowthRateSoliExp2 %>% 
+GrowthRateSol %>% 
 ggplot() +
   geom_point(aes(JVPSII_umol_eLs_Par_ue_ugChl, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
@@ -272,7 +260,16 @@ ggplot() +
   ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 
-GrowthRateSoliExp2 %>% 
+GrowthRateSol %>% 
+ggplot() +
+  geom_point(aes(JVPSII_umol_eLs_Par_ue_umolChl, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw() 
+
+GrowthRateSol %>% 
 ggplot() +
   geom_point(aes(JVPSII_umol_eLs_Par_ue_cell, deltaOD_Lmu_corr, colour=as.factor(Strain)), alpha = 0.9, size = 3.5, show.legend = T) +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
@@ -288,13 +285,14 @@ calculate JVPSII per day
 
 # JVPSII_ETRqpOxbo_FoSig
 
-GrowthRateSoliExpDay<-GrowthRateSoliExp2 %>% 
+GrowthRateSoliExpDay<-GrowthRateSol %>% 
   mutate(JVPSII_umol_eLs_Par_ue_ugChl_day = JVPSII_umol_eLs_Par_ue_ugChl*3600*Photoperiod/2) %>%
   mutate(JVPSII_umol_eLs_HalfPar_ue_ugChl_day = JVPSII_umol_eLs_HalfPar_ue_ugChl*3600*Photoperiod/2) %>%
   mutate(JVPSII_umol_eLs_Par_ue_umolChl_day = JVPSII_umol_eLs_Par_ue_umolChl*3600*Photoperiod/2) %>% 
   mutate(JVPSII_umol_eLs_HalfPar_ue_umolChl_day = JVPSII_umol_eLs_HalfPar_ue_umolChl*3600*Photoperiod/2) %>% 
   mutate(JVPSII_umol_eLs_Par_ue_cell_day = JVPSII_umol_eLs_Par_ue_cell*3600*Photoperiod/2) %>% 
-  mutate(JVPSII_umol_eLs_HalfPar_ue_cell_day = JVPSII_umol_eLs_HalfPar_ue_cell*3600*Photoperiod/2) 
+  mutate(JVPSII_umol_eLs_HalfPar_ue_cell_day = JVPSII_umol_eLs_HalfPar_ue_cell*3600*Photoperiod/2) %>% 
+  unique()
 
 
 ```
@@ -359,19 +357,29 @@ ggplot() +
   ggh4x::facet_nested(cols = vars(WL),rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() 
 ```
+#Cleaning the df
+
+```{r}
+#colnames(GrowthRateSoliExpDay)
+
+GrowthRateSoliExpDay2<-GrowthRateSoliExpDay %>% 
+  select(-c(Tube, MC, LightShape, PURPARRatio, meanPURPARRatio, sdPURPARRatio, JVPSII_umol_eLs_HalfPar_ue, JVPSII_umol_eLs_Par_ue, JVPSII_umol_eLs_Par_ue_ugChl, JVPSII_umol_eLs_Par_ue_umolChl, JVPSII_umol_eLs_Par_ue_cell, JVPSII_umol_eLs_HalfPar_ue_ugChl, JVPSII_umol_eLs_HalfPar_ue_umolChl, JVPSII_umol_eLs_HalfPar_ue_cell, JVPSII_umol_eLs_HalfPar_ue_ugChl, JVPSII_umol_eLs_HalfPar_ue_umolChl, JVPSII_umol_eLs_HalfPar_ue_cell, JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_cell_day)) %>% 
+  unique()
+```
+
 
 # Creating mean JVPSII only for plot
 
 ```{r}
 #colnames(MCGrowthJVPSIISP)
 
-MCGrowthJVPSIISPmean<-GrowthRateSoliExpDay %>% 
-  drop_na(JVPSII_umol_eLs_Par_ue_ugChl_day) %>%
-  drop_na(JVPSII_umol_eLs_Par_ue_cell_day) %>%
-  select(c(Strain, Par_ue, Photoperiod, O2, Oxygen, WL, Ex_WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, JVPSII_umol_eLs_HalfPar_ue_cell_day)) %>% 
+MCGrowthJVPSIISPmean<-GrowthRateSoliExpDay2 %>% 
+  # drop_na(JVPSII_umol_eLs_Par_ue_ugChl_day) %>%
+  # drop_na(JVPSII_umol_eLs_Par_ue_cell_day) %>%
+  # select(c(Strain, Par_ue, Photoperiod, O2, Oxygen, WL, Ex_WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, JVPSII_umol_eLs_HalfPar_ue_cell_day)) %>% 
   
-  group_by(Strain, Par_ue, Photoperiod, O2, WL, Ex_WL) %>%
-  summarize(Strain, Par_ue, Photoperiod, O2, Oxygen, WL, Ex_WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, JVPSII_umol_eLs_HalfPar_ue_cell_day,
+  group_by(Strain, O2, WL) %>%
+  summarize(Strain, Par_ue, Photoperiod, O2, Oxygen, WL, Ex_WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, 
     
             meanJVPSII_umol_eLs_Par_ue_ugChl_day = mean(JVPSII_umol_eLs_Par_ue_ugChl_day),
             sdJVPSII_umol_eLs_Par_ue_ugChl_day = sd(JVPSII_umol_eLs_Par_ue_ugChl_day),
