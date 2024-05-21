@@ -119,6 +119,12 @@ MultiCultiGrowth<-MultiCultiGrowth %>%
          O2==0~"2.5~µM"))
 ```
 
+```{r}
+MultiCultiGrowth<-MultiCultiGrowth %>% 
+  mutate(deltaOD_Lmu_se=case_when(deltaOD_Lmu_se>0.2~0,
+         deltaOD_Lmu_se<=0.2~deltaOD_Lmu_se))
+```
+
 
 ```{r}
 MultiCultiGrowth %>%
@@ -497,11 +503,6 @@ JazDataRoundMeta0<-JazDataRoundMeta
 
 JazDataRoundMeta2<-rbind(JazDataRoundMeta21, JazDataRoundMeta0)
 rm(JazDataRoundMeta21, JazDataRoundMeta0)
-```
-
-```{r}
-MultiCultiGrowth1<-MultiCultiGrowth1 %>% 
-  filter(deltaOD_Lmu_se<0.2) 
 ```
 
 

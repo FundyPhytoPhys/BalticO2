@@ -98,11 +98,12 @@ SolFitsMeta %>%
   filter(WL != "WW") %>%
   filter(ActPAR== 80) %>% 
   filter(E_days>=4) %>% 
+  filter(E_days<=10) %>% 
   ggplot() +
   geom_point(aes(x = WLNum, y = JVPSII_ETRqpOxbo_FoSigmax_m2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
   scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
-  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
-  scale_fill_identity() +
+  # stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  # scale_fill_identity() +
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() 
 ```
@@ -134,6 +135,7 @@ SolFitsMeta <- left_join(SolFitsMeta, JVPSII_eLs_ModelTerms, by = join_by(Ex_WL)
 SolFitsMeta<-SolFitsMeta %>%
   filter(Par_ue!= 30) %>% 
     filter(E_days>=4) %>% 
+    filter(E_days<=10) %>% 
     filter(WL != "WW") %>%
     filter(Run!=118 & Run!= 119) 
 ```
@@ -219,14 +221,14 @@ SolFitsMetaLRCGrowth |>
   theme_bw()
 
 SolFitsMetaLRCGrowth |>
-  filter(Strain == "BA127R") |>
+  filter(Strain == "PE-rich_127") |>
   ggplot() +
   geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = Ex_WL)) +
   facet_grid(cols = vars(Ex_WL, Photoperiod, Strain), rows = vars(Par_ue)) +
   theme_bw()
 
 SolFitsMetaLRCGrowth |>
-  filter(Strain == "BA77G") |>
+  filter(Strain == "PC-rich_077") |>
   ggplot() +
   geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = Ex_WL)) +
   facet_grid(cols = vars(Ex_WL, Photoperiod, Strain), rows = vars(Par_ue)) +
@@ -287,27 +289,95 @@ ChlData
 ```
 
 
+# Merge Turner with catalog to check missing data
+
+```{r combine Solisense and MetaData catalog, warning = FALSE, echo=FALSE}
+ChlDataCatalog <- CultureCatalog %>%
+  left_join(., ChlData, by = c("SampleID" = "SampleID"))
+
+ChlDataCatalog <- ChlDataCatalog %>%
+group_by(SampleID) %>%
+  arrange(ObsDate) %>%
+  mutate(E_days = as.numeric((ObsDate - ExpDate[1]))) %>% 
+ungroup() %>% 
+  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
+         Strain=="BA77G"~"PC-rich_077")) 
+```
+
+```{r}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+ChlDataCatalog %>% 
+  ggplot() +
+  geom_point(aes(x = E_days, y = TurChl_ugL, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+```
+
+
+--------------
+### Problem with E_days - chack this Sylwia!
+
+```{r}
+#colnames(SolFitsMetaLRCGrowth)
+
+SolFitsMetaLRCGrowth<-SolFitsMetaLRCGrowth %>% 
+  select(-c(data, lrcplatt_Model, estimate_a, estimate_b, estimate_Pmax, std.error_a, std.error_b, std.error_Pmax, E_days))
+```
+
+
+# Merge Solisense with chlorophyll Turner data 
+
+```{r}
+SolFitsExpStTurner <- ChlDataCatalog %>%
+  full_join(., SolFitsMetaLRCGrowth, by = c("SampleID"="SampleID", "Strain"="Strain", "ObsDate"="ObsDate", "Run"="Run", "Par_ue"="Par_ue", "ExpDate"="ExpDate", "ExpEndDate"="ExpEndDate","Photoperiod"="Photoperiod", "MC"="MC", "Tube"="Tube", "WL"="WL", "O2"="O2", "LightShape"="LightShape", "PARPhotonDose_day"="PARPhotonDose_day")) 
+```
+
+```{r}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+SolFitsExpStTurner %>% 
+  ggplot() +
+  geom_point(aes(x = E_days, y = TurChl_ugL, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+SolFitsExpStTurner %>% 
+  ggplot() +
+  geom_point(aes(x = Ex_WL, y = TurChl_ugL, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+```
+
+
+
 # Merge JVPSII with chlorophyll Turner data 
 It is "bigger" df b/c I have 3 replica for Turner
 
 ```{r}
-SolFitsExpStTurner <- ChlData %>%
-  full_join(., SolFitsMetaLRCGrowth, by = c("SampleID"="SampleID", "ObsDate"="ObsDate")) %>% 
-  drop_na(Strain)
+# SolFitsExpStTurner <- ChlData %>%
+#   full_join(., SolFitsMetaLRCGrowth, by = c("SampleID"="SampleID", "ObsDate"="ObsDate")) %>% 
+#   drop_na(Strain)
 ```
 
 
 ```{r}
-SolFitsExpStTurner<-SolFitsExpStTurner %>%  
-  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-         Strain=="BA77G"~"PC-rich_077")) 
+# SolFitsExpStTurner<-SolFitsExpStTurner %>%  
+#   mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
+#          Strain=="BA77G"~"PC-rich_077")) 
 ```
 
 # Filter only revelant strains
 
 ```{r}
-SolFitsExpStTurner<-SolFitsExpStTurner %>%  
-  filter(Strain == "PC-rich_077" | Strain == "PE-rich_127")
+# SolFitsExpStTurner<-SolFitsExpStTurner %>%  
+#   filter(Strain == "PC-rich_077" | Strain == "PE-rich_127")
 ```
 
 
@@ -320,6 +390,14 @@ lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 SolFitsExpStTurner %>% 
   ggplot() +
   geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+SolFitsExpStTurner %>% 
+  ggplot() +
+  geom_point(aes(x = TurChl_ugL, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
   scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
     ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
@@ -470,12 +548,17 @@ MDPicoAll<-MDPicoAll %>%
 # Create Preliminary plot
 
 ```{r preliminary plot}
-MDPicoAll %>%
+
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+MDPicoAll %>% 
   ggplot() +
-  geom_point(aes(x = E_days, y = meanCellmL_MDPico)) +
+  geom_point(aes(x = E_days, y = meanCellmL_MDPico, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
   scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
-  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw()
+
 ```
 # Merge MD Pico with Solisense Turner
 
@@ -489,16 +572,22 @@ SolFitsTurnerMDPico <- SolFitsExpStTurner %>%
   select(-c(estimate_a, estimate_b, estimate_Pmax, std.error_a, std.error_b, std.error_Pmax, lrcplatt_Model, MC)) %>% 
   unique()
 
-
 ```
 # Create Preliminary plot
 
 ```{r preliminary plot}
-SolFitsTurnerMDPico %>%
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+
+SolFitsTurnerMDPico %>% 
+  filter(WL!= "WW") %>% 
   ggplot() +
-  geom_point(aes(y = JVPSII_umol_eLs_Par_ue, x = meanCellmL_MDPico)) +
-  ggh4x::facet_nested(rows = vars(Par_ue), cols = vars(Strain, Photoperiod), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  geom_point(aes(y = JVPSII_umol_eLs_Par_ue, x = meanCellmL_MDPico, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw()
+
 ```
 
 # Create preliminary plot
@@ -508,32 +597,43 @@ lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 
 SolFitsTurnerMDPico %>%
+  filter(WL!= "WW") %>% 
   ggplot() +
   geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
   scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Par_ue), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() 
 
 SolFitsTurnerMDPico %>%
+  filter(WL!= "WW") %>% 
   ggplot() +
   geom_point(aes(x = meanTurChl_ugL, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
   scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Par_ue), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() 
 
 SolFitsTurnerMDPico %>%
+  filter(WL!= "WW") %>% 
   ggplot() +
   geom_point(aes(x = meanCellmL_MDPico, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
   scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Par_ue), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() 
 ```
+
+# Calculate Turner per umol chl
+
+```{r}
+SolFitsTurnerMDPico<-SolFitsTurnerMDPico %>% 
+  mutate(meanTurChl_umolL=meanTurChl_ugL*0.00112)
+```
+
 
 
 # Save rds for further analysis
 
 ```{r save rds}
-saveRDS(SolFitsTurnerMDPico, file.path(DataOut, paste(Project, "Processed_SolisenseJVPSII_2.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(SolFitsTurnerMDPico, file.path(DataOut, paste(Project, "Processed_SolisenseJVPSII.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 
 ```
 
@@ -621,1119 +721,22 @@ saveRDS(SolFitsTurnerMDPico, file.path(DataOut, paste(Project, "Processed_Solise
 ```
 
 
-# Choose only exp data
-
-```{r choose only exp data}
-# O1 <- SolFitsAll %>%
-#   filter(Par_ue == 300 | Par_ue == 90 | Par_ue == 180 | Par_ue == 600 | Par_ue == 900) %>%
-#   filter(Photoperiod == 24) %>%
-#   filter(E_days <= 4)
-# 
-# O2 <- SolFitsAll %>%
-#   filter(Par_ue == 90 | Par_ue == 180 | Par_ue == 300) %>%
-#   filter(Photoperiod == 16) 
-#   #filter(E_days < 9)
-# 
-# O3 <- SolFitsAll %>%
-#   filter(Par_ue == 900 | Par_ue == 600) %>%
-#   filter(Photoperiod == 16) %>%
-#   filter(E_days <= 4)
-# 
-# O4 <- SolFitsAll %>%
-#   filter(Par_ue == 30) %>%
-#   filter(Photoperiod == 16) 
-#   #filter(E_days <= 14)
-# 
-# O5 <- SolFitsAll %>%
-#   filter(Par_ue == 30) %>%
-#   filter(Photoperiod == 8 | Photoperiod == 12) 
-#   #filter(E_days <=14)
-# 
-# O6 <- SolFitsAll %>%
-#   filter(Par_ue == 90) %>%
-#   filter(Photoperiod == 8) 
-#   #filter(E_days <=14)
-# 
-# O7 <- SolFitsAll %>%
-#   filter(Par_ue == 90) %>%
-#   filter(Photoperiod == 12) %>%
-#   filter(E_days <=10)
-# 
-# O8 <- SolFitsAll %>%
-#   filter(Par_ue == 180 | Par_ue == 300) %>%
-#   filter(Photoperiod == 8 | Photoperiod == 12) 
-#   #filter(E_days <=10)
-# 
-# O9 <- SolFitsAll %>%
-#   filter(Par_ue == 900 | Par_ue == 600) %>%
-#   filter(Photoperiod == 8 | Photoperiod == 12) %>%
-#   filter(E_days <=7)
-# 
-# O10 <- SolFitsAll %>%
-#   filter(Par_ue == 30) %>%
-#   filter(Photoperiod == 24) %>%
-#   filter(E_days <= 8)
-# 
-# SolFitsAllExp <-rbind(O1, O2, O3, O4, O5, O6, O7, O8, O9, O10)
-# 
-# rm(O1, O2, O3, O4, O5, O6, O7, O8, O9, O10)
-```
-
-# Choose only Stationary data 
-
-```{r choose only St data}
-# O1 <- SolFitsAll %>%
-#   filter(Par_ue == 300 | Par_ue == 90 | Par_ue == 180 | Par_ue == 600 | Par_ue == 900) %>%
-#   filter(Photoperiod == 24) %>%
-#   filter(E_days > 4)
-# 
-# O2 <- SolFitsAll %>%
-#   filter(Par_ue == 30) %>%
-#   filter(Photoperiod == 12 | Photoperiod == 16) %>%
-#   filter(E_days >14)
-# 
-# O3 <- SolFitsAll %>%
-#   filter(Par_ue == 90) %>%
-#   filter(Photoperiod == 12 | Photoperiod == 16) %>%
-#   filter(E_days >10)
-# 
-# O4 <- SolFitsAll %>%
-#   filter(Par_ue == 180 | Par_ue == 300) %>%
-#   filter(Photoperiod == 8 | Photoperiod == 12 | Photoperiod == 16) %>%
-#   filter(E_days >10)
-# 
-# O5 <- SolFitsAll %>%
-#   filter(Par_ue == 900 | Par_ue == 600) %>%
-#   filter(Photoperiod == 16) %>%
-#   filter(E_days >=6)
-# 
-# O6 <- SolFitsAll %>%
-#   filter(Par_ue == 900 | Par_ue == 600) %>%
-#   filter(Photoperiod == 12) %>%
-#   filter(E_days >=4)
-# 
-# O6 <- SolFitsAll %>%
-#   filter(Par_ue == 900 | Par_ue == 600) %>%
-#   filter(Photoperiod == 8) %>%
-#   filter(E_days >7)
-# 
-# SolFitsAllSt <-rbind(O1, O2, O3, O4, O5, O6)
-# 
-# rm(O1, O2, O3, O4, O5, O6)
-```
-
-# Combine Exp and St data
-
-```{r}
-  # SolFitsAllExp$Phase <- 'Exponential'
-  # SolFitsAllSt$Phase <- 'Pre-stationary'
-  # 
-  # SolFitsAllExpSt <-rbind(SolFitsAllExp, SolFitsAllSt)
-  # rm(SolFitsAllExp, SolFitsAllSt)
-```
-
-
-# Create preliminary plot
-
-```{r preliminary plot}
-# lab1=c(expression("PC-rich_056"), expression("PC-rich_077"), expression("PE-rich_048"), expression("PE-rich_127"))
-# lab2=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
-# lab3=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("900 µE"))
-# 
-# SolFitsAllExpSt %>%
-#   filter(Ex_WL == 445) %>% 
-#   filter(Phase == "Exponential") %>% 
-#   ggplot() +
-#   geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-#   ggh4x::facet_nested(cols = vars(Phase, Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
-#   theme_bw() 
-# 
-# SolFitsAllExpSt %>%
-#   filter(Ex_WL == 445) %>% 
-#   filter(Phase == "Exponential") %>% 
-#   #filter(Photoperiod == 8) %>% 
-#   ggplot() +
-#   geom_point(aes(x = TurChl_ugL, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-#   ggh4x::facet_nested(cols = vars(Phase, Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
-#   theme_bw() 
-# 
-# SolFitsAllExpSt %>%
-#   filter(Ex_WL == 445) %>% 
-#   filter(Phase == "Exponential") %>% 
-#   ggplot() +
-#   geom_point(aes(x = cellL_OD680, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-#   ggh4x::facet_nested(cols = vars(Phase, Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
-#   theme_bw() 
-```
-# Save rds for further analysis
-
-```{r save rds}
-# saveRDS(SolFitsAllExpSt, file.path(DataOut, paste(Project, "Processed_SolisenseJVPSII.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
-
-```
-
-# Cleaning the environment
-
-```{r}
-# rm(MCPigmentAll, ChlData, SolFitsExpStTurner, Turnercatalog)
-```
-
-
-
-
-
--------------------------------------------- LIFT example plot ----------------------------------
-
-# Set Project Variables 
-
-```{r set project variables, read zipped files, list available files, warning = FALSE, echo=FALSE}
-Project <- "BalticPhotoperiod"
-DataIn <- file.path("..", "Data", "RawData", "SolisenseCurveData")
-DataOut <- file.path("..", "Data", "ProcessedData", "ProcessedSolisenseData")
-
-FigPath <- file.path("..", "Output", "Figures")
-FigRdsPath <- file.path("..", "Output", "FiguresRds")
-TableRdsPath <- file.path("..", "Output", "TablesRDS")
-# FileID <- "fit"
-# FileEncode <- "UTF-8"
-# Delimiter <- ","
-# HeaderRows <- 0
-```
-
-# Read Imported Solisense
-
-```{r read locally stored metadata from rds}
-LIFT445_0 <- read.csv(file = file.path("..", "Data", "RawData", "SolisenseCurveData", "PICO_202112201453_SySl1035_445_data_dark.csv"))
-LIFT445_0<-LIFT445_0 %>% 
-  rename(DataPt=X....) %>% 
-  rename(Time_us=X) %>% 
-  rename(EX=X.1) %>% 
-  rename(EM=X.2) %>% 
-  rename(Fit=X.3) %>% 
-  rename(PAR = X.4) %>% 
-  select(-c(X.5))
-LIFT445_0 = LIFT445_0[-1:-15,]
-LIFT445_0[is.na(LIFT445_0)] <- 0
-LIFT445_0$Ex_WL <- 445
-
-LIFT445_80 <- read.csv(file = file.path("..", "Data", "RawData", "SolisenseCurveData", "PICO_202112201453_SySl1035_445_data_light80.csv"))
-LIFT445_80<-LIFT445_80 %>% 
-  rename(DataPt=X....) %>% 
-  rename(Time_us=X) %>% 
-  rename(EX=X.1) %>% 
-  rename(EM=X.2) %>% 
-  rename(Fit=X.3) %>% 
-  rename(PAR = X.4) %>% 
-  select(-c(X.5))
-LIFT445_80 = LIFT445_80[-1:-15,]
-LIFT445_80[is.na(LIFT445_80)] <- 80
-LIFT445_80$Ex_WL <- 445
-
-LIFT590_0 <- read.csv(file = file.path("..", "Data", "RawData", "SolisenseCurveData", "PICO_202112201547_SySl1035_590_data_dark.csv"))
-LIFT590_0<-LIFT590_0 %>% 
-  rename(DataPt=X....) %>% 
-  rename(Time_us=X) %>% 
-  rename(EX=X.1) %>% 
-  rename(EM=X.2) %>% 
-  rename(Fit=X.3) %>% 
-  rename(PAR = X.4) %>% 
-  select(-c(X.5))
-LIFT590_0 = LIFT590_0[-1:-15,]
-LIFT590_0[is.na(LIFT590_0)] <- 0
-LIFT590_0$Ex_WL <- 590
-
-LIFT590_80 <- read.csv(file = file.path("..", "Data", "RawData", "SolisenseCurveData", "PICO_202112201547_SySl1035_590_data_light80.csv"))
-LIFT590_80<-LIFT590_80 %>% 
-  rename(DataPt=X....) %>% 
-  rename(Time_us=X) %>% 
-  rename(EX=X.1) %>% 
-  rename(EM=X.2) %>% 
-  rename(Fit=X.3) %>% 
-  rename(PAR = X.4) %>% 
-  select(-c(X.5))
-LIFT590_80 = LIFT590_80[-1:-15,]
-LIFT590_80[is.na(LIFT590_80)] <- 80
-LIFT590_80$Ex_WL <- 590
-
-
-LIFT<-rbind(LIFT590_80, LIFT590_0, LIFT445_80, LIFT445_0)
-rm(LIFT590_80, LIFT590_0, LIFT445_80, LIFT445_0)
-
-LIFT$SampleID <- "SySl1035"
-LIFT$ObsDate <- 20211220
-
-LIFT<-LIFT %>% 
-  mutate(ObsDate=as.Date(ObsDate)) %>% 
-  mutate(DataPt=as.double(DataPt)) %>% 
-  mutate(Time_us=as.double(Time_us)) %>% 
-  mutate(EX=as.double(EX)) %>% 
-  mutate(EM=as.double(EM)) %>% 
-  mutate(Fit=as.double(Fit)) 
-```
-
-
-# Merge LIFT data with MetaData
-
-```{r combine Solisense and MetaData catalog, warning = FALSE, echo=FALSE}
-LIFTMeta <- LIFT %>%
-  left_join(., CultureCatalog, by = c("SampleID" = "SampleID"))
-
-rm(LIFT)
-```
-
-```{r}
-LIFTMeta$facetsActinicPAR = factor(LIFTMeta$O2, labels = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"))
-LIFTMeta$facetsExcitation = factor(LIFTMeta$WL, labels = c("Excitation~(nm)"))
-```
-
-
-# Create preliminary plot
-
-```{r fig.height = 4.5, fig.width = 8, warning = FALSE}
-data_textA <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('A'))
-
-arrowdf1 <- tibble(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain = "PE-rich_048")
-arrowdf2 <- tibble(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain = "PE-rich_048")
-
-arrowdf3 <- tibble(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain = "PE-rich_048")
-arrowdf4 <- tibble(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain = "PE-rich_048")
-
-data_textSat <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(590), Strain  = c("PE-rich_048"), label = c('Saturation'))
-data_textRel <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(590), Strain  = c("PE-rich_048"), label = c('Relaxation'))
-data_textSat1 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(590), Strain  = c("PE-rich_048"), label = c('(~250 µs)'))
-data_textRel1 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(590), Strain  = c("PE-rich_048"), label = c('(~250-50000 µs)'))
-data_textRel2 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(590), Strain  = c("PE-rich_048"), label = c(''))
-
-data_textTao <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('italic(\u03C4)[1] - italic(\u03C4)[3]'))
-data_textTaop <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('italic(\u03C4)[1]~ʹ~- italic(\u03C4)[3]', "~~~~~~~~~~~~~~~'ʹ'"))
-
-data_textFm <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[M]"))
-data_textFmp <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[M]", "~~~~~~~'ʹ'"))
-
-# data_textF0 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("F[0]"))
-data_textF0 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[O]"))
-
-data_textF <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[]", "~~~~~'ʹ'"))
-# data_textF <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("F"))
-
-data_textSig <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('\u03C3[PSII]'))
-data_textSigp <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('\u03C3[PSII]', "~~~~~~~~~~~'ʹ'"))
-
-# lab1=c(expression("PC-rich_056"), expression("PC-rich_077"), expression("PE-rich_048"), expression("PE-rich_127"))
-# lab2=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
-# lab3=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("900 µE"))
-
-
-PlotA<-LIFTMeta %>%
-  filter(Time_us<1000) %>% 
-  filter(Time_us>0) %>% 
-  ggplot() +
-  #geom_point(aes(x = Time_us, y = EX),  colour = "brown4", alpha = 0.8, size = 1, show.legend = F) +
-  geom_point(aes(x = Time_us, y = EM),  colour = "brown1", alpha = 0.8, size = 2, show.legend = F) +
-  geom_line(aes(x = Time_us, y = Fit),  colour = "blue", alpha = 0.7, size = 0.7, show.legend = F) +
-  geom_vline(xintercept = 250, linetype="dashed", col="black", lwd=0.2) +
-  
-  geom_text(data=data_textA, aes(x=950, y=450, label=label), size=4.5) +
-  
-  geom_text(data=data_textSat, aes(x=100, y=500, label=label), size=3.5) +
-  geom_text(data=data_textRel, aes(x=500, y=500, label=label), size=3.5) +
-  geom_text(data=data_textSat1, aes(x=100, y=210, label=label), size=3.5) +
-  geom_text(data=data_textRel1, aes(x=500, y=210, label=label), size=3.5) +
-  geom_text(data=data_textRel2, aes(x=500, y=180, label=label), size=3.5) +
-  
-  geom_text(data=data_textTao, aes(x=400, y=250, label=label), size=3.5, parse = TRUE) +
-  geom_text(data=data_textTaop, aes(x=450, y=300, label=label), size=3.5, parse = TRUE) +
-  
-  geom_text(data=data_textFm, aes(x=350, y=400, label=label), size=3.5, parse = TRUE) +
-  geom_text(data=data_textFmp, aes(x=350, y=480, label=label), size=3.5, parse = TRUE) +
-  
-  geom_text(data = data_textF0, aes(x = 50, y = 150, label = label), size = 3.5, parse = TRUE) +
-  #geom_text(data=data_textF0, aes(x=50, y=100, label=expression(F[0])), size=3.5, parse = TRUE) +
-  geom_text(data = data_textF, aes(x=50, y=200, label=label), size=3.5, parse = TRUE) +
-
-  geom_text(data=data_textSig, aes(x=100, y=400, label=label), size=3.5, parse = TRUE) +
-  geom_text(data=data_textSigp, aes(x=60, y=450, label=label), size=3.5, parse = TRUE) +
-  
-  geom_segment(data = arrowdf1, aes(x = -5, xend = 150, y = 230, yend = 360),
-               colour = "black", size = 0.5, alpha=0.9, arrow = arrow(ends="both", type = "closed", length=unit(0.1, 'cm'))) +
-  geom_segment(data = arrowdf2, aes(x = -10, xend = 150, y = 260, yend = 450),
-               colour = "black", size = 0.5, alpha=0.9, arrow = arrow(ends="both", type = "closed", length=unit(0.1, 'cm'))) +
-
-  geom_segment(data = arrowdf3, aes(x = 250, xend = 500, y = 355, yend = 355),
-               colour = "black", size = 0.5, alpha=0.9, arrow = arrow(type = "closed", length=unit(0.1, 'cm'))) +
-  geom_segment(data = arrowdf4, aes(x = 250, xend = 500, y = 440, yend = 440),
-               colour = "black", size = 0.5, alpha=0.9, arrow = arrow(type = "closed", length=unit(0.1, 'cm'))) +
-  
-  #scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
-  # scale_y_continuous(breaks=seq(0, 2000, by = 500)) +
-  # coord_cartesian(ylim = c(0, 2500)) +
-  #annotate("text", x = 50, y = 100, label = expression(F[0]), size = 3.5, data = data_textF0) +
-  #annotate("text", x = 1, y = 1, label = "\u03C4[PSII]", parse = TRUE) +
-  labs(y = "Fluorescence yield", x = "Elapsed time (µs)") +
-  ggh4x::facet_nested(cols = vars(facetsActinicPAR, PAR), rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed, scales="free_y") +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.position = c(0.12,0.96),
-        legend.key.height= unit(0.005, 'cm'),
-        legend.spacing.x = unit(0.01, 'cm'),
-        legend.text = element_text(size=11))
-PlotA
-```
-# Save plot 
-
-```{r save plot}
-#ggsave(file = file.path(FigPath, paste("Fig_LIFT_1",".png",sep = "")), height=4.5, width= 7,  dpi = 300, limitsize = TRUE)
-```
-
-
-
-# Plot a
-
-```{r fig.height = 4.5, fig.width = 8, warning = FALSE}
-data_textA <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('A'))
-
-arrowdf1 <- tibble(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain = "PE-rich_048")
-arrowdf2 <- tibble(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain = "PE-rich_048")
-
-arrowdf3 <- tibble(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain = "PE-rich_048")
-arrowdf4 <- tibble(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain = "PE-rich_048")
-
-data_textSat <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('Saturation'))
-data_textRel <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('Relaxation'))
-data_textSat1 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('(~250 µs)'))
-data_textRel1 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('(~250-50000 µs)'))
-data_textRel2 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c(''))
-
-data_textTao <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('italic(\u03C4)[1] - italic(\u03C4)[3]'))
-data_textTaop <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('italic(\u03C4)[1]~ʹ~- italic(\u03C4)[3]', "~~~~~~~~~~~~~~~'ʹ'"))
-
-data_textFm <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[M]"))
-data_textFmp <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[M]", "~~~~~~~'ʹ'"))
-
-data_textF0 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[O]"))
-
-data_textF <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[]", "~~~~~'ʹ'"))
-
-data_textSig <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('\u03C3[PSII]'))
-data_textSigp <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('\u03C3[PSII]', "~~~~~~~~~~~'ʹ'"))
-
-
-Plota<-LIFTMeta %>%
-  filter(Ex_WL==445) %>% 
-  filter(Time_us<1000) %>% 
-  filter(Time_us>0) %>% 
-  ggplot() +
-  geom_point(aes(x = Time_us, y = EM),  colour = "darkblue", shape = 1, alpha = 0.8, size = 2, show.legend = F) +
-  geom_line(aes(x = Time_us, y = Fit),  colour = "blue", alpha = 0.7, size = 0.7, show.legend = F) +
-  geom_vline(xintercept = 250, linetype="dashed", col="black", lwd=0.2) +
-  
-  geom_text(data=data_textA, aes(x=1000, y=500, label=label), size=5) +
-  
-  geom_text(data=data_textSat, aes(x=100, y=100, label=label), size=4) +
-  geom_text(data=data_textRel, aes(x=500, y=100, label=label), size=4) +
-  geom_text(data=data_textSat1, aes(x=100, y=60, label=label), size=4) +
-  geom_text(data=data_textRel1, aes(x=500, y=60, label=label), size=4) +
-  geom_text(data=data_textRel2, aes(x=500, y=40, label=label), size=4) +
-  
-  geom_text(data=data_textTao, aes(x=400, y=280, label=label), size=4, parse = TRUE) +
-  geom_text(data=data_textTaop, aes(x=450, y=330, label=label), size=4, parse = TRUE) +
-  
-  geom_text(data=data_textFm, aes(x=350, y=390, label=label), size=4, parse = TRUE) +
-  geom_text(data=data_textFmp, aes(x=350, y=470, label=label), size=4, parse = TRUE) +
-  
-  geom_text(data = data_textF0, aes(x = 50, y = 180, label = label), size = 4, parse = TRUE) +
-  geom_text(data = data_textF, aes(x=50, y=230, label=label), size=4, parse = TRUE) +
-
-  geom_text(data=data_textSig, aes(x=100, y=390, label=label), size=4, parse = TRUE) +
-  geom_text(data=data_textSigp, aes(x=60, y=450, label=label), size=4, parse = TRUE) +
-  
-  geom_segment(data = arrowdf1, aes(x = -25, xend = 150, y = 190, yend = 360),
-               colour = "black", size = 0.5, alpha=0.9, arrow = arrow(ends="both", type = "closed", length=unit(0.1, 'cm'))) +
-  geom_segment(data = arrowdf2, aes(x = -15, xend = 150, y = 240, yend = 450),
-               colour = "black", size = 0.5, alpha=0.9, arrow = arrow(ends="both", type = "closed", length=unit(0.1, 'cm'))) +
-
-  geom_segment(data = arrowdf3, aes(x = 250, xend = 500, y = 355, yend = 355),
-               colour = "black", size = 0.5, alpha=0.9, arrow = arrow(type = "closed", length=unit(0.1, 'cm'))) +
-  geom_segment(data = arrowdf4, aes(x = 250, xend = 500, y = 440, yend = 440),
-               colour = "black", size = 0.5, alpha=0.9, arrow = arrow(type = "closed", length=unit(0.1, 'cm'))) +
-
-  labs(y = "Fluorescence yield", x = "Elapsed time (µs)") +
-  ggh4x::facet_nested(cols = vars(facetsActinicPAR, PAR), labeller = label_parsed, scales="free_y") +
-  # ggh4x::facet_nested(cols = vars(facetsActinicPAR, PAR), rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed, scales="free_y") +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=14),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.position = c(0.12,0.96),
-        legend.key.height= unit(0.005, 'cm'),
-        legend.spacing.x = unit(0.01, 'cm'),
-        legend.text = element_text(size=11))
-Plota
-```
-
-# Plot aa
-
-```{r fig.height = 4.5, fig.width = 8, warning = FALSE}
-scientific_10 <- function(y) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(y))) }
-
-LIFTMeta590<-LIFTMeta %>% 
-  filter(Ex_WL==590) %>% 
-  filter(Time_us<1000) %>% 
-  filter(Time_us>0) 
-
-LIFTMeta445<-LIFTMeta %>% 
-  filter(Ex_WL==445) %>% 
-  filter(Time_us<1000) %>% 
-  filter(Time_us>0) 
-
-data_textA <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('A'))
-
-arrowdf1 <- tibble(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain = "PE-rich_048")
-arrowdf2 <- tibble(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain = "PE-rich_048")
-
-arrowdf3 <- tibble(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain = "PE-rich_048")
-arrowdf4 <- tibble(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain = "PE-rich_048")
-
-data_textSat <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('Saturation'))
-data_textRel <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('Relaxation'))
-data_textSat1 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('(~250 µs)'))
-data_textRel1 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0, 80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('(~250-50000 µs)'))
-
-
-data_textTao <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('italic(\u03C4)[1] - italic(\u03C4)[3]'))
-data_textTaop <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('italic(\u03C4)[1]~ʹ~- italic(\u03C4)[3]', "~~~~~~~~~~~~~~~'ʹ'"))
-
-data_textFm <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[M]"))
-data_textFmp <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[M]", "~~~~~~~'ʹ'"))
-
-data_textF0 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[O]"))
-
-data_textF <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[]", "~~~~~'ʹ'"))
-
-data_textSig <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('\u03C3[PSII]'))
-data_textSigp <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(80), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c('\u03C3[PSII]', "~~~~~~~~~~~'ʹ'"))
-
-
-Plotaa<-LIFTMeta %>%
-  #filter(Ex_WL==445) %>% 
-  filter(Time_us<1000) %>% 
-  filter(Time_us>0) %>% 
-  ggplot() +
-  geom_point(aes(x = Time_us, y = EM),  colour = "darkblue", alpha = 0.8, size = 2, shape = 1, show.legend = F, LIFTMeta445) +
-  geom_point(aes(x = Time_us, y = EM),  colour = "orange", alpha = 0.8, size = 1.5, shape = 5, show.legend = F, LIFTMeta590) +
-  geom_line(aes(x = Time_us, y = Fit),  colour = "darkblue", alpha = 0.7, size = 0.7, show.legend = F, LIFTMeta445) +
-  geom_line(aes(x = Time_us, y = Fit),  colour = "orange", alpha = 0.7, size = 0.7, show.legend = F, LIFTMeta590) +
-  geom_vline(xintercept = 250, linetype="dashed", col="black", lwd=0.2) +
-  
-  geom_text(data=data_textA, aes(x=-25, y=2000, label=label), size=5.5) +
-  
-  geom_text(data=data_textSat, aes(x=100, y=-140, label=label), size=4.0) +
-  geom_text(data=data_textRel, aes(x=500, y=-140, label=label), size=4.0) +
-  geom_text(data=data_textSat1, aes(x=100, y=-280, label=label), size=4.0) +
-  geom_text(data=data_textRel1, aes(x=500, y=-280, label=label), size=4.0) +
-
-  
-  geom_text(data=data_textTao, aes(x=400, y=200, label=label), size=4.5, parse = TRUE) +
-  geom_text(data=data_textTaop, aes(x=450, y=250, label=label), size=4.5, parse = TRUE) +
-  
-  geom_text(data=data_textFm, aes(x=350, y=480, label=label), size=4.5, parse = TRUE) +
-  geom_text(data=data_textFmp, aes(x=350, y=560, label=label), size=4.5, parse = TRUE) +
-  
-  geom_text(data = data_textF0, aes(x = 10, y = 60, label = label), size = 4.5, parse = TRUE) +
-  geom_text(data = data_textF, aes(x=10, y=110, label=label), size=4.5, parse = TRUE) +
-
-  geom_text(data=data_textSig, aes(x=30, y=420, label=label), size=4.5, parse = TRUE) +
-  geom_text(data=data_textSigp, aes(x=30, y=480, label=label), size=4.5, parse = TRUE) +
-  
-  geom_segment(data = arrowdf1, aes(x = -25, xend = 120, y = 220, yend = 360),
-               colour = "black", size = 0.5, alpha=0.9, arrow = arrow(ends="both", type = "closed", length=unit(0.1, 'cm'))) +
-  geom_segment(data = arrowdf2, aes(x = -25, xend = 120, y = 250, yend = 450),
-               colour = "black", size = 0.5, alpha=0.9, arrow = arrow(ends="both", type = "closed", length=unit(0.1, 'cm'))) +
-
-  geom_segment(data = arrowdf3, aes(x = 250, xend = 500, y = 370, yend = 370),
-               colour = "black", size = 0.5, alpha=0.9, arrow = arrow(type = "closed", length=unit(0.1, 'cm'))) +
-  geom_segment(data = arrowdf4, aes(x = 250, xend = 500, y = 440, yend = 440),
-               colour = "black", size = 0.5, alpha=0.9, arrow = arrow(type = "closed", length=unit(0.1, 'cm'))) +
-
-  labs(y = "Fluorescence yield", x = "Elapsed time (µs)") +
-  ggh4x::facet_nested(cols = vars(facetsActinicPAR, PAR), labeller = label_parsed, scales="free_y") +
-  
-  scale_y_continuous(breaks=seq(0, 2000, by = 500)) +
-  coord_cartesian(ylim = c(-300, 2000)) +
-  
-  # ggh4x::facet_nested(cols = vars(facetsActinicPAR, PAR), rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed, scales="free_y") +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=14),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.position = c(0.12,0.96),
-        legend.key.height= unit(0.005, 'cm'),
-        legend.spacing.x = unit(0.01, 'cm'),
-        legend.text = element_text(size=11))
-Plotaa
-```
-
-
-```{r}
-LIFTMeta %>%
-  #filter(Time_us<1000) %>% 
-  filter(Time_us>0) %>% 
-  ggplot() +
-  #geom_point(aes(x = Time_us, y = EX),  colour = "brown4", alpha = 0.8, size = 1, show.legend = F) +
-  geom_point(aes(x = log(Time_us), y = EM),  colour = "brown1", alpha = 0.8, size = 2, show.legend = F) +
-  geom_line(aes(x = log(Time_us), y = Fit),  colour = "blue", alpha = 0.7, size = 0.7, show.legend = F) +
-    #labs(y = "Fluorescence yield", x = "Elapsed time (µs)") +
-  ggh4x::facet_nested(cols = vars(facetsActinicPAR, PAR), rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed, scales="free_y") +
-  theme_bw() 
-```
-
-```{r}
-#SolFitsMetaLRC$facetsActinicPAR = factor(SolFitsMetaLRC$O2, labels = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"))
-SolFitsMetaLRC$facetsExcitation = factor(SolFitsMetaLRC$WL, labels = c("Excitation~(nm)"))
-```
-
-# Preliminary plot
-
-```{r }
-data_textC <- data.frame(facetsExcitation  = c("Excitation~(nm)"), Ex_WL = c("445"), label = c('C'))
-
-SolFitsMetaLRC %>%  
-  unnest(lrcplatt_Predict) %>% 
-  filter(Strain == "BA48R") %>%
-  filter(Par_ue == 90) %>%
-  filter(Photoperiod == 16) %>%
-  filter(E_days == 7) %>%
-ggplot() +
-  geom_point(aes(ActPARCorr, JVPSII_umol_eLs), colour = "brown1", alpha = 0.8, size = 2, show.legend = F) +
-  geom_line(aes(ActPARCorr, .fitted), colour = "blue", linetype = "solid", size = 0.4) +
-  geom_text(data=data_textC, aes(x=800, y=0.7, label=label), size=4.5) +
-  #labs(y = ""~italic(JV)~""["PSII"]*" ("~10^18~""~e^-~""~L^-1~""~s^-1~")", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
-  labs(y = ""~italic(JV)~""["PSII"]*" (µmol"~e^-~""~L^-1~""~s^-1~")", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
-  ggh4x::facet_nested(rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.position = c(0.12,0.96),
-        legend.key.height= unit(0.005, 'cm'),
-        legend.spacing.x = unit(0.01, 'cm'),
-        legend.text = element_text(size=11))
-
-```
-
-
-
-
-# Again join with ChlTurner for plot only
-
-```{r}
-#colnames(SolFitsMeta)
-
-SolFitsMetaPlot<-SolFitsMeta %>% 
-  select(c(SampleID, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, LightShape, PARPhotonDose_day, Ex_WL, ObsDate, ActPARCorr, E_days, JVPSII_eLs, JVPSII_umol_eLs))
-
-SolTurner <- ChlData %>%
-  full_join(., SolFitsMetaPlot, by = c("SampleID"="SampleID", "ObsDate"="ObsDate")) %>% 
-  drop_na(Strain) %>% 
-  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-         Strain=="BA48R"~"PE-rich_048",
-        Strain=="BA56G"~"PC-rich_056",
-         Strain=="BA77G"~"PC-rich_077")) %>% 
-  filter(Strain=="PC-rich_056" | Strain == "PC-rich_077" | Strain == "PE-rich_048" | Strain == "PE-rich_127")
-  
-```
 
 # Calculate Turner per umol chl
 
 ```{r}
-SolTurner<-SolTurner %>% 
-  mutate(meanTurChl_umolL=meanTurChl_ugL*0.00112)
+# SolTurner<-SolTurner %>% 
+#   mutate(meanTurChl_umolL=meanTurChl_ugL*0.00112)
 ```
 
 
-# Again join with MDPico for plot only
 
-```{r}
-colnames(MDPicoAll)
-MDPicoAllPlot<-MDPicoAll %>% 
-  select(c(SampleID, Run, Strain, ExpDate, Par_ue, Photoperiod, PARPhotonDose_day, O2, WL, LightShape, ObsDate_count, CellmL_MDPico, meanCellmL_MDPico, sdCellmL_MDPico, E_days))
-
-SolTurnerMDPico <- SolTurner %>%
-  left_join(., MDPicoAllPlot, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", 'ExpDate'="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", "PARPhotonDose_day"="PARPhotonDose_day", "O2"="O2", "WL"="WL", "LightShape"="LightShape", "E_days"="E_days")) %>% 
-  drop_na(Strain) 
-```
-# Filter unrevelant columns
-
-```{r}
-colnames(SolTurnerMDPico)
-SolTurnerMDPico<-SolTurnerMDPico %>% 
-  select(-c(TurChl_ugL, sdTurChl_ugL, CellmL_MDPico, sdCellmL_MDPico)) %>% 
-  unique() %>% 
-  mutate(meanCellL_MDPico=meanCellmL_MDPico*1000) %>% 
-  mutate(JVPSII_umol_eLs_Cell=JVPSII_umol_eLs/meanCellL_MDPico) %>% 
-  mutate(JVPSII_umol_eLs_ugChla=JVPSII_umol_eLs/meanTurChl_ugL) %>% 
-  mutate(JVPSII_umol_eLs_umolChla=JVPSII_umol_eLs/meanTurChl_umolL) 
-```
 # Adding facet labels
 
 ```{r}
-SolTurnerMDPico$facetsExcitation = factor(SolTurnerMDPico$WL, labels = c("Excitation~(nm)"))
+#SolTurnerMDPico$facetsExcitation = factor(SolTurnerMDPico$WL, labels = c("Excitation~(nm)"))
 ```
 
-
-```{r warning = FALSE}
-
-SolTurnerMDPico %>%  
-  filter(Strain == "PE-rich_048") %>%
-  filter(Par_ue == 90) %>%
-  filter(Photoperiod == 16) %>%
-  filter(E_days == 7) %>%
-ggplot() +
-  geom_point(aes(ActPARCorr, JVPSII_umol_eLs_Cell), colour = "brown1", alpha = 0.8, size = 2, show.legend = F) +
-  ggh4x::facet_nested(rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed) +
-  theme_bw()
-
-SolTurnerMDPico %>%  
-  filter(Strain == "PE-rich_048") %>%
-  filter(Par_ue == 90) %>%
-  filter(Photoperiod == 16) %>%
-  filter(E_days == 7) %>%
-ggplot() +
-  geom_point(aes(ActPARCorr, JVPSII_umol_eLs_ugChla), colour = "brown1", alpha = 0.8, size = 2, show.legend = F) +
-  ggh4x::facet_nested(rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed) +
-  theme_bw()
-
-SolTurnerMDPico %>%  
-  filter(Strain == "PE-rich_048") %>%
-  filter(Par_ue == 90) %>%
-  filter(Photoperiod == 16) %>%
-  filter(E_days == 7) %>%
-ggplot() +
-  geom_point(aes(ActPARCorr, JVPSII_umol_eLs_umolChla), colour = "brown1", alpha = 0.8, size = 2, show.legend = F) +
-  ggh4x::facet_nested(rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed) +
-  theme_bw()
-```
-
-# Fit LRC for JVPSII to allow selection of specific JVPSII for different growth light levels.
-
-```{r}
-lrcplatt <- function(I, a, b, Pmax){Pmax * (1-exp(-a*I/Pmax)) * exp(-b*I/Pmax)}
-
-colnames(SolTurnerMDPico)
-
-SolTurnerMDPicoLRC <- SolTurnerMDPico %>%
-  drop_na(ObsDate_count) %>% 
-  nest(data = -c("SampleID", "Run", "Strain" ,"ExpDate","Par_ue", "Photoperiod", "O2", "WL","Ex_WL","LightShape",  "PARPhotonDose_day", "ObsDate", "E_days", "facetsExcitation")) %>% 
-  mutate(lrcplatt_Model = map(data, possibly(~nlsLM(JVPSII_umol_eLs_Cell ~ lrcplatt(I = ActPARCorr, a, b, Pmax),
-         data = .x,
-         control = list(maxiter = 100),
-         start = list(a = 0.1, b = 0.01, Pmax = 3), lower = c(0, 0, 0))))) %>%
-  mutate(lrcplatt_Param = map(lrcplatt_Model, tidy),
-         lrcplatt_Predict = map(lrcplatt_Model, possibly(augment)),
-         lrcplatt_Glance = map(lrcplatt_Model, possibly(glance)))
-
-
-SolTurnerMDPicoLRC2 <- SolTurnerMDPico %>%
-  drop_na(ObsDate_count) %>% 
-  nest(data = -c("SampleID", "Run", "Strain" ,"ExpDate","Par_ue", "Photoperiod", "O2", "WL","Ex_WL","LightShape",  "PARPhotonDose_day", "ObsDate", "E_days", "facetsExcitation")) %>% 
-  mutate(lrcplatt_Model = map(data, possibly(~nlsLM(JVPSII_umol_eLs_umolChla ~ lrcplatt(I = ActPARCorr, a, b, Pmax),
-         data = .x,
-         control = list(maxiter = 100),
-         start = list(a = 0.1, b = 0.01, Pmax = 3), lower = c(0, 0, 0))))) %>%
-  mutate(lrcplatt_Param = map(lrcplatt_Model, tidy),
-         lrcplatt_Predict = map(lrcplatt_Model, possibly(augment)),
-         lrcplatt_Glance = map(lrcplatt_Model, possibly(glance)))
-```
-
-# Create preliminary plot - Example
-
-```{r prelim plot}
-SolTurnerMDPicoLRC |> 
-  unnest(lrcplatt_Predict) |>
-  filter(Strain == "PE-rich_048") %>% 
-  filter(Par_ue == 90) %>% 
-  filter(Photoperiod == 16) |>
-ggplot() +
-  geom_point(aes(ActPARCorr, JVPSII_umol_eLs_Cell, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.8, size = 3.5, show.legend = T) +
-  geom_line(aes(ActPARCorr, .fitted), colour = "black", linetype = "dotted") +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, Par_ue, Photoperiod, E_days), labeller = label_parsed) +
-  theme_bw()
-
-
-
-SolTurnerMDPicoLRC2 |> 
-  unnest(lrcplatt_Predict) |>
-  filter(Strain == "PE-rich_048") %>% 
-  filter(Par_ue == 90) %>% 
-  filter(Photoperiod == 16) |>
-ggplot() +
-  geom_point(aes(ActPARCorr, JVPSII_umol_eLs_umolChla, colour = as.factor(Par_ue), shape = as.factor(Photoperiod)), alpha = 0.8, size = 3.5, show.legend = T) +
-  geom_line(aes(ActPARCorr, .fitted), colour = "black", linetype = "dotted") +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, Par_ue, Photoperiod, E_days), labeller = label_parsed) +
-  theme_bw()
-```
-
-# Plot C
-
-```{r fig.height = 4.5, fig.width = 8, warning = FALSE}
-data_textC <- data.frame(facetsExcitation  = c("Excitation~(nm)"), Ex_WL = c("445"), label = c('C'))
-
-PlotC<-SolTurnerMDPicoLRC2 %>%  
-  unnest(lrcplatt_Predict) %>% 
-  filter(Strain == "PE-rich_048") %>%
-  filter(Par_ue == 90) %>%
-  filter(Photoperiod == 16) %>%
-  filter(E_days == 7) %>%
-ggplot() +
-  geom_point(aes(ActPARCorr, JVPSII_umol_eLs_umolChla), colour = "brown1", alpha = 0.8, size = 2, show.legend = F) +
-  geom_line(aes(ActPARCorr, .fitted), colour = "blue", linetype = "solid", size = 0.4) +
-  geom_text(data=data_textC, aes(x=800, y=1, label=label), size=4.5) +
-  #labs(y = ""~italic(JV)~""["PSII"]*" ("~10^18~""~e^-~""~L^-1~""~s^-1~")", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
-  labs(y = ""~italic(JV)~""["PSII"]*" (µmol"~e^-~""~µmol~Chl~italic(a)~""^-1~""~s^-1~")", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
-  
-  ggh4x::facet_nested(rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.position = c(0.12,0.96),
-        legend.key.height= unit(0.005, 'cm'),
-        legend.spacing.x = unit(0.01, 'cm'),
-        legend.text = element_text(size=11))
-PlotC
-```
-
-# Plot C
-
-```{r fig.height = 4.5, fig.width = 8, warning = FALSE}
-data_textC <- data.frame(facetsExcitation  = c("Excitation~(nm)"), Ex_WL = c("445"), label = c('C'))
-
-Plotc<-SolTurnerMDPicoLRC2 %>%  
-  unnest(lrcplatt_Predict) %>% 
-  filter(Ex_WL==445) %>% 
-  filter(Strain == "PE-rich_048") %>%
-  filter(Par_ue == 90) %>%
-  filter(Photoperiod == 16) %>%
-  filter(E_days == 14) %>%
-ggplot() +
-  geom_point(aes(ActPARCorr, JVPSII_umol_eLs_umolChla), colour = "darkblue", shape = 1, alpha = 0.8, size = 2, show.legend = F) +
-  geom_line(aes(ActPARCorr, .fitted), colour = "blue", linetype = "solid", size = 0.4) +
-  geom_text(data=data_textC, aes(x=800, y=0.4, label=label), size=5) +
-  #labs(y = ""~italic(JV)~""["PSII"]*" ("~10^18~""~e^-~""~L^-1~""~s^-1~")", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
-  labs(y = ""~italic(JV)~""["PSII"]*" (µmol"~e^-~""~µmol~Chl~italic(a)~""^-1~""~s^-1~")", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
-  #ggh4x::facet_nested(rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.position = c(0.12,0.96),
-        legend.key.height= unit(0.005, 'cm'),
-        legend.spacing.x = unit(0.01, 'cm'),
-        legend.text = element_text(size=11))
-Plotc
-```
-# Plot C
-
-```{r fig.height = 4.5, fig.width = 8, warning = FALSE}
-data_textC <- data.frame(facetsExcitation  = c("Excitation~(nm)"), Ex_WL = c("445"), label = c('C'))
-
-SolTurnerMDPicoLRC2590<-SolTurnerMDPicoLRC2 %>% 
-  unnest(lrcplatt_Predict) %>% 
-  filter(Strain == "PE-rich_048") %>%
-  filter(Ex_WL==590) %>% 
-  filter(Par_ue == 90) %>%
-  filter(Photoperiod == 16) %>%
-  filter(E_days == 7) 
-  
-Plotcc<-SolTurnerMDPicoLRC2 %>%  
-  unnest(lrcplatt_Predict) %>% 
-  filter(Ex_WL==445) %>% 
-  filter(Strain == "PE-rich_048") %>%
-  filter(Par_ue == 90) %>%
-  filter(Photoperiod == 16) %>%
-  filter(E_days == 14) %>%
-ggplot() +
-  geom_point(aes(ActPARCorr, JVPSII_umol_eLs_umolChla), colour = "darkblue", shape = 1, size = 2, alpha = 0.8, size = 2, show.legend = F) +
-  geom_point(aes(ActPARCorr, JVPSII_umol_eLs_umolChla), colour = "orange", shape = 5, size = 1.5, alpha = 0.8, size = 2, show.legend = F, SolTurnerMDPicoLRC2590) +
-  geom_line(aes(ActPARCorr, .fitted), colour = "darkblue", linetype = "solid", size = 0.4) +
-  geom_line(aes(ActPARCorr, .fitted), colour = "orange", linetype = "solid", size = 0.4, SolTurnerMDPicoLRC2590) +
-  geom_text(data=data_textC, aes(x=0, y=0.8, label=label), size=5.5) +
-  
-  scale_y_continuous(breaks=seq(0, 0.8, by = 0.2)) +
-  coord_cartesian(ylim = c(0, 0.8)) +
-  
-  #labs(y = ""~italic(JV)~""["PSII"]*" ("~10^18~""~e^-~""~L^-1~""~s^-1~")", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
-  labs(y = ""~italic(JV)~""["PSII"]*" (µmol"~e^-~""~µmol~Chl~italic(a)~""^-1~""~s^-1~")", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
-  #ggh4x::facet_nested(rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.position = c(0.12,0.96),
-        legend.key.height= unit(0.005, 'cm'),
-        legend.spacing.x = unit(0.01, 'cm'),
-        legend.text = element_text(size=11))
-Plotcc
-```
-
-
-# Save plot 
-
-```{r save plot}
-#ggsave(file = file.path(FigPath, paste("Fig_LIFT",".png",sep = "")), height=9, width= 7,  dpi = 300, limitsize = TRUE)
-```
-
-
-
-
-
-
-# JVPSII vs eLs
-
-```{r JVPSII calib}
-O2FRRfMetaModels <- read_rds(file.path("..","Data", "CleanedData", "JVPSIIO2Calib", "O2FRRfMetaModels.Rds"))
-
-O2FRRfMetaModels$facetsExcitation <- 'Excitation~(nm)'
-#smarter way to code this with 'which' in [] and map through Ex_WL
-# SolFitsMeta <- left_join(SolFitsMeta, JVPSII_eLs_ModelTerms, by = join_by(Ex_WL)) |>
-#   select(-c(Slope_P)) |>
-#   mutate(JVPSII_eLs = JVPSII_ETRqpOxbo_FoSigmax_m2psii/Slope) |>
-#   mutate(JVPSII_umol_eLs = JVPSII_eLs/6.022e17)
-
-```
-
-# Plot B
-
-```{r JVPSII_e regressions}
-data_textB <- data.frame(facetsExcitation  = c("Excitation~(nm)"), Ex_WL = c("445"), label = c('B'))
-
-scientific_10 <- function(x) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(x))) }
-scientific_10 <- function(y) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(y))) }
-
-PlotB<-O2FRRfMetaModels %>%
-  filter(Ex_WL == 445 | Ex_WL == 590) %>% 
-  unnest(JVPSII_ETRqpOxbo_FoSigmax_m2psii_e_predict) %>%
-  ggplot() +
-  geom_line(aes(x = e_Ls, y = .fitted), colour = "black", linetype = "dashed") +
-  geom_text(data=data_textB, aes(x=2.8e17, y=7.1e22, label=label), size=4.5) +
- #geom_line(aes(x = O2evln_O2ls, y = .fitted + .se.fit), colour = "grey", linetype = "dashed") +
- #geom_line(aes(x = O2evln_O2ls, y = .fitted - .se.fit), colour = "grey", linetype = "dashed") +
-  geom_point(aes(x = e_Ls, y = JVPSII_ETRqpOxbo_FoSigmax_m2psii),colour = "darkgreen") +
-  geom_point(aes(x = e_Ls, y = .resid), colour = "darkred", size = 0.1) +
-  geom_hline(yintercept = 0,linetype = "dashed") +
-  scale_x_continuous(label=scientific_10) +
-  scale_y_continuous(breaks=seq(0, 7.5e22, by = 2.5e22), label=scientific_10) +
-  coord_cartesian(ylim = c(-100, 7.5e22)) +
-  labs(y = "Uncalibrated"~italic(JV)~""["PSII"]*"", x = ""~e^-~""~L^-1~""~s^-1~"") +
-  #labs(y = ""~italic(JV)~""["PSII"]*" ("~e^-~""~L^-1~""~s^-1~")", x = ""~e^-~""~L^-1~""~s^-1~"") +
-  ggh4x::facet_nested(rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.position = c(0.12,0.96),
-        legend.key.height= unit(0.005, 'cm'),
-        legend.spacing.x = unit(0.01, 'cm'),
-        legend.text = element_text(size=11))
-PlotB
-```
-# Plot B
-
-```{r JVPSII_e regressions, fig.height = 4.5, fig.width = 8, warning = FALSE}
-data_textB <- data.frame(facetsExcitation  = c("Excitation~(nm)"), Ex_WL = c("445"), label = c('B'))
-
-scientific_10 <- function(x) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(x))) }
-scientific_10 <- function(y) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(y))) }
-
-Plotb<-O2FRRfMetaModels %>%
-  filter(Ex_WL == 445) %>% 
-  unnest(JVPSII_ETRqpOxbo_FoSigmax_m2psii_e_predict) %>%
-  ggplot() +
-  geom_line(aes(x = e_Ls, y = .fitted), colour = "blue", linetype = "solid") +
-  geom_text(data=data_textB, aes(x=7.5e16, y=2.0e22, label=label), size=5) +
- #geom_line(aes(x = O2evln_O2ls, y = .fitted + .se.fit), colour = "grey", linetype = "dashed") +
- #geom_line(aes(x = O2evln_O2ls, y = .fitted - .se.fit), colour = "grey", linetype = "dashed") +
-  geom_point(aes(x = e_Ls, y = JVPSII_ETRqpOxbo_FoSigmax_m2psii),colour = "darkblue", shape = 1, alpha = 0.8, size = 2.0) +
-  #geom_point(aes(x = e_Ls, y = .resid), colour = "black", size = 0.1) +
-  #geom_hline(yintercept = 0,linetype = "dashed") +
-  scale_x_continuous(label=scientific_10) +
-  scale_y_continuous(breaks=seq(0, 2e22, by = 1e22), label=scientific_10) +
-  coord_cartesian(ylim = c(-100, 2e22)) +
-  labs(y = "Uncalibrated"~italic(JV)~""["PSII"]*"", x = ""~e^-~""~L^-1~""~s^-1~"") +
-  #labs(y = ""~italic(JV)~""["PSII"]*" ("~e^-~""~L^-1~""~s^-1~")", x = ""~e^-~""~L^-1~""~s^-1~"") +
-  #ggh4x::facet_nested(rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.position = c(0.12,0.96),
-        legend.key.height= unit(0.005, 'cm'),
-        legend.spacing.x = unit(0.01, 'cm'),
-        legend.text = element_text(size=11))
-Plotb
-```
-# Plot B
-
-```{r JVPSII_e regressions, fig.height = 4.5, fig.width = 8, warning = FALSE}
-data_textB <- data.frame(facetsExcitation  = c("Excitation~(nm)"), Ex_WL = c("445"), label = c('B'))
-data_textSlope445 <- data.frame(facetsExcitation  = c("Excitation~(nm)"), Ex_WL = c("445"), label = c('Calibration slope = 108832'))
-data_textSlope590 <- data.frame(facetsExcitation  = c("Excitation~(nm)"), Ex_WL = c("445"), label = c('Calibration slope = 254327'))
-
-scientific_10 <- function(x) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(x))) }
-scientific_10 <- function(y) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(y))) }
-
-O2FRRfMetaModels590<-O2FRRfMetaModels %>% 
-  filter(Ex_WL == 590) %>% 
-  unnest(JVPSII_ETRqpOxbo_FoSigmax_m2psii_e_predict) 
-
-
-Plotbb<-O2FRRfMetaModels %>%
-  filter(Ex_WL == 445) %>% 
-  unnest(JVPSII_ETRqpOxbo_FoSigmax_m2psii_e_predict) %>%
-  ggplot() +
-  geom_line(aes(x = e_Ls, y = .fitted), colour = "darkblue", linetype = "solid") +
-  geom_line(aes(x = e_Ls, y = .fitted), colour = "orange", linetype = "solid", O2FRRfMetaModels590) +
-  geom_text(data=data_textB, aes(x=1000000000000, y=8e22, label=label), size=5.5) +
-  geom_text(data=data_textSlope445, aes(x=1.6e17, y=0.7e22, label=label), size=4, colour = "darkblue") +
-  geom_text(data=data_textSlope590, aes(x=7.5e16, y=6e22, label=label), size=4, colour = "orange") +
- #geom_line(aes(x = O2evln_O2ls, y = .fitted + .se.fit), colour = "grey", linetype = "dashed") +
- #geom_line(aes(x = O2evln_O2ls, y = .fitted - .se.fit), colour = "grey", linetype = "dashed") +
-  geom_point(aes(x = e_Ls, y = JVPSII_ETRqpOxbo_FoSigmax_m2psii),colour = "darkblue", shape =1, alpha = 0.8, size = 2.0) +
-  geom_point(aes(x = e_Ls, y = JVPSII_ETRqpOxbo_FoSigmax_m2psii),colour = "orange", shape =5, size = 1.5, alpha = 0.8, size = 2.0, O2FRRfMetaModels590) +
-  # geom_point(aes(x = e_Ls, y = .resid), colour = "darkblue", alpha = 0.8, size = 0.1) +
-  # geom_point(aes(x = e_Ls, y = .resid), colour = "orange", alpha = 0.8, size = 0.1, O2FRRfMetaModels590) +
-  #geom_hline(yintercept = 0,linetype = "dashed") +
-  scale_x_continuous(label=scientific_10) +
-  scale_y_continuous(breaks=seq(0, 8e22, by = 2e22), label=scientific_10) +
-  coord_cartesian(ylim = c(-100, 8e22), xlim = c(0, 2.8e17)) +
-  labs(y = "Uncalibrated"~italic(JV)~""["PSII"]*"", x = ""~e^-~""~L^-1~""~s^-1~"") +
-  #labs(y = ""~italic(JV)~""["PSII"]*" ("~e^-~""~L^-1~""~s^-1~")", x = ""~e^-~""~L^-1~""~s^-1~"") +
-  #ggh4x::facet_nested(rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.position = c(0.12,0.96),
-        legend.key.height= unit(0.005, 'cm'),
-        legend.spacing.x = unit(0.01, 'cm'),
-        legend.text = element_text(size=11))
-Plotbb
-```
-
-```{r, warning = FALSE, fig.height = 9, fig.width = 10}
-ggp<- Plota/(Plotb+Plotc)   
-ggp                           
-```
-# Save plot 
-
-```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_LIFT2",".png",sep = "")), height=9, width= 9.5, dpi = 300, limitsize = TRUE)
-```
-
-
-```{r, warning = FALSE, fig.height = 9, fig.width = 10}
-ggp<- Plotaa/(Plotbb+Plotcc)   
-ggp                           
-```
-
-# Save plot 
-
-```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_LIFT",".png",sep = "")), height=10, width= 9.5,  dpi = 300, limitsize = TRUE)
-```
-
-
-# Merge two plots into one with panel A and B
-
-```{r Final Plot arrange, warning = FALSE, fig.height = 9, fig.width = 8}
-# ggarrange(Plota,Plotb,Plotc,
-#           ncol = 1, nrow = 3) 
-
-
-# ss<-ggarrange(PlotA,PlotB,
-#           ncol = 1, nrow = 2) %>% 
-#   ggsave(file = file.path(FigPath, paste("Fig_LIFT",".png",sep = "")), height=9, width= 7,  dpi = 300, limitsize = TRUE)
-```
-
-
-# Save rds for further analysis
-
-```{r save rds}
-# saveRDS(SolFitsTrimMetaClean, file.path(DataOut, paste(Project, "Imported_SolisenseLight1.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
-# 
-# saveRDS(SolFitsTrimMetaDarkafterLight, file.path(DataOut, paste(Project, "Imported_SolisenseDarkafterLight1.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
-```
-
-# Variable names used in Data Dictionary
-
-```{r}
-# colnames(SolFitsTrimMetaClean)
-```
 
 
 

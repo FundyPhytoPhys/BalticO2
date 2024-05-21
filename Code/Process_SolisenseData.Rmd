@@ -304,13 +304,13 @@ SolFitsMetaLightCorr %>%
 ```
 
 
-# Calculate Sigma mean from 3 replica measured on the same day
+# Calculate "Big" Sigma mean from 3 replica measured on the same day and different days - (data very similar across different days)
 # 6 replica b/c 3 replica * 2 values ("up" and "down")
 
 ```{r calculate Sigma mean from 3 replica measured on the same day}
 SolFitsMetaLightCorr <- SolFitsMetaLightCorr %>%
   filter(E_days>=4) %>% 
-  filter(E_days <=10) %>% 
+  # filter(E_days <=10) %>% 
   group_by(Strain, Ex_WL, Par_ue, Photoperiod, WL, O2) %>%
   
   summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days,
@@ -521,6 +521,17 @@ Make "one big - All" mean to combine all days (divided by Exp and St) and all re
 # saveRDS(Anova_Sig445, file.path(TableRdsPath, paste(Project, "Anova_Sig445.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 ```
 
+------------------------------------------------ MetaData Catalog ------------------------------------------------------
+
+# Read MetaData Catalog
+
+```{r read locally stored metadata from rds}
+CultureCatalog <- readRDS(file = file.path("..", "Data", "ImportedData", "ImportedMetaData", "CultureCatalog.Rds"))
+
+CultureCatalog<-CultureCatalog %>% 
+  select(-c(PrimaryOperator, Temp_c, ExpCul, ExpStartTime, O2_Category, Optode, OptodeCh, OptodeMeasure))
+```
+
 
 ------------------------------------------------------# Add Turner Catalog--------------------------------------------------
 
@@ -543,63 +554,301 @@ ChlData <- ChlData %>%
 
 ```
 
+# Merge Turner with CultureCatalog
+
 ```{r}
-# ChlData <- ChlData %>%  
-#   filter(TurChl_ugL<1500)
+ChlDataMeta <- CultureCatalog %>% 
+  left_join(., ChlData, by = c("SampleID"="SampleID")) %>% 
+    mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
+         Strain=="BA77G"~"PC-rich_077")) 
 ```
 
 
-# Calculate Chl mean from 3 technical replica
+# Calculate Chl mean from 3 technical replica - wierd issue with ObsDate - probably I need to use Turner correlation
 
 ```{r}
-ChlData <- ChlData %>%
-  group_by(SampleID, ObsDate) %>%
-  summarize(SampleID, ObsDate, TurChl_ugL,
+colnames(ChlDataMeta)
+
+ChlDataMeta <- ChlDataMeta %>%
+  group_by(Strain, WL) %>%
+  summarize(SampleID, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, PARPhotonDose_day, ObsDate, TurChl_ugL,
             meanTurChl_ugL = mean(TurChl_ugL),
             sdTurChl_ugL = sd(TurChl_ugL)) %>%
-  ungroup()
+  ungroup() %>% 
+  select(-c(ObsDate))
 ```
+# Create Preliminary plot
+
+```{r preliminary plot}
+ChlDataMeta %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
 
 
 # Merge Sigma with chlorophyll Turner data 
 It is "bigger" df than SolFitsPigmentExp, b/c I have 3 replica for Turner
 
 ```{r}
-SolFitsExpStTurner <- ChlData %>%
-  full_join(., SolFitsMetaLightCorr, by = c("SampleID"="SampleID", "ObsDate"="ObsDate")) %>% 
-  drop_na(Strain)
-```
+SolFitsExpStTurner <- ChlDataMeta %>%
+  full_join(., SolFitsMetaLightCorr, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) 
 
-# Filter only revelant strains
+
+#"ObsDate"="ObsDate"
+```
+# Removed TurChl_ugL b/c I have already mean from 3 technical replica - smaller df
 
 ```{r}
-# SolFitsExpStTurner<-SolFitsExpStTurner %>%   
-#   filter(Strain=="PC-rich_056" | Strain == "PC-rich_077" | Strain == "PE-rich_048" | Strain == "PE-rich_127")
+SolFitsExpStTurner<-SolFitsExpStTurner %>% 
+  select(-c(TurChl_ugL)) %>% 
+  unique()
 ```
 
+# Create Preliminary plot
 
-# Create preliminary JVPSII vs Chl Turner (ug/L) plot
+```{r preliminary plot}
+#colnames(SolFitsExpStTurner)
 
-```{r preliminary plots, warning = FALSE}
-
-SolFitsExpStTurner %>% 
+SolFitsExpStTurner %>%
   ggplot() +
-  geom_point(aes(x = WL, y = JVPSII_ETRqpOxbo_FoSigmax_m2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-  ggh4x::facet_nested(rows = vars(O2), labeller = label_parsed) +
+  geom_point(aes(x = WL, y = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+SolFitsExpStTurner %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = Sig_nm2psii, x = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+SolFitsExpStTurner %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_ETRqpOxbo_FoSigmax_m2psii, x = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
   theme_bw()
 
 ```
 
+
+
+
+--------------------------------------------------- MD Pico --------------------------------------
+
+# IMPORT MD PICO CORRELATION DATA
+
+```{r set project variables, warning = FALSE, echo = FALSE}
+Project <- "BalticO2"
+zip_file <- file.path("..", "Data", "RawData", "MDPico.zip")
+
+# List files in the extracted folder with a ".txt" extension
+CountFiles <- unzip(zip_file, list = TRUE)
+CountFiles <- CountFiles[grepl(".csv$", CountFiles$Name), "Name"]
+print(CountFiles)
+
+FileID <- "ExperimentSummaryData"
+FileEncode <- "UTF-8" 
+HeaderRows <- 0
+DelimCS <- ","
+```
+
+# Read fread_plus function
+
+```{r data read adds filename and cdate, warning=FALSE, message=FALSE, echo=FALSE}
+# Define function to read and process each file
+fread_plus <- function(Flnm, FileEncode, Delim) {
+  con <- unz(zip_file, Flnm)
+  
+  # Read the file using read.table
+  data <- read.table(con, skip = HeaderRows, encoding = FileEncode, sep = Delim, header = TRUE)
+  
+  # Use tryCatch to handle errors during the closing of the connection
+  tryCatch(
+    close(con),
+    error = function(e) {
+      warning("Error closing connection: ", e$message)
+    })
+  
+  data <- data %>%
+    mutate(Filename = Flnm, CDateTime = ymd_hms(file.info(zip_file)$ctime)) 
+  return(data)
+}
+
+# Use map_df to read and process all files in CountFiles
+MDPicoTidy <- CountFiles %>%
+  map_df(~fread_plus(Flnm = ., FileEncode = FileEncode, Delim = DelimCS))
+```
+
+```{r tidy CountTidy}
+
+MDPicoTidy <- MDPicoTidy %>% 
+  select(-c("Concentration", "Group", "Compound", "CDateTime")) %>% # remove superfluous columns
+  mutate(Filename = str_remove(string = Filename, pattern = ".csv")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../MDPico/")) %>%
+  separate(Filename, into = c("ObsDate", "Project", "Initials",  "PlateNr", "IndStud", "Organism", "Count"), sep = "([\\/\\/\\_\\_\\_\\_\\_])", remove = FALSE) %>%
+  select(-c("IndStud", "Organism", "Count")) %>% 
+  mutate(ObsDate = ymd_hm(ObsDate)) 
+
+```
+
+Load MDPicoMetaData catalog
+```{r load local metadatacatalog, message = FALSE, warning = FALSE, echo=FALSE}
+gs4_deauth()
+
+# this is the URL or ID of a Sheet readable by anyone (with a link)
+
+MDPicoMetaData <- read_sheet("https://docs.google.com/spreadsheets/d/1Lerp5u25kzBtaBbnOYElYqUP59cn68gJpxxayhnGdkw/edit#gid=0") %>%
+  #mutate(Date = as.numeric(Date)) %>%
+  mutate(Date = ymd_hm(`Date`)) %>%
+  separate(Date, into = c("Date_count", "Time_count"), sep = " ", remove = FALSE) %>%
+  mutate(Date_count = ymd(`Date_count`)) 
+```
+
+
+# Merge MD Pico and Culture catalog
+
+```{r}
+MDPicoMeta <- MDPicoMetaData %>%
+  left_join(., CultureCatalog, by = c("SampleID" = "SampleID")) %>% 
+      mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
+         Strain=="BA77G"~"PC-rich_077")) 
+```
+
+
+# Merge
+
+```{r}
+MDPicoAll <- MDPicoTidy %>%
+  mutate(PlateNr = as.double(PlateNr)) %>%
+  left_join(., MDPicoMeta, by = c("Well.Name" = "WellNumber", "PlateNr" = "PlateNumber")) %>% 
+  drop_na(Strain)
+```
+
+```{r, warning = FALSE}
+MDPicoAll <- MDPicoAll %>%
+  mutate(culture_inocul_L = as.double(culture_inocul_L)) %>%
+  mutate(CapAreaPercentage = as.double(CapAreaPercentage)) %>%
+
+  mutate(CellmL_MDPico = (`Cell.Count` * (0.001/culture_inocul_L)) /(CapAreaPercentage/100)) %>%
+  # mutate(cellsml = `cellsmlwithoutpercentage`/(CapAreaPercentage/100))
+group_by(SampleID) %>%
+  arrange(Date_count) %>%
+  mutate(E_days = as.numeric((Date_count - ExpDate[1]))) %>%
+ungroup() 
+  
+```
+
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+MDPicoAll %>%
+  ggplot() +
+  geom_point(aes(x = E_days, y = CellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+# Calculate "Big" cell count mean from 3 technical replica - wierd issue with ObsDate_Count - probably I need to use MDPico correlation
+
+```{r}
+#Date_count
+
+MDPicoAll <- MDPicoAll %>%
+  filter(E_days>4) %>% 
+group_by(Strain, WL) %>%
+
+summarize(Well.Name, Cell.Count, Filename, ObsDate, PlateNr, PlateID, SampleID, Date, Date_count, Time_count, media_inocul_L, culture_inocul_L, CapAreaPercentage, Run, Strain, ExpDate, Par_ue, Photoperiod, PARPhotonDose_day, Tube, O2, WL, LightShape, ExpEndDate, E_days, CellmL_MDPico, 
+          meanCellmL_MDPico = mean(CellmL_MDPico), 
+          sdCellmL_MDPico = sd(CellmL_MDPico)) %>%
+ungroup() %>%
+  
+  rename(Cell_Count=Cell.Count) %>% 
+  rename(Well_Name=Well.Name) %>% 
+  rename(MeasDate = ObsDate) %>% 
+  rename(ObsDateTime = Date) %>% 
+  rename(ObsDate_count = Date_count) %>% 
+  rename(ObsTime_count = Time_count) %>% 
+  rename(FilenameMDPico=Filename) 
+```
+
+```{r}
+#colnames(MDPicoAll)
+
+MDPicoAll <- MDPicoAll %>%
+  select(c(Strain, WL, SampleID, Run, ExpDate, Par_ue, Photoperiod, PARPhotonDose_day, O2, meanCellmL_MDPico, sdCellmL_MDPico))
+```
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+MDPicoAll %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+
+# Merge Sigma-Turner with MDPicoData data 
+
+```{r}
+SolFitsExpStTurnerMD <- MDPicoAll %>%
+  full_join(., SolFitsExpStTurner, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) %>% 
+  drop_na(Ex_WL) %>% 
+  unique()
+
+```
+```{r preliminary plot}
+#colnames(SolFitsExpStTurner)
+
+SolFitsExpStTurnerMD %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+SolFitsExpStTurnerMD %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = Sig_nm2psii, x = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+SolFitsExpStTurnerMD %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_ETRqpOxbo_FoSigmax_m2psii, x = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+# Calculate cell per L - for JVPSII
+
+```{r}
+SolFitsExpStTurnerMD<-SolFitsExpStTurnerMD %>% 
+  mutate(meanCellL_MDPico=meanCellmL_MDPico*1000) %>% 
+  mutate(sdCellL_MDPico=sdCellmL_MDPico*1000)
+```
+
+
 # Save Rds for further analysis
 
 ```{r save rds}
-saveRDS(SolFitsExpStTurner, file.path(DataOut, paste(Project, "Processed_SolisenseData.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(SolFitsExpStTurnerMD, file.path(DataOut, paste(Project, "Processed_SolisenseData.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 ```
 
 # Variable names used in Data Dictionary
 
 ```{r}
-colnames(SolFitsExpStTurner)
+colnames(SolFitsExpStTurnerMD)
 ```
 
 

@@ -130,6 +130,9 @@ GrowthRate %>%
 
 ```{r read ProcessFile}
 SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseJVPSII.Rds"
+
+#"../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseData.Rds"
+
 SolisenseFileName <- str_split(string = SolisenseFile, "/")[[1]][3] %>%
   str_remove(pattern = ".Rds")
 

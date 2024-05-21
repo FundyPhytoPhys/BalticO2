@@ -502,7 +502,7 @@ Spectra
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_OlisSpectra",".png",sep = "")), height=5.5, width= 9,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_OlisSpectra",".png",sep = "")), height=5.5, width= 9,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -576,7 +576,8 @@ OLISAllPURTidy %>%
 #colnames(OLISAllPURTidy)
 OLISAllPURTidyChoosen<-OLISAllPURTidy %>% 
   #filter(E_days >=6 & E_days <=10) %>% 
-  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  #filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  filter(E_days >=5) %>% 
   group_by(Strain, Par_ue, WL, O2) %>%
   summarize(SampleID, Run, Strain, ExpDate, Par_ue, Photoperiod, Tube, O2, WL, LightShape, PARPhotonDose_day, PUR, PURPhotonDose_day, E_days, PURPARRatio, Oxygen,
             meanPURPARRatio = mean(PURPARRatio),
@@ -631,7 +632,7 @@ PURPAR
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -680,7 +681,7 @@ OLISAllPURTidyChoosen %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio2",".png",sep = "")), height=8, width= 6,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio2",".png",sep = "")), height=8, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 

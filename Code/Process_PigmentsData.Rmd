@@ -135,8 +135,8 @@ MCPigmentPlot<-rbind(MCPigment1, MCPigment2, MCPigment3)
 rm(MCPigment1, MCPigment2, MCPigment3)
 ```
 
-# I have 24 measurements per pigment per day (b/c number of cells changes every h so pigments per cell changed as well)
-# Choosen only ToD=10 to get only 1 value of pigment (b/c I measured Olis usually at 12pm). 
+# I have many measurements per pigment per day (b/c number of cells changes every h so pigments per cell changed as well)
+# Choosen only ToD=12 to get only 1 value of pigment (b/c I measured Olis usually at 12pm). 
 
 ```{r}
 MCPigmentPlot<-MCPigmentPlot %>%
@@ -248,17 +248,17 @@ MCPigmentPlot %>%
 
 
 
-# Make mean to combine all days (divided by Exp and St) and all replica when samples were measured 
+# Make All big mean to combine all days (from mid exp) and all replica when samples were measured 
 (This give me only one value of Phyco/Chla ratio JVPSII plot and sig plot as well)
 
-# Calculate one "big" mean from Phyco/Chla ratio from all data measured on Exp or St phase 
-# AllmeanPhycoChlaRatio contains max 5 measurements (different days)
+# meanvalue contains max 5 measurements (5 different days)
 
 ```{r calculate Sigma mean from exp phase}
 #E_days, Time_h, caused problem
 
 MCPigmentChoosen<-MCPigment %>%
   filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  #filter(E_days >=5) %>% 
   drop_na(PhycoChlaRatio) %>% 
   group_by(Strain, Par_ue, Photoperiod, WL, O2) %>%
 
@@ -277,6 +277,9 @@ MCPigmentChoosen<-MCPigment %>%
             meanCarChlaRatio = mean(CarChlaRatio),
             sdCarChlaRatio = sd(CarChlaRatio),
             
+            meancellL_OD680 = mean(cellL_OD680),
+            sdcellL_OD680 = sd(cellL_OD680),
+            
             meanPURPARRatio = mean(PURPARRatio),
             sdPURPARRatio = sd(PURPARRatio)) %>%
   ungroup()
@@ -290,7 +293,7 @@ lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 MCPigmentChoosen %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
-  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  #filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   ggplot() +
   geom_point(aes(x = WLNum, y = meanPhycoChlaRatio, colour = as.factor(Strain), shape = as.factor(Strain)),  alpha = 0.8, size = 4, show.legend = T) +
   geom_line(aes(x = WLNum, y = meanPhycoChlaRatio, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
@@ -502,6 +505,14 @@ ggsave(file = file.path(FigPath, paste("Fig_Pigment",".png",sep = "")), height=9
 #rm(MCPigmentPlot)
 ```
 
+```{r}
+# colnames(MCPigmentChoosen2)
+# 
+# MCPigmentChoosen2<-MCPigmentChoosen %>% 
+#   select(-c(Chlapgcell, PURPARRatio, APCugmL, APCpgcell, cellL_OD680, cellmL_OD680_MDPico, PCugmL, PCpgcell, PEPCRatio, PEugmL, PEpgcell, CarugmL, Carpgcell, CarChlaRatio, ChlaugmL, Phycopgcell, PhycoChlaRatio)) %>% 
+#   unique()
+```
+
 
 # Save rds for further analysis
 
@@ -509,6 +520,7 @@ ggsave(file = file.path(FigPath, paste("Fig_Pigment",".png",sep = "")), height=9
 saveRDS(MCPigmentChoosen, file.path(DataOut, paste(Project, "Processed_Pigments.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 
 ```
+
 
 # Variable names used in Data Dictionary
 
