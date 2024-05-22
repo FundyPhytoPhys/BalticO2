@@ -367,11 +367,178 @@ SolFitsMetaLightCorr %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_SigCorr",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_SigCorr",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
+```
+
+
+
+------------------------------# Support Vector regression---------------------------------------------------
+
+https://www.geeksforgeeks.org/support-vector-regression-svr-using-linear-and-non-linear-kernels-in-scikit-learn/
+
+https://minimatech.org/non-linear-regression-with-r/
+
+# Support Vector regression
+
+```{r libraries}
+
+library(zoo)
+library(e1071)
+library(gcookbook)  # Load gcookbook for the uspopage data set
+
+```
+
+```{r}
+MCDataHourSVR <- SolFitsMetaLightCorr %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") 
+
+# Function to train an SVM model and make predictions
+train_and_predict_svm <- function(data) {
+  svr_model <- svm(meanSig_nm2psii ~ WLNum, data = data, kernel = 'radial',
+                   cost = 5, gamma = 10)
+  data$svr_pred <- predict(svr_model, data)
+  return(data)
+}
+
+# Group by Tube, train SVM model, and make predictions within each group
+MCDataHourSVR <- MCDataHourSVR %>%
+  group_by(Strain, O2, Oxygen) %>%
+  nest() %>%
+  mutate(data = map(data, train_and_predict_svm)) %>%
+  unnest(data) %>%
+  ungroup()
+
+# Calculate the root mean squared error for each group
+RMSE_by_Tube <- MCDataHourSVR %>%
+  group_by(Strain, O2, Oxygen) %>%
+  summarise(RMSE = sqrt(mean((meanSig_nm2psii - svr_pred)^2)))
+
+```
+
+
+```{r}
+MCDataHourSVR %>%
+
+  ggplot() +
+  geom_point(aes(x = WLNum, y = meanSig_nm2psii), alpha = 0.4) +
+  geom_line(aes(x = WLNum, y = svr_pred, color = 'SVR_radial')) +
+  geom_line(aes(x = WLNum, y = meanSig_nm2psii)) +
+
+  facet_grid(rows = vars(Strain), cols = vars (O2)) +
+  theme_bw()
+```
+# Create preliminary plots 
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+
+SolFitsMetaLightCorr %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  # filter(ActPAR== 80) %>%
+  #filter(E_days>=4) %>% 
+  ggplot() +
+  
+    geom_point(aes(x = WLNum, y = meanSig_nm2psii, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
+    # geom_line(aes(x = WLNum, y = meanSig_nm2psii, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
+  
+    geom_errorbar(aes(x = WLNum, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+    geom_line(aes(x = WLNum, y = svr_pred, colour = as.factor(Strain), linetype = as.factor(Strain)), size = 0.6, MCDataHourSVR) +
+     
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.1, alpha = 0.5) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+
+```
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_SigCorr",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
 # Create preliminary plots 
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+
+SolFitsMetaLightCorr %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  # filter(ActPAR== 80) %>%
+  #filter(E_days>=4) %>% 
+  ggplot() +
+  
+    geom_point(aes(x = WLNum, y = meanSig_nm2psii, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
+    # geom_line(aes(x = WLNum, y = meanSig_nm2psii, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
+  
+    geom_errorbar(aes(x = WLNum, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+    geom_line(aes(x = WLNum, y = svr_pred, colour = as.factor(Strain), linetype = as.factor(Strain)), size = 0.6, MCDataHourSVR) +
+     
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.1, alpha = 0.5) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  
+  scale_fill_identity() +
+  coord_flip()+
+  
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(cols = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.35,0.20),
+        legend.text = element_text(size=10))
+
+```
+
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_SigCorr2",".png",sep = "")), height=6, width= 7,  dpi = 300, limitsize = TRUE)
+```
+
+-----------------------------------------------------------------------------------------------------------------
+
+# Create preliminary plots for sig in the dark
 
 ```{r preliminary plot}
 lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
