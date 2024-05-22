@@ -33,6 +33,8 @@ Process_SolisenseDataLRC.Rmd process BalticPhotoperiod_Imported_SolisenseLight_L
 # Load Libraries
 
 ```{r load libraries, warning = FALSE, echo=FALSE} 
+library(ggspectra)
+library(photobiologyWavebands)
 library(ggtext)
 library(tidyverse)
 library(broom)
@@ -252,6 +254,29 @@ saveRDS(SolFitsMetaLRCGrowth, file.path(DataOut, paste(Project, "SolFitsMetaLRCG
 
 XXXXDoug Stopped JVPSII_umol_eLs calibratedXXX
 
+# Choosen corresponding Ex_WL
+
+```{r}
+SolFitsMetaLightCorr1<-SolFitsMetaLRCGrowth %>% 
+  filter(WL== 405 | WL == 450) %>% 
+  filter(Ex_WL == 445)
+
+SolFitsMetaLightCorr2<-SolFitsMetaLRCGrowth %>% 
+  filter(WL== 470) %>% 
+  filter(Ex_WL == 470)
+  
+SolFitsMetaLightCorr3<-SolFitsMetaLRCGrowth %>% 
+  filter(WL== 530) %>% 
+  filter(Ex_WL == 535)
+
+SolFitsMetaLightCorr4<-SolFitsMetaLRCGrowth %>% 
+  filter(WL== 620 | WL== 660 | WL == 730) %>% 
+  filter(Ex_WL == 590)
+
+SolFitsMetaLRCGrowthCorr<-rbind(SolFitsMetaLightCorr1, SolFitsMetaLightCorr2, SolFitsMetaLightCorr3, SolFitsMetaLightCorr4)
+  rm(SolFitsMetaLightCorr1, SolFitsMetaLightCorr2, SolFitsMetaLightCorr3, SolFitsMetaLightCorr4)
+```
+
 
 ------------------------------------------------------# Add Turner Catalog--------------------------------------------------
 
@@ -312,9 +337,11 @@ ChlDataMeta %>%
 # Merge JVPSII with chlorophyll Turner data 
 It is "bigger" df b/c I have 3 replica for Turner
 
+#SolFitsMetaLRCGrowthCorr or SolFitsMetaLRCGrowth
+
 ```{r}
 SolFitsExpStTurner <- ChlDataMeta %>%
-  full_join(., SolFitsMetaLRCGrowth, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) 
+  full_join(., SolFitsMetaLRCGrowthCorr, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) 
 
 #"ObsDate"="ObsDate"
 ```
@@ -613,7 +640,7 @@ SolFitsExpStTurnerMD %>%
   ggplot() +
   geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
   scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() 
 
 SolFitsExpStTurnerMD %>%
@@ -621,7 +648,7 @@ SolFitsExpStTurnerMD %>%
   ggplot() +
   geom_point(aes(x = meanTurChl_ugL, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
   scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() 
 
 SolFitsExpStTurnerMD %>%
@@ -629,7 +656,7 @@ SolFitsExpStTurnerMD %>%
   ggplot() +
   geom_point(aes(x = meanCellmL_MDPico, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
   scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() 
 ```
 
