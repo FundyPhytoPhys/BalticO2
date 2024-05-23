@@ -681,37 +681,6 @@ GrowthRateSol445590 <- GrowthRate %>%
 ```
 
 
-# Growth rate vs JVPSII
-
-```{r warning = FALSE}
-lab1=c(expression("PC-rich"), expression("PE-rich"))
-lab2=c(expression("2.5 µM"), expression("250 µM"))
-
-GrowthRateSol445590 %>%
-    filter(WL != "WW") %>%
-  ggplot() +
-  geom_point(aes(x = JVPSII_umol_eLs_Par_ue, y = deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
-  geom_line(aes(x = JVPSII_umol_eLs_Par_ue, y = deltaOD_Lmu_corr, colour = as.factor(Strain), linetype = as.factor(Strain)),  alpha = 0.8, show.legend = F) +
-  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
-  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
-  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
-  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
-  theme_bw()
-
-
-GrowthRateSol445590 %>%
-    filter(WL != "WW") %>%
-  ggplot() +
-  geom_point(aes(x = JVPSII_umol_eLs_Par_ue, y = deltaOD_Lmu_corr, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = F) +
-  geom_line(aes(x = JVPSII_umol_eLs_Par_ue, y = deltaOD_Lmu_corr, linetype = as.factor(O2)),  alpha = 0.8,  show.legend = T) +
-  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
-  scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
-  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
-  theme_bw()
-
-```
-
 
 # Calculate umol chl a
 
@@ -902,7 +871,7 @@ ggplot() +
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_GrowthRate_JVPSII_Chla445590_2",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+# ggsave(file = file.path(FigPath, paste("Fig_GrowthRate_JVPSII_Chla445590_2",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
