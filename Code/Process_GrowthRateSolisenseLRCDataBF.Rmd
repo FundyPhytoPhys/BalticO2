@@ -619,16 +619,6 @@ ggsave(file = file.path(FigPath, paste("Fig_GrowthRate_JVPSII_ChlaCorr",".png",s
 
 
 
-
-
-
-
-
-
-
-
-
-
 -------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------ Chl and Phyco 445 and 590 ------------------------------------------
 --------------------------------------------------------------------------------------------------------------------
@@ -749,7 +739,7 @@ MCGrowthJVPSIISPmean445590<-GrowthRateSoliExpDay445590 %>%
   # drop_na(JVPSII_umol_eLs_Par_ue_cell_day) %>%
   # select(c(Strain, Par_ue, Photoperiod, O2, Oxygen, WL, Ex_WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, JVPSII_umol_eLs_HalfPar_ue_cell_day)) %>% 
   
-  group_by(Strain, O2, WL) %>%
+  group_by(Strain, O2, WL, Ex_WL) %>%
   summarize(Strain, Par_ue, Photoperiod, O2, Oxygen, WL, Ex_WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, 
     
             meanJVPSII_umol_eLs_Par_ue_ugChl_day = mean(JVPSII_umol_eLs_Par_ue_ugChl_day),
@@ -784,7 +774,7 @@ ggplot() +
   scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
   scale_x_continuous(label=scientific_10) +
-  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
@@ -817,7 +807,7 @@ ggplot() +
   scale_shape_manual(values = c(15, 16, 17, 18, 3,4,8), name="", labels = lab3) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   scale_x_continuous(label=scientific_10) +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
@@ -849,7 +839,7 @@ ggplot() +
   scale_shape_manual(values = c(15, 16, 17, 18, 3,4,8), name="", labels = lab3) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   scale_x_continuous(label=scientific_10) +
-  ggh4x::facet_nested(rows = vars(O2, Strain), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(O2, Strain), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
@@ -959,7 +949,7 @@ ggplot() +
   scale_shape_manual(values = c(15, 16, 17, 18, 3,4,8), name="", labels = lab3) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   scale_x_continuous(label=scientific_10) +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
@@ -1000,7 +990,7 @@ ggplot() +
   scale_shape_manual(values = c(15, 16, 17, 18, 3,4,8), name="", labels = lab3) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   scale_x_continuous(label=scientific_10) +
-  ggh4x::facet_nested(rows = vars(O2, Strain), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(O2, Strain), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
