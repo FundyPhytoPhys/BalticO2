@@ -416,7 +416,7 @@ SolFitsMeta %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_Sig",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_Sig",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -462,7 +462,7 @@ SolFitsMeta %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_Sig2",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_Sig2",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
 ```
 
 ```{r preliminary plot}
@@ -506,7 +506,7 @@ SolFitsMeta %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_UncalibJVPSII",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_UncalibJVPSII",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
 ```
 
 

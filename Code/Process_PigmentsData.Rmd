@@ -105,7 +105,10 @@ MCPigment[MCPigment < 0] <- 0
 ```{r Calculate pigments per L}
 MCPigment <- MCPigment %>%
   mutate(cellL_OD680=cellmL_OD680_MDPico*1000) %>% 
-  mutate(PURPARRatio = PUR/Par_ue)
+  mutate(PURPARRatio = PUR/Par_ue) %>% 
+  
+  mutate(Oxygen=case_when(O2==21~"250~µM",
+         O2==0~"2.5~µM"))
   # mutate(ChlaugL = ChlaugmL*1000) 
 ```
 
@@ -197,22 +200,7 @@ MCPigmentRatioPlot %>%
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
   labs(y = "Pigment ratio", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(cols = vars(factor(PigmentsRatioName, levels=c("Total~Phyco/Chl~italic(a)~ratio","Car/Chl~italic(a)~ratio"))), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.10,0.90),
-        legend.text = element_text(size=10))
+  theme_bw() 
 
 
 MCPigmentPlot %>%
@@ -227,22 +215,7 @@ MCPigmentPlot %>%
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
   labs(y = "Pigment content " ~ "(pg"~cell^-1~")", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(cols = vars(factor(PigmentsName, levels=c("Chlorophyll~italic(a)","Total~phycobilins", "Carotenoids"))), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.10,0.90),
-        legend.text = element_text(size=10))
+  theme_bw() 
 
 ```
 
@@ -264,6 +237,9 @@ MCPigmentChoosen<-MCPigment %>%
 
   summarize(SampleID, ToD, Run, Strain, ExpDate, FilenameMC, Tube, Par_ue, Photoperiod, O2, WL, MC, LightShape, ExpEndDate, meanActinic_par_h, meanOD680_h, meanOD720_h, meanDeltaOD_h, facetsPar_ue, facetsPhotoperiod, cellmL_OD680_MDPico, PARPhotonDose_day, PUR, PURPhotonDose_day, ChlaugmL, CarugmL, PEugmL, PCugmL, APCugmL, Chlapgcell, Carpgcell, PEpgcell, PCpgcell, APCpgcell, Phycopgcell, CarChlaRatio, PhycoChlaRatio, PEPCRatio, cellL_OD680, PURPARRatio, E_days, Oxygen,
 
+            
+            meanPUR = mean(PUR),
+            sdPUR = sd(PUR),
             
             meanChlapgcell = mean(Chlapgcell),
             sdChlapgcell = sd(Chlapgcell),
@@ -309,23 +285,7 @@ MCPigmentChoosen %>%
   scale_fill_identity() +
   labs(y = "Phycobilin to Chl a ratio (µg:µg)", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.10,0.90),
-        legend.text = element_text(size=10))
-
+  theme_bw() 
 ```
 # Save plot 
 
@@ -401,21 +361,14 @@ rm(MCPigmentRatio1, MCPigmentRatio2)
 ```{r}
 MCPigmentChoosenPlot<-MCPigmentChoosenPlot %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  filter(WL != "WW") %>% 
-  mutate(Oxygen=case_when(O2==21~"250~µM",
-         O2==0~"2.5~µM"))
+  filter(WL != "WW") 
 
-MCPigmentChoosenPlot<-MCPigmentChoosenPlot %>% 
-  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  filter(WL != "WW") %>% 
-  mutate(Oxygen=case_when(O2==21~"250~µM",
-         O2==0~"2.5~µM"))
 ```
 
 ```{r}
-MCPigmentChoosenPlot<-MCPigmentChoosenPlot %>% 
-  mutate(Strain=case_when(Strain=="PE-rich_127"~"PE-rich",
-         Strain=="PC-rich_077"~"PC-rich"))
+# MCPigmentChoosenPlot<-MCPigmentChoosenPlot %>% 
+#   mutate(Strain=case_when(Strain=="PE-rich_127"~"PE-rich",
+#          Strain=="PC-rich_077"~"PC-rich"))
 ```
 
 
@@ -424,7 +377,7 @@ MCPigmentChoosenPlot<-MCPigmentChoosenPlot %>%
 ```{r preliminary plot}
 lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
-A<-MCPigmentChoosenPlot %>%
+MCPigmentChoosenPlot %>%
   filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   ggplot() +
   geom_point(aes(x = WLNum, y = meanPigmentsRatio, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
@@ -439,25 +392,10 @@ A<-MCPigmentChoosenPlot %>%
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
   labs(y = "Pigment ratio (µg:µg)", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(cols = vars(factor(PigmentsRatioName, levels=c("Phycobilins:Chlorophyll~italic(a)","Carotenoids:Chlorophyll~italic(a)"))), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.10,0.90),
-        legend.text = element_text(size=10))
-A
+  theme_bw() 
 
-B<-MCPigmentChoosenPlot %>%
+
+MCPigmentChoosenPlot %>%
   filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   ggplot() +
   geom_point(aes(x = WLNum, y = meanPigmentspgcell, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
@@ -472,23 +410,8 @@ B<-MCPigmentChoosenPlot %>%
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
   labs(y = "Pigment content " ~ "(pg"~cell^-1~")", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(cols = vars(factor(PigmentsName, levels=c("Chlorophyll~italic(a)","Phycobilins", "Carotenoids"))), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.10,0.90),
-        legend.text = element_text(size=10))
-B
+  theme_bw() 
+
 ```
 #Create preliminary plot
 
@@ -760,26 +683,6 @@ ggsave(file = file.path(FigPath, paste("Fig_Pigment",".png",sep = "")), height=9
 
 
 
-
-
-
-
-
-
-
-# Cleaning df before saving as Rds and removed unnecessary files from the environment
-
-```{r Cleaning the environment}
-#rm(MCPigmentPlot)
-```
-
-```{r}
-# colnames(MCPigmentChoosen2)
-# 
-# MCPigmentChoosen2<-MCPigmentChoosen %>% 
-#   select(-c(Chlapgcell, PURPARRatio, APCugmL, APCpgcell, cellL_OD680, cellmL_OD680_MDPico, PCugmL, PCpgcell, PEPCRatio, PEugmL, PEpgcell, CarugmL, Carpgcell, CarChlaRatio, ChlaugmL, Phycopgcell, PhycoChlaRatio)) %>% 
-#   unique()
-```
 
 
 # Save rds for further analysis

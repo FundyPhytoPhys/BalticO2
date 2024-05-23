@@ -113,8 +113,8 @@ MultiCultiDataAll$facetsPar_ue = factor(MultiCultiDataAll$O2, labels = c("PAR~(�
 MultiCultiDataAll$facetsPhotoperiod = factor(MultiCultiDataAll$WL, labels = c("Photoperiod~(h)"))
 
 MultiCultiDataAll <- MultiCultiDataAll %>% 
-    mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-         Strain=="BA77G"~"PC-rich_077")) %>% 
+    mutate(Strain=case_when(Strain=="BA127R"~"PE-rich",
+         Strain=="BA77G"~"PC-rich")) %>% 
     mutate(Oxygen=case_when(O2==21~"250~µM",
          O2==0~"2.5~µM"))
 ```
@@ -160,7 +160,7 @@ OD680
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_OD680",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_OD680",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -204,7 +204,7 @@ ODDelta
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_Delta",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_Delta",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -247,7 +247,7 @@ OD720
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_OD720",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_OD720",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
 ```
 
 -------------------------------------------------------------------------------------------------------------------
@@ -259,7 +259,7 @@ ggp
 ```
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_OD680720",".png",sep = "")), height=9, width= 12,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_OD680720",".png",sep = "")), height=9, width= 12,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -305,8 +305,8 @@ MultiCultiGrowth<-MultiCultiGrowth %>%
   dplyr::select(c(Tube, ExpDate, MC, Run, SampleID, Strain, Par_ue, Photoperiod, WL, O2, LightShape, PARPhotonDose_day, OD720_Lmu_se, OD720_Lmu_corr, deltaOD_Lmu_se, deltaOD_Lmu_corr, tubedata, deltaOD_logistic_predict))
 
 MCGrowthRate<-MultiCultiGrowth %>% 
-  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-         Strain=="BA77G"~"PC-rich_077"))
+  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich",
+         Strain=="BA77G"~"PC-rich"))
 
 ```
 
@@ -447,8 +447,8 @@ MultiCultiGrowth<-MCDataAllFit %>%
 
 
 MultiCultiGrowth<-MultiCultiGrowth %>% 
-  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
-         Strain=="BA77G"~"PC-rich_077"))
+  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich",
+         Strain=="BA77G"~"PC-rich"))
 
 MCGrowthRate<-MultiCultiGrowth 
 

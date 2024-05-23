@@ -728,6 +728,9 @@ OLISAllPURTidyChoosen<-OLISAllPURTidy %>%
   filter(E_days >=5) %>% 
   group_by(Strain, Par_ue, WL, O2) %>%
   summarize(SampleID, Run, Strain, ExpDate, Par_ue, Photoperiod, Tube, O2, WL, LightShape, PARPhotonDose_day, PUR, PURPhotonDose_day, E_days, PURPARRatio, Oxygen,
+            
+            meanPUR = mean(PUR),
+            sdPUR = sd(PUR),
             meanPURPARRatio = mean(PURPARRatio),
             sdPURPARRatio = sd(PURPARRatio)) %>%
   ungroup()
