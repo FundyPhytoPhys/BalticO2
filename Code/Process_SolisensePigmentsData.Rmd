@@ -84,6 +84,7 @@ SolFits <- readRDS(SolisenseFile)  %>%
 ```
 
 
+
 # Sig per phyco/chla ratio
 
 Issue - not always pigment based on Olis correspond to Solisense data-> I choose the time (range) that pigments correspond to Sig measurements (for exp and st phase separately). Max 5 measurements for pigments. Then I made a mean for pigments to get one value.
@@ -166,6 +167,14 @@ SolFitsPigmentExp <- SolFits %>%
   full_join(., MCPigmentAll, by = c("SampleID" = "SampleID", "Strain"="Strain", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", "Run"="Run", "WL"="WL", "O2"="O2", "PARPhotonDose_day"="PARPhotonDose_day", "ExpDate"="ExpDate", "Oxygen"="Oxygen")) 
 
 ```
+
+```{r}
+SolFitsPigmentExp<-SolFitsPigmentExp %>% 
+  mutate(Strain=case_when(Strain=="PE-rich_127"~"PE-rich",
+         Strain=="PC-rich_077"~"PC-rich"))
+```
+
+
 # make smaller df
 
 ```{r}
@@ -198,11 +207,16 @@ SolFitsPigmentExpChoose %>%
 # Create preliminary plots
 
 ```{r preliminary plots}
-lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+lab3=c(expression("450"), expression("470"), expression("530"), expression("620"))
 
 SolFitsPigmentExpChoose %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
+    filter(WL != 405) %>%
+    filter(WL != 660) %>%
+    filter(WL != 730) %>%
   ggplot() +
   #geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
   
@@ -237,39 +251,154 @@ SolFitsPigmentExpChoose %>%
         legend.position = c(0.10,0.90),
         legend.text = element_text(size=10))
 
+
+
+
+
+SolFitsPigmentExpChoose %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+    filter(WL != 405) %>%
+    filter(WL != 660) %>%
+    filter(WL != 730) %>%
+  ggplot() +
+
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain), shape = as.factor(WL)), size = 4, show.legend = T) +
+  geom_line(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, linetype = as.factor(O2)), show.legend = T) +
+  geom_errorbar(aes(x = meanPhycoChlaRatio, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab3) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Phycobiliprotein to Chl" ~italic(a)~ "ratio (µg:µg)") +
+  #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.78),
+        legend.text = element_text(size=10))
+
+
 ```
 
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_SigPig",".png",sep = "")), height=4, width= 6,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("Fig_SigPigCorr",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------ Chl and Phyco 445 and 590 ------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------
+
+```{r read ProcessFile Sol}
+SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseData.Rds"
+
+SolisenseFileName <- str_split(string = SolisenseFile, "/")[[1]][3] %>%
+  str_remove(pattern = ".Rds")
+
+SolFits <- readRDS(SolisenseFile)  %>%
+  ungroup()
+```
+
+```{r}
+SolFitsMetaLightCorr1<-SolFits %>% 
+  filter(Ex_WL == 445)
+
+SolFitsMetaLightCorr2<-SolFits %>% 
+  filter(Ex_WL == 590)
+
+SolFits445590<-rbind(SolFitsMetaLightCorr1, SolFitsMetaLightCorr2)
+  rm(SolFitsMetaLightCorr1, SolFitsMetaLightCorr2)
+  
+```
+
+
+# Merge Solisense data with Pigment data
+
+```{r Joining Solisense and pig data}
+
+# MCPigmentAll<-MCPigmentAll %>% 
+#   select(-c(E_days))
+
+SolFitsPigmentExp445590 <- SolFits445590 %>% 
+  full_join(., MCPigmentAll, by = c("SampleID" = "SampleID", "Strain"="Strain", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", "Run"="Run", "WL"="WL", "O2"="O2", "PARPhotonDose_day"="PARPhotonDose_day", "ExpDate"="ExpDate", "Oxygen"="Oxygen")) 
+
+```
+
+```{r}
+SolFitsPigmentExp445590<-SolFitsPigmentExp445590 %>% 
+  mutate(Strain=case_when(Strain=="PE-rich_127"~"PE-rich",
+         Strain=="PC-rich_077"~"PC-rich"))
+```
+
+
+# make smaller df
+
+```{r}
+#colnames(SolFitsPigmentExpChoose)
+
+SolFitsPigmentExp445590Choose<-SolFitsPigmentExp445590 %>% 
+  select(-c(ToD, MC, ExpEndDate, ChlaugmL, CarugmL, PEugmL, PCugmL, APCugmL, Chlapgcell, Carpgcell, PEpgcell, PCpgcell, APCpgcell, Phycopgcell, CarChlaRatio, PhycoChlaRatio, PEPCRatio, cellL_OD680, cellmL_OD680_MDPico, PURPARRatio, FilenameMC, FilenameSolisense, facetsPar_ue, facetsPhotoperiod, PUR, meanOD680_h, meanOD720_h, meanDeltaOD_h, meanActinic_par_h)) %>% 
+  unique()
+```
+
+
+```{r preliminary plots}
+SolFitsPigmentExp445590 %>% 
+  ggplot() +
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+SolFitsPigmentExp445590Choose %>% 
+  ggplot() +
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+```
 
 # Create preliminary plots
 
 ```{r preliminary plots}
-lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
 
-SolFitsPigmentExpChoose %>% 
+SolFitsPigmentExp445590Choose %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
+  drop_na(meanPhycoChlaRatio) %>% 
+  drop_na(meanSig_nm2psii) %>% 
   ggplot() +
   #geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
   
-  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 4, show.legend = F) +
   #geom_line(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
   geom_errorbar(aes(x = meanPhycoChlaRatio, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   
   # stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   # scale_fill_identity() +
-  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
-  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
-  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Phycobiliprotein to Chl" ~italic(a)~ "ratio (µg:µg)") +
+  
+    ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
   #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
-  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  # ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
    #ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   
   theme_bw() +
@@ -289,16 +418,60 @@ SolFitsPigmentExpChoose %>%
         legend.position = c(0.10,0.90),
         legend.text = element_text(size=10))
 
+
+
+
+
+SolFitsPigmentExp445590Choose %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  drop_na(meanPhycoChlaRatio) %>% 
+  drop_na(meanSig_nm2psii) %>% 
+  ggplot() +
+
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 4, show.legend = F) +
+  geom_line(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, linetype = as.factor(O2)), show.legend = T) +
+  geom_errorbar(aes(x = meanPhycoChlaRatio, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Phycobiliprotein to Chl" ~italic(a)~ "ratio (µg:µg)") +
+  #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+
+
 ```
-# Save plot 
-
-```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_SigPig2",".png",sep = "")), height=4, width= 6,  dpi = 300, limitsize = TRUE)
-```
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------
 
 # Linear fit per par_ue
 
