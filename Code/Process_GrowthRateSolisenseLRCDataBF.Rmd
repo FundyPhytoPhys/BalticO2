@@ -150,10 +150,16 @@ GrowthRate %>%
 
 ```
 
+
+-------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------ Chl and Phyco 445 and 590 ------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
 # Already contain data from corresponding Par_ue and Ex_WL
 
 ```{r read ProcessFile}
-SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseJVPSII.Rds"
+SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseJVPSIICorr.Rds"
 
 #"../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseData.Rds"
 
@@ -163,8 +169,6 @@ SolisenseFileName <- str_split(string = SolisenseFile, "/")[[1]][3] %>%
 Solisense <- readRDS(SolisenseFile)  %>%
   ungroup()
 ```
-
-
 
 
 # Clean df
@@ -189,8 +193,6 @@ Solisense<-Solisense %>%
   mutate(Strain=case_when(Strain=="PE-rich_127"~"PE-rich",
          Strain=="PC-rich_077"~"PC-rich"))
 ```
-
-
 
 
 # Create preliminary plot
@@ -290,8 +292,6 @@ GrowthRateSol %>%
 GrowthRateSol<-GrowthRateSol %>%
   mutate(meanTurChl_umolL=meanTurChl_ugL*0.00112)
 ```
-
-
 
 
 JVPSII per Turner Chl ug/L and per cell/L (meanCellmL_MDPico; meanTurChl_ugL)
@@ -616,6 +616,451 @@ ggsave(file = file.path(FigPath, paste("Fig_GrowthRate_JVPSII_ChlaCorr",".png",s
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------ Chl and Phyco 445 and 590 ------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+# Already contain data from corresponding Par_ue and Ex_WL
+
+```{r read ProcessFile}
+SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseJVPSII445590.Rds"
+
+#"../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseData.Rds"
+
+SolisenseFileName <- str_split(string = SolisenseFile, "/")[[1]][3] %>%
+  str_remove(pattern = ".Rds")
+
+Solisense <- readRDS(SolisenseFile)  %>%
+  ungroup()
+```
+
+
+# Clean df
+
+```{r}
+colnames(Solisense)
+Solisense<-Solisense %>%
+  select(-c(meanCellmL_MDPico, sdCellmL_MDPico, MC, Tube, LightShape, ExpEndDate, data, lrcplatt_Model, estimate_a, estimate_b, estimate_Pmax, std.error_a, std.error_b, std.error_Pmax)) %>% 
+  unique()
+```
+
+# Adding facets labels
+
+```{r}
+Solisense<-Solisense %>%
+  mutate(Oxygen=case_when(O2==21~"250~µM",
+         O2==0~"2.5~µM"))
+```
+
+```{r}
+# Solisense<-Solisense %>%
+#   mutate(Strain=case_when(Strain=="PE-rich_127"~"PE-rich",
+#          Strain=="PC-rich_077"~"PC-rich"))
+```
+
+
+
+```{r Joining growth rate and Solisense exp data}
+GrowthRateSol445590 <- GrowthRate %>% 
+  full_join(., Solisense, by = c("Strain"="Strain", "Par_ue"="Par_ue","Photoperiod"="Photoperiod",  "O2"="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day", "Oxygen"="Oxygen", "SampleID"="SampleID", "Run"="Run", "ExpDate"="ExpDate")) %>% 
+    unique()
+```
+
+
+# Growth rate vs JVPSII
+
+```{r warning = FALSE}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+GrowthRateSol445590 %>%
+    filter(WL != "WW") %>%
+  ggplot() +
+  geom_point(aes(x = JVPSII_umol_eLs_Par_ue, y = deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+  geom_line(aes(x = JVPSII_umol_eLs_Par_ue, y = deltaOD_Lmu_corr, colour = as.factor(Strain), linetype = as.factor(Strain)),  alpha = 0.8, show.legend = F) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw()
+
+
+GrowthRateSol445590 %>%
+    filter(WL != "WW") %>%
+  ggplot() +
+  geom_point(aes(x = JVPSII_umol_eLs_Par_ue, y = deltaOD_Lmu_corr, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = F) +
+  geom_line(aes(x = JVPSII_umol_eLs_Par_ue, y = deltaOD_Lmu_corr, linetype = as.factor(O2)),  alpha = 0.8,  show.legend = T) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+```
+
+
+# Calculate umol chl a
+
+```{r}
+GrowthRateSol445590<-GrowthRateSol445590 %>%
+  mutate(meanTurChl_umolL=meanTurChl_ugL*0.00112)
+```
+
+
+JVPSII per Turner Chl ug/L and per cell/L (meanCellmL_MDPico; meanTurChl_ugL)
+
+```{r}
+# JVPSII_ETRqpOxbo_FoSig = JVPSII_Par_ue
+
+GrowthRateSol445590<-GrowthRateSol445590 %>%
+  filter(WL!="WW") %>% 
+  #Turner
+  mutate(JVPSII_umol_eLs_Par_ue_ugChl = JVPSII_umol_eLs_Par_ue/meanTurChl_ugL) %>% #umol e/ug ch/s
+  mutate(JVPSII_umol_eLs_HalfPar_ue_ugChl = JVPSII_umol_eLs_HalfPar_ue/meanTurChl_ugL) %>% 
+  
+  mutate(JVPSII_umol_eLs_Par_ue_umolChl = JVPSII_umol_eLs_Par_ue/meanTurChl_umolL) %>% #umol e/umol ch/s
+  mutate(JVPSII_umol_eLs_HalfPar_ue_umolChl = JVPSII_umol_eLs_HalfPar_ue/meanTurChl_umolL) %>% 
+  
+  #cell per L based on MC OD680 and pamas corr
+  mutate(JVPSII_umol_eLs_Par_ue_cell = JVPSII_umol_eLs_Par_ue/meanCellL_MDPico) %>% 
+  mutate(JVPSII_umol_eLs_HalfPar_ue_cell = JVPSII_umol_eLs_HalfPar_ue/meanCellL_MDPico)  
+```
+
+
+calculate JVPSII per day
+```{r}
+
+# JVPSII_ETRqpOxbo_FoSig
+
+GrowthRateSoliExpDay445590<-GrowthRateSol445590 %>% 
+  mutate(JVPSII_umol_eLs_Par_ue_ugChl_day = JVPSII_umol_eLs_Par_ue_ugChl*3600*Photoperiod/2) %>%
+  mutate(JVPSII_umol_eLs_HalfPar_ue_ugChl_day = JVPSII_umol_eLs_HalfPar_ue_ugChl*3600*Photoperiod/2) %>%
+  mutate(JVPSII_umol_eLs_Par_ue_umolChl_day = JVPSII_umol_eLs_Par_ue_umolChl*3600*Photoperiod/2) %>% 
+  mutate(JVPSII_umol_eLs_HalfPar_ue_umolChl_day = JVPSII_umol_eLs_HalfPar_ue_umolChl*3600*Photoperiod/2) %>% 
+  mutate(JVPSII_umol_eLs_Par_ue_cell_day = JVPSII_umol_eLs_Par_ue_cell*3600*Photoperiod/2) %>% 
+  mutate(JVPSII_umol_eLs_HalfPar_ue_cell_day = JVPSII_umol_eLs_HalfPar_ue_cell*3600*Photoperiod/2) %>% 
+  unique()
+
+
+```
+
+
+#Cleaning the df
+
+```{r}
+#colnames(GrowthRateSoliExpDay)
+
+GrowthRateSoliExpDay445590<-GrowthRateSoliExpDay445590 %>% 
+  select(-c(Tube, MC, LightShape, PURPARRatio, meanPURPARRatio, sdPURPARRatio, JVPSII_umol_eLs_HalfPar_ue, JVPSII_umol_eLs_Par_ue, JVPSII_umol_eLs_Par_ue_ugChl, JVPSII_umol_eLs_Par_ue_umolChl, JVPSII_umol_eLs_Par_ue_cell, JVPSII_umol_eLs_HalfPar_ue_ugChl, JVPSII_umol_eLs_HalfPar_ue_umolChl, JVPSII_umol_eLs_HalfPar_ue_cell, JVPSII_umol_eLs_HalfPar_ue_ugChl, JVPSII_umol_eLs_HalfPar_ue_umolChl, JVPSII_umol_eLs_HalfPar_ue_cell, JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_cell_day)) %>% 
+  unique()
+```
+
+
+# Creating mean JVPSII only for plot
+
+```{r}
+#colnames(MCGrowthJVPSIISP)
+
+MCGrowthJVPSIISPmean445590<-GrowthRateSoliExpDay445590 %>% 
+  # drop_na(JVPSII_umol_eLs_Par_ue_ugChl_day) %>%
+  # drop_na(JVPSII_umol_eLs_Par_ue_cell_day) %>%
+  # select(c(Strain, Par_ue, Photoperiod, O2, Oxygen, WL, Ex_WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, JVPSII_umol_eLs_HalfPar_ue_cell_day)) %>% 
+  
+  group_by(Strain, O2, WL) %>%
+  summarize(Strain, Par_ue, Photoperiod, O2, Oxygen, WL, Ex_WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, 
+    
+            meanJVPSII_umol_eLs_Par_ue_ugChl_day = mean(JVPSII_umol_eLs_Par_ue_ugChl_day),
+            sdJVPSII_umol_eLs_Par_ue_ugChl_day = sd(JVPSII_umol_eLs_Par_ue_ugChl_day),
+            
+            meanJVPSII_umol_eLs_Par_ue_umolChl_day = mean(JVPSII_umol_eLs_Par_ue_umolChl_day),
+            sdJVPSII_umol_eLs_Par_ue_umolChl_day = sd(JVPSII_umol_eLs_Par_ue_umolChl_day),
+            
+            meanJVPSII_umol_eLs_Par_ue_cell_day = mean(JVPSII_umol_eLs_Par_ue_cell_day),
+            sdJVPSII_umol_eLs_Par_ue_cell_day = sd(JVPSII_umol_eLs_Par_ue_cell_day)) %>%
+  ungroup()
+  
+
+MCGrowthJVPSIISPmean445590$facetsStrain <- 'Strain'
+```
+
+```{r}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+lab3=c(expression("405"), expression("450"), expression("470"), expression("530"), expression("620"),  expression("660"),  expression("730"))
+
+scientific_10 <- function(x) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(x))) }
+
+MCGrowthJVPSIISPmean445590 %>% 
+  filter(WL != "WW") %>% 
+ggplot() +
+  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain)), alpha = 0.8, size = 3.5, show.legend = T) +
+  geom_line(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain), linetype = as.factor(Strain)), alpha = 0.8, show.legend = F) +
+  
+  geom_errorbar(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  scale_x_continuous(label=scientific_10) +
+  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+
+
+
+
+MCGrowthJVPSIISPmean445590 %>% 
+  filter(WL != "WW") %>% 
+ggplot() +
+  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(WL)), alpha = 0.8, size = 3.5, show.legend = T) +
+  geom_line(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, linetype = as.factor(O2)), alpha = 0.8, show.legend = T) +
+  
+  geom_errorbar(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  # scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_shape_manual(values = c(15, 16, 17, 18, 3,4,8), name="", labels = lab3) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_x_continuous(label=scientific_10) +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.90,0.60),
+        legend.text = element_text(size=10))
+
+
+
+MCGrowthJVPSIISPmean445590 %>% 
+  filter(WL != "WW") %>% 
+ggplot() +
+  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(WL)), alpha = 0.8, size = 3.5, show.legend = T) +
+  geom_line(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, linetype = as.factor(O2)), alpha = 0.8, show.legend = T) +
+  
+  geom_errorbar(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  # scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_shape_manual(values = c(15, 16, 17, 18, 3,4,8), name="", labels = lab3) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_x_continuous(label=scientific_10) +
+  ggh4x::facet_nested(rows = vars(O2, Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.90,0.60),
+        legend.text = element_text(size=10))
+```
+
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_GrowthRate_JVPSII_Chla445590_2",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+
+------------------------------# Support Vector regression---------------------------------------------------
+
+https://www.geeksforgeeks.org/support-vector-regression-svr-using-linear-and-non-linear-kernels-in-scikit-learn/
+
+https://minimatech.org/non-linear-regression-with-r/
+
+# Support Vector regression
+
+```{r libraries}
+
+library(zoo)
+library(e1071)
+library(gcookbook)  # Load gcookbook for the uspopage data set
+
+```
+
+```{r}
+MCDataHourSVR <- MCGrowthJVPSIISPmean445590 %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>% 
+  drop_na(meanJVPSII_umol_eLs_Par_ue_umolChl_day) %>% 
+  drop_na(deltaOD_Lmu_corr) %>% 
+  select(c(deltaOD_Lmu_corr, meanJVPSII_umol_eLs_Par_ue_umolChl_day, Strain, O2, Oxygen, Ex_WL, WL, WLNum))
+
+
+# Function to train an SVM model and make predictions
+train_and_predict_svm <- function(data) {
+  svr_model <- svm(deltaOD_Lmu_corr ~ meanJVPSII_umol_eLs_Par_ue_umolChl_day, data = data, kernel = 'radial',
+                   cost = 5, gamma = 1)
+  data$svr_pred <- predict(svr_model, data)
+  return(data)
+}
+
+# Group by Tube, train SVM model, and make predictions within each group
+MCDataHourSVR <- MCDataHourSVR %>%
+  group_by(Strain, O2, Oxygen, Ex_WL) %>%
+  nest() %>%
+  mutate(data = map(data, train_and_predict_svm)) %>%
+  unnest(data) %>%
+  ungroup()
+
+# Calculate the root mean squared error for each group
+RMSE_by_Tube <- MCDataHourSVR %>%
+  group_by(Strain, O2, Oxygen, Ex_WL) %>%
+  summarise(RMSE = sqrt(mean((deltaOD_Lmu_corr - svr_pred)^2)))
+
+```
+
+
+```{r}
+MCDataHourSVR %>%
+
+  ggplot() +
+  geom_point(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, y = deltaOD_Lmu_corr), alpha = 0.4) +
+  geom_line(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, y = svr_pred, color = 'SVR_radial')) +
+  geom_line(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, y = deltaOD_Lmu_corr)) +
+
+  facet_grid(rows = vars(Strain), cols = vars (O2)) +
+  theme_bw()
+```
+```{r}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+lab3=c(expression("405"), expression("450"), expression("470"), expression("530"), expression("620"),  expression("660"),  expression("730"))
+
+scientific_10 <- function(x) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(x))) }
+
+
+
+MCGrowthJVPSIISPmean445590 %>% 
+  filter(WL != "WW") %>% 
+ggplot() +
+  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(WL)), alpha = 0.8, size = 3.5, show.legend = T) +
+  # geom_line(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, linetype = as.factor(O2)), alpha = 0.8, show.legend = T) +
+  
+  geom_line(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, y = svr_pred, linetype = as.factor(O2)), show.legend = T, size = 0.6, MCDataHourSVR) +
+  
+  
+  geom_errorbar(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  # scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_shape_manual(values = c(15, 16, 17, 18, 3,4,8), name="", labels = lab3) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_x_continuous(label=scientific_10) +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.90,0.60),
+        legend.text = element_text(size=10))
+
+
+
+
+
+
+
+
+
+MCGrowthJVPSIISPmean445590 %>% 
+  filter(WL != "WW") %>% 
+ggplot() +
+  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(WL)), alpha = 0.8, size = 3.5, show.legend = T) +
+  # geom_line(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, linetype = as.factor(O2)), alpha = 0.8, show.legend = T) +
+  
+  geom_line(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, y = svr_pred, linetype = as.factor(O2)), show.legend = T, size = 0.6, MCDataHourSVR) +
+  
+  
+  geom_errorbar(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  # scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_shape_manual(values = c(15, 16, 17, 18, 3,4,8), name="", labels = lab3) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_x_continuous(label=scientific_10) +
+  ggh4x::facet_nested(rows = vars(O2, Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.90,0.60),
+        legend.text = element_text(size=10))
+```
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_GrowthRate_JVPSII_Chla445590_3",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------
 # Added a Starting Point (SP) at 0 
 
 ```{r added starting point}

@@ -254,6 +254,13 @@ saveRDS(SolFitsMetaLRCGrowth, file.path(DataOut, paste(Project, "SolFitsMetaLRCG
 
 XXXXDoug Stopped JVPSII_umol_eLs calibratedXXX
 
+
+-------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------- Choosen corresponding Ex_WL -------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
+
+
+
 # Choosen corresponding Ex_WL
 
 ```{r}
@@ -661,12 +668,200 @@ SolFitsExpStTurnerMD %>%
 ```
 
 
+-------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------ Chl and Phyco 445 and 590 ------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+```{r}
+SolFitsMetaLRCGrowthCorr1<-SolFitsMetaLRCGrowth %>% 
+  filter(Ex_WL == 445)
+
+SolFitsMetaLRCGrowthCorr2<-SolFitsMetaLRCGrowth %>% 
+  filter(Ex_WL == 590)
+
+SolFitsMetaLRCGrowth445590<-rbind(SolFitsMetaLRCGrowthCorr1, SolFitsMetaLRCGrowthCorr2)
+  rm(SolFitsMetaLRCGrowthCorr1, SolFitsMetaLRCGrowthCorr2)
+  
+```
+
+
+```{r}
+SolFitsMetaLRCGrowth445590<-SolFitsMetaLRCGrowth445590 %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>% 
+  mutate(Oxygen=case_when(O2==21~"250~µM",
+         O2==0~"2.5~µM"))
+
+SolFitsMetaLRCGrowth445590<-SolFitsMetaLRCGrowth445590 %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>% 
+  mutate(Oxygen=case_when(O2==21~"250~µM",
+         O2==0~"2.5~µM"))
+```
+
+```{r}
+SolFitsMetaLRCGrowth445590<-SolFitsMetaLRCGrowth445590 %>% 
+  mutate(Strain=case_when(Strain=="PE-rich_127"~"PE-rich",
+         Strain=="PC-rich_077"~"PC-rich"))
+```
+
+
+-------------------------------------------- Turner ---------------------------------------------------
+
+# Merge JVPSII with chlorophyll Turner data 
+It is "bigger" df b/c I have 3 replica for Turner
+
+#SolFitsMetaLRCGrowthCorr or SolFitsMetaLRCGrowth
+
+```{r}
+ChlDataMeta<-ChlDataMeta %>% 
+  mutate(Strain=case_when(Strain=="PE-rich_127"~"PE-rich",
+         Strain=="PC-rich_077"~"PC-rich"))
+
+SolFitsExpStTurner445590 <- ChlDataMeta %>%
+  full_join(., SolFitsMetaLRCGrowth445590, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) 
+
+#"ObsDate"="ObsDate"
+```
+
+# Removed TurChl_ugL b/c I have already mean from 3 technical replica - smaller df
+
+```{r}
+SolFitsExpStTurner445590<-SolFitsExpStTurner445590 %>% 
+  select(-c(TurChl_ugL)) %>% 
+  unique()
+```
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+#colnames(SolFitsExpStTurner)
+
+SolFitsExpStTurner445590 %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+SolFitsExpStTurner445590 %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_umol_eLs_Par_ue, x = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+-------------------------------------- MD Pico -------------------------------------
+
+
+# Merge Sigma-Turner with MDPicoData data 
+
+```{r}
+MDPicoAll<-MDPicoAll %>% 
+  mutate(Strain=case_when(Strain=="PE-rich_127"~"PE-rich",
+         Strain=="PC-rich_077"~"PC-rich"))
+
+SolFitsExpStTurnerMD445590 <- MDPicoAll %>%
+  full_join(., SolFitsExpStTurner445590, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) %>% 
+  drop_na(Ex_WL) %>% 
+  unique()
+
+```
+
+```{r preliminary plot}
+#colnames(SolFitsExpStTurner)
+
+SolFitsExpStTurnerMD445590 %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+
+SolFitsExpStTurnerMD445590 %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_umol_eLs_Par_ue, x = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+# Calculate cell per L - for JVPSII
+
+```{r}
+SolFitsExpStTurnerMD445590<-SolFitsExpStTurnerMD445590 %>% 
+  mutate(meanCellL_MDPico=meanCellmL_MDPico*1000) %>% 
+  mutate(sdCellL_MDPico=sdCellmL_MDPico*1000)
+```
+
+
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+SolFitsExpStTurnerMD445590 %>% 
+  ggplot() +
+  geom_point(aes(x = E_days, y = meanCellmL_MDPico, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+SolFitsExpStTurnerMD445590 %>% 
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_umol_eLs_Par_ue, x = meanCellmL_MDPico, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+SolFitsExpStTurnerMD445590 %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+
+SolFitsExpStTurnerMD445590 %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(x = meanTurChl_ugL, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+
+SolFitsExpStTurnerMD445590 %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(x = meanCellmL_MDPico, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+```
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------
 
 # Save rds for further analysis
 
 ```{r save rds}
-saveRDS(SolFitsExpStTurnerMD, file.path(DataOut, paste(Project, "Processed_SolisenseJVPSII.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(SolFitsExpStTurnerMD, file.path(DataOut, paste(Project, "Processed_SolisenseJVPSIICorr.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 
+
+saveRDS(SolFitsExpStTurnerMD445590, file.path(DataOut, paste(Project, "Processed_SolisenseJVPSII445590.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 ```
 
 
