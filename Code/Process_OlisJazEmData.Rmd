@@ -744,7 +744,7 @@ lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
 
-PURPAR<-OLISAllPURTidyChoosen %>%
+OLISAllPURTidyChoosen %>%
   #filter(E_days == 7 | E_days == 8) %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
@@ -764,27 +764,11 @@ PURPAR<-OLISAllPURTidyChoosen %>%
   labs(y = "PUR/PAR ratio", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   #ggh4x::facet_nested(rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.15,0.90),
-        legend.text = element_text(size=10))
-PURPAR
+  theme_bw()
 
 
 
-
-PURPAR<-OLISAllPURTidyChoosen %>%
+OLISAllPURTidyChoosen %>%
   #filter(E_days == 7 | E_days == 8) %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
@@ -804,84 +788,47 @@ PURPAR<-OLISAllPURTidyChoosen %>%
   labs(y = "PUR/PAR ratio", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
   #ggh4x::facet_nested(rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.15,0.90),
-        legend.text = element_text(size=10))
-PURPAR
-```
-# Save plot 
+  theme_bw() 
 
-```{r save plot}
-#ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
-```
-
-
-# Save plot 
-
-```{r save plot}
-#ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
-```
-
-
-
-```{r Create final PUR/PAR ratio plot}
-lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 OLISAllPURTidyChoosen %>%
   #filter(E_days == 7 | E_days == 8) %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
   ggplot() +
-  geom_point(aes(x = WLNum, y = meanPURPARRatio, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
-  geom_line(aes(x = WLNum, y = meanPURPARRatio, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
-  geom_errorbar(aes(x = WLNum, ymin = meanPURPARRatio - sdPURPARRatio, ymax = meanPURPARRatio + sdPURPARRatio, colour = as.factor(Strain)), width = 0, size=0.3, show.legend = F) +
+  geom_point(aes(x = WLNum, y = meanPURPARRatio, shape = as.factor(O2)), size = 4, show.legend = T) +
+  geom_line(aes(x = WLNum, y = meanPURPARRatio, linetype = as.factor(O2)), show.legend = T) +
+  geom_errorbar(aes(x = WLNum, ymin = meanPURPARRatio - sdPURPARRatio, ymax = meanPURPARRatio + sdPURPARRatio, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   scale_fill_identity() +
-  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
-  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
-  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(17, 2), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   scale_y_continuous(breaks=seq(0, 1.2, by = 0.4)) +
   coord_cartesian(ylim = c(0, 1.5)) +
   
   labs(y = "PUR/PAR ratio", x = "Growth wavelength (nm)") +
-  coord_flip()+
-  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
   #ggh4x::facet_nested(rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.15,0.90),
-        legend.text = element_text(size=10))
+  theme_bw() 
 ```
+# Save plot 
+
+```{r save plot}
+#ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
 
 # Save plot 
 
 ```{r save plot}
-#ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio2",".png",sep = "")), height=8, width= 6,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
+
+
+
+
 
 
 
@@ -916,7 +863,7 @@ library(gcookbook)  # Load gcookbook for the uspopage data set
 MCDataHourSVR <- OLISAllPURTidyChoosen %>%  
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>% 
-  select(-c(sdPURPARRatio))
+  select(-c(sdPURPARRatio, sdPUR))
 
 # Function to train an SVM model and make predictions
 train_and_predict_svm <- function(data) {
@@ -958,7 +905,7 @@ MCDataHourSVR %>%
 lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
-PURPAR<-OLISAllPURTidyChoosen %>%
+OLISAllPURTidyChoosen %>%
   #filter(E_days == 7 | E_days == 8) %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
@@ -996,11 +943,11 @@ PURPAR<-OLISAllPURTidyChoosen %>%
         legend.title = element_blank(),
         legend.position = c(0.15,0.90),
         legend.text = element_text(size=10))
-PURPAR
 
 
 
-PURPAR<-OLISAllPURTidyChoosen %>%
+
+OLISAllPURTidyChoosen %>%
   #filter(E_days == 7 | E_days == 8) %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
@@ -1038,12 +985,55 @@ PURPAR<-OLISAllPURTidyChoosen %>%
         legend.title = element_blank(),
         legend.position = c(0.15,0.90),
         legend.text = element_text(size=10))
+
+
+
+
+
+PURPAR<-OLISAllPURTidyChoosen %>%
+  #filter(E_days == 7 | E_days == 8) %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  ggplot() +
+  geom_point(aes(x = WLNum, y = meanPURPARRatio, shape = as.factor(O2)), size = 4, show.legend = T) +
+  #geom_line(aes(x = WLNum, y = meanPURPARRatio, linetype = as.factor(O2)), show.legend = T) +
+  
+  geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  
+  geom_errorbar(aes(x = WLNum, ymin = meanPURPARRatio - sdPURPARRatio, ymax = meanPURPARRatio + sdPURPARRatio, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.010, alpha = 0.5) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(17, 2), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_y_continuous(breaks=seq(0, 1.2, by = 0.4)) +
+  coord_cartesian(ylim = c(0, 1.5)) +
+  
+  labs(y = "PUR/PAR ratio", x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  #ggh4x::facet_nested(rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.15,0.90),
+        legend.text = element_text(size=10))
 PURPAR
 ```
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 ```{r, warning = FALSE, fig.height = 9, fig.width = 8}

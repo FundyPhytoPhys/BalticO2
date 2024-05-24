@@ -76,26 +76,6 @@ CultureCatalog<-CultureCatalog %>%
 ```
 
 
-```{r prelim plot}
-SolFitsMeta %>%  
-  # filter(Run!=118 & Run!= 119) %>% 
-  # filter(Par_ue!=30) %>% 
-  # filter(WL != "WW") %>%
-  # 
-  # filter(E_days>=4) %>% 
-  # filter(E_days<=10) %>% 
-  filter(O2 == 0) %>% 
-  filter(Strain == "PC-rich_077") %>% 
-  
-ggplot() +
-  geom_point(aes(ActPARCorr, Sig, colour = as.factor(Strain)), alpha = 0.8, size = 3.5, show.legend = T, SolFitsMeta) +
-  #geom_line(aes(ActPARCorr, .fitted), colour = "black", linetype = "dotted") +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, O2, WL), labeller = label_parsed) +
-  theme_bw()
-
-```
-
-
 # Read Imported Solisense
 
 ```{r read locally stored metadata from rds}

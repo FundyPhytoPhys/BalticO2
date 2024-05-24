@@ -614,7 +614,7 @@ MCGrowthRate %>%
   geom_line(aes(x = meanPUR, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), show.legend = T) +
   geom_errorbar(aes(x = meanPUR, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(WL)), width=0, size=0.3, show.legend = F) +
   
-  stat_wl_strip(aes(x = meanPUR), ymin = -Inf, ymax = -0.08, alpha = 0.5) +
+  #stat_wl_strip(aes(x = meanPUR), ymin = -Inf, ymax = -0.08, alpha = 0.5) +
   scale_fill_identity() +
   scale_colour_manual(values = c("royalblue4", "steelblue3", "lightseagreen", "limegreen", "coral","brown1","indianred4"), name="", labels = lab3) +
   scale_shape_manual(values = c(15, 16, 17, 18, 3, 4, 8), name="", labels = lab3) +
