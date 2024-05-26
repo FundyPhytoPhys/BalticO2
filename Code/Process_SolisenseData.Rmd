@@ -92,52 +92,45 @@ SolFitsMeta <- SolFits %>%
 
 ```
 
-#Filter outliers
+
 ```{r}
-SolFitsMeta1 <-SolFitsMeta %>%
-  filter(Strain == "PC-rich") %>% 
-  filter(O2 == 21) %>% 
-  filter(Ex_WL== 470 | Ex_WL == 505) %>% 
-  filter(Sig > 400)
-SolFitsMeta2 <-SolFitsMeta %>%
-  filter(Strain == "PE-rich") 
-SolFitsMeta3 <-SolFitsMeta %>%
-  filter(Strain == "PC-rich") %>% 
-  filter(O2 == 0)  
-SolFitsMeta4 <-SolFitsMeta %>%
-  filter(Strain == "PC-rich") %>% 
-  filter(O2 == 21) %>%     
-  filter(Ex_WL!= 470 | Ex_WL != 505) 
-SolFitsMeta5 <-SolFitsMeta %>%
-  filter(Strain == "PC-rich") %>% 
-  filter(O2 == 21) %>% 
-  filter(Ex_WL== 470 | Ex_WL == 505) %>% 
-  filter(Sig < 400)
-
-
-ss<-rbind(SolFitsMeta2, SolFitsMeta3, SolFitsMeta4)
-
-
-# 989.08
-# 940.64
-# 873.12
-# 500.42
-# 478.93
+SolFitsMetaLRC<-SolFitsMeta %>%
+  filter(Par_ue == 180) %>% 
+  filter(Run!= 118) %>% 
+  filter(Run!= 119) %>% 
+  filter(Run!= 122) %>% 
+  # filter(Sig!= 989.08) %>%
+  #   filter(Sig!= 940.64) %>%
+  #   filter(Sig!= 873.12) %>%
+  #   filter(Sig!= 500.42) %>%
+  #   filter(Sig!= 478.93) %>% 
+    filter(Sig>0)
 ```
 
+# Convert Sig_m2psii to Sig_nm2psii and Sigdark_m2psii to Sigdark_nm2psii and calculated number of days when measurements were made
+
+```{r convert Sigma}
+SolFitsMetaLRC <- SolFitsMetaLRC %>%
+mutate(Sig_nm2psii=Sig_m2psii*1000000000000000000) %>%
+mutate(Sigdark_nm2psii=Sigdark_m2psii*1000000000000000000)
+```
+
+```{r}
+SolFitsMetaLRC<-SolFitsMetaLRC %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>% 
+  mutate(Oxygen=case_when(O2==21~"250~µM",
+         O2==0~"2.5~µM"))
+```
 
 # Create preliminary plots 
 
 ```{r preliminary plot}
 lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
-
-SolFitsMeta %>%
-  # filter(Run!=118 & Run!= 119) %>% 
-  # filter(Par_ue!=30) %>% 
+SolFitsMetaLRC %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
-  # filter(ActPAR== 80) %>%
   filter(E_days>=4) %>% 
   ggplot() +
   geom_point(aes(x = WLNum, y = Sig, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
@@ -147,21 +140,6 @@ SolFitsMeta %>%
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() 
 
-
-ss %>%
-  # filter(Run!=118 & Run!= 119) %>% 
-  # filter(Par_ue!=30) %>% 
-  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  filter(WL != "WW") %>%
-  # filter(ActPAR== 80) %>%
-  filter(E_days>=4) %>% 
-  ggplot() +
-  geom_point(aes(x = WLNum, y = Sig, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
-  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
-  scale_fill_identity() +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
-  theme_bw() 
 ```
 
 # Create preliminary plots sig vs ActPAR
@@ -170,48 +148,237 @@ ss %>%
 lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 
-SolFitsMeta %>%
+SolFitsMetaLRC %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  filter(Strain == "PC-rich") %>% 
-  filter(O2 == 0) %>% 
-  filter(WL != "WW") %>%
-  #filter(ObsDate == "2022-06-16") %>% 
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 620) %>%
+  filter(Ex_WL == 590) %>%
   ggplot() +
-  geom_point(aes(x = ActPARCorr, y = Sig), size = 3.5, show.legend = T) +
-  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  geom_point(aes(x = ActPARCorr, y = Sig), size = 2, show.legend = T) +
   scale_fill_identity() +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, O2, WL), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL, O2), rows = vars(Strain, WL), labeller = label_parsed) +
   theme_bw()
 
+```
 
-SolFitsMeta %>%
+
+# Calculate Sigma mean from 3 replica measured on the same day 
+# 6 replica b/c 3 replica * 2 values ("up" and "down")
+
+```{r calculate Sigma mean from 3 replica measured on the same day}
+SolFitsMetaLRC <- SolFitsMetaLRC %>%
+  filter(E_days>=4) %>% 
+  # filter(E_days <=10) %>% 
+  group_by(Strain, Ex_WL, Par_ue, Photoperiod, WLNum, WL, O2, E_days, Oxygen, ObsDate, ActPARCorr) %>%
+  
+  summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, WLNum, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, ActPARCorr, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days,
+            meanSig_nm2psii = mean(Sig_nm2psii),
+            sdSig_nm2psii = sd(Sig_nm2psii),
+            meanSigdark_nm2psii = mean(Sigdark_nm2psii),
+            sdSigdark_nm2psii = sd(Sigdark_nm2psii)) %>%
+  ungroup() 
+```
+# Calculate Sigma Allmean measured on all days from exp phase of growth (day4-13)
+
+
+```{r calculate Sigma mean from 3 replica measured on the same day}
+SolFitsMetaLRC <- SolFitsMetaLRC %>%
+  filter(E_days>=4) %>% 
+  # filter(E_days <=10) %>% 
+  group_by(Strain, Ex_WL, Par_ue, Photoperiod, WLNum, WL, O2, Oxygen, ActPARCorr) %>%
+  
+  summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, WLNum, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, meanSig_nm2psii, sdSig_nm2psii, meanSigdark_nm2psii, sdSigdark_nm2psii, ActPARCorr, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days,
+            AllmeanSig_nm2psii = mean(meanSig_nm2psii),
+            AllsdSig_nm2psii = sd(sdSig_nm2psii),
+            AllmeanSigdark_nm2psii = mean(meanSigdark_nm2psii),
+            AllsdSigdark_nm2psii = sd(sdSigdark_nm2psii)) %>%
+  ungroup() 
+```
+
+
+# Create preliminary plots sig vs ActPAR
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+
+SolFitsMetaLRC %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  filter(Strain == "PC-rich") %>% 
-  filter(O2 == 0) %>% 
-  filter(WL != "WW") %>%
-  #filter(ObsDate == "2022-06-16") %>% 
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 620) %>%
+  filter(Ex_WL == 590) %>%
   ggplot() +
-  geom_point(aes(x = ActPARCorr, y = Fm), size = 3.5, show.legend = T) +
-  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  geom_point(aes(x = ActPARCorr, y = Sig_nm2psii), colour = "gray", size = 2, show.legend = T) +
+  geom_point(aes(x = ActPARCorr, y = meanSig_nm2psii), colour = "darkgreen",size = 2, show.legend = T) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "red",size = 2, show.legend = T) +
   scale_fill_identity() +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, O2, WL), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL, O2), rows = vars(Strain, WL), labeller = label_parsed) +
   theme_bw()
 
-SolFitsMeta %>%
-  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  filter(Strain == "PC-rich") %>% 
-  filter(O2 == 0) %>% 
-  filter(WL != "WW") %>%
-  #filter(ObsDate == "2022-06-16") %>% 
+```
+# Create preliminary plots sig vs ActPAR
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+
+SolFitsMetaLRC %>%
+  #mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 620) %>%
+  filter(Ex_WL == 590) %>%
   ggplot() +
-  geom_point(aes(x = ActPARCorr, y = FvFm), size = 3.5, show.legend = T) +
-  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, colour = as.factor(Strain)), size = 4, show.legend = F) +
+  geom_point(aes(x = ActPARCorr, y = Sig_nm2psii, colour = as.factor(Strain)), size = 1, alpha = 0.2, show.legend = F) +
+  
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  geom_line(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, linetype = as.factor(O2)), size = 0.6, show.legend = T) +
+  
+  #geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  
   scale_fill_identity() +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, O2, WL), labeller = label_parsed) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "ActPAR") +
+  ggh4x::facet_nested(cols = vars(Ex_WL, O2), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw() 
+
+```
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_SigLRC",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+
+
+------------------------------# Support Vector regression---------------------------------------------------
+
+https://www.geeksforgeeks.org/support-vector-regression-svr-using-linear-and-non-linear-kernels-in-scikit-learn/
+
+https://minimatech.org/non-linear-regression-with-r/
+
+# Support Vector regression
+
+```{r libraries}
+
+library(zoo)
+library(e1071)
+library(gcookbook)  # Load gcookbook for the uspopage data set
+
+```
+
+```{r}
+MCDataHourSVR <- SolFitsMetaLRC %>% 
+  select(c(Strain, O2, Oxygen, WLNum, Ex_WL, WL, ActPARCorr, AllmeanSig_nm2psii)) %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>% 
+  filter(WL == 450 | WL == 620) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445) 
+
+# Function to train an SVM model and make predictions
+train_and_predict_svm <- function(data) {
+  svr_model <- svm(AllmeanSig_nm2psii ~ ActPARCorr, data = data, kernel = 'radial',
+                   cost = 5, gamma = 10)
+  data$svr_pred <- predict(svr_model, data)
+  return(data)
+}
+
+# Group by Tube, train SVM model, and make predictions within each group
+MCDataHourSVR <- MCDataHourSVR %>%
+  group_by(Strain, O2, Oxygen, WLNum, WL, Ex_WL) %>%
+  nest() %>%
+  mutate(data = map(data, train_and_predict_svm)) %>%
+  unnest(data) %>%
+  ungroup()
+
+# Calculate the root mean squared error for each group
+RMSE_by_Tube <- MCDataHourSVR %>%
+  group_by(Strain, O2, Oxygen, WLNum, WL, Ex_WL) %>%
+  summarise(RMSE = sqrt(mean((AllmeanSig_nm2psii - svr_pred)^2)))
+
+```
+
+
+```{r}
+MCDataHourSVR %>%
+
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), alpha = 0.4) +
+  geom_line(aes(x = ActPARCorr, y = svr_pred, color = 'SVR_radial')) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanSig_nm2psii)) +
+
+  facet_grid(rows = vars(Strain), cols = vars (O2)) +
   theme_bw()
 ```
 
 
+
+
+# Create preliminary plots sig vs ActPAR
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 620) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  ggplot() +
+  
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, colour = as.factor(Strain)), size = 4, show.legend = F) +
+  geom_point(aes(x = ActPARCorr, y = Sig_nm2psii, colour = as.factor(Strain)), size = 1, alpha = 0.2, show.legend = F) +
+  
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  geom_line(aes(x = ActPARCorr, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "ActPAR") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+
+```
+
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_SigLRC2",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+----------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------
 
 # Choosen Sigma from corresponding light
 
