@@ -1,5 +1,5 @@
 ---
-title: "Coastal picocyanobacteria exploit low oxygen habitats"
+title: "Coastal picocyanobacteria can exploit low oxygen habitats"
 
 author:
 - Sylwia Śliwińska-Wilczewska:
@@ -165,39 +165,44 @@ Statistical differences for all analyses were determined at significance level �
 
 # Results {.unnumbered}
 
-## Growth curves and chlorophyll-specific exponential growth rate {.unnumbered}
+## Chlorophyll-specific exponential growth rate {.unnumbered}
 
 <br>
 
-![<span id="fig:GrowthCurve"></span>**Fig. **1: **Growth curves, tracked as OD~680~ vs. elapsed time (d)**. Growth curves were estimated over 5-min intervals for  PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.](../Output/Figures/SFig_GrowthCurve_OD680.png)
+![<span id="fig:GrowthRate"></span>**Fig. **1: Chlorophyll-specific exponential growth rates (d^−1^) vs. growth wavelength (nm). Growth rates (± SE falling within symbols) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for PC-rich_077 (green circle) and PE-rich_127 (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 450, 470, 530, 620, 660, and 730 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).](../Output/Figures/Fig_GrowthRate.png)
 
 <br>
 
-![<span id="fig:GrowthRate"></span>**Fig. **2: **Chlorophyll-specific exponential growth rates (d^−1^) vs. wavelength (nm)**. Growth rates (± SE falling within symbols) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for  PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.](../Output/Figures/Fig_GrowthRate.png)
+## Whole-cell spectra and PUR/PAR ratio {.unnumbered}
+
+![<span id="fig:PURPAR"></span>**Fig. **2: Whole-cell absorbance spectra vs. wavelength (nm) and PUR/PAR ratio vs. growth wavelength (nm). (*a*) Representative absorbance spectra, normalized to 440 nm (NormA~440~), were measured together with emission spectra of the colour LED lamp used for PAR, normalized to their emission peak. Estimated Photosynthetically Usable Radiation (PUR) is shown as a green area for the PC-rich_077 strain and a red area for the PE-rich_127 strain grown at spectral bandwidth of 405, 450, 470, 530, 620, 660, and 730 nm and O~2~ concentration of 250 µM (dashed line) and 2.5 µM (solid line). (*b*) PUR/PAR ratio was estimated for PC-rich_077 (green circle) and PE-rich_127 (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 450, 470, 530, 620, 660, and 730 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).](../Output/Figures/Fig_PURPARRatioSpectra.png)
+
 
 <br>
 
-## Whole-cell spectra {.unnumbered}
+## Pigment content and pigment ratio {.unnumbered}
 
-![<span id="fig:OlisSpectra"></span>**Fig. **3: **Whole-cell absorbance spectra** of PC-rich_077 (solid light green lines) or PE-rich_127 (solid dark red lines) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM. Representative absorbance spectra, normalized to 440 nm (NormA~440~), were measured together with emission spectra of the white LED lamp used for PAR, normalized to their emission peak (light gray area). Estimated Photosynthetically Usable Radiation (PUR) is shown as a green area for the PC-rich_077 strain and a red area for the PE-rich_127 strain.](../Output/Figures/Fig_OlisSpectra.png)
-
-<br>
-
-## PUR/PAR ratio vs. spectral bandwidth {.unnumbered}
-
-![<span id="fig:PURPARRatio"></span>**Fig. **4: **Changes in PUR/PAR ratio vs. wavelength (nm)**. PUR/PAR ratio was estimated for PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.](../Output/Figures/Fig_PURPARRatio2.png)
+![<span id="fig:Pigment"></span>**Fig. **3: Pigment content (pg cell ^−1^) (*a*) and pigment ratio (µg:µg) (*b*) vs. growth wavelength (nm) for PC-rich_077 (green circle) and PE-rich_127 (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 450, 470, 530, 620, 660, and 730 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).](../Output/Figures/Fig_Pigment.png)
 
 <br>
 
 ## Effective absorption cross section of PSII {.unnumbered}
 
-![<span id="fig:Sigma590"></span>**Fig. **5: **Effective absorption cross section of PSII (σ~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. wavelength (nm)**. σ~PSII~ʹ was estimated using FRRf induction curves with excitations (Ex~445nm~, blue, Ex~470nm~, blue-green, Ex~505nm~, green, Ex~535nm~, green-yellow, Ex~590nm~, orange, Ex~590nm~, orange), for PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.](../Output/Figures/Fig_Sig2.png)
-
-## Uncalibrated PSII electron flux {.unnumbered}
+![<span id="fig:SigLRC"></span>**Fig. **4: Effective absorption cross section of PSII (σ~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. Actinic PAR (µmol photons m^−2^s^−1^). σ~PSII~ʹ was estimated using FRRf induction curves with excitations (Ex~445nm~; blue, and Ex~590nm~; orange), for PC-rich_077 (green circle) and PE-rich_127 (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 450 and 620 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).](../Output/Figures/Fig_SigLRC.png)
 
 <br>
 
-![<span id="fig:GrowthRateJVPSII"></span>**Fig. **6: **Uncalibrated PSII electron flux  measured under diel peak PAR growth light vs. wavelength (nm)**. *JV*~PSII~ was estimated using FRRf induction curves with excitations (Ex~445nm~, blue, Ex~470nm~, blue-green, Ex~505nm~, green, Ex~535nm~, green-yellow, Ex~590nm~, orange, Ex~590nm~, orange), for PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.](../Output/Figures/Fig_UncalibJVPSII.png)
+![<span id="fig:SigWL"></span>**Fig. **5: Effective absorption cross section of PSII (σ~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. wavelength (nm). σ~PSII~ʹ was estimated using FRRf induction curves with excitations (Ex~445nm~; blue and Ex~590nm~; orange), for PC-rich_077 (green circle) and PE-rich_127 (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 450 and 620 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).](../Output/Figures/Fig_SigWL_2.png)
+
+<br>
+
+![<span id="fig:SigPig"></span>**Fig. **6: Effective absorption cross section of PSII (σ~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. the ratio of sum of µg Phycobiliprotein to µg Chl *a*. σ~PSII~ʹ was estimated using FRRf induction curves with excitations (Ex~445nm~; blue and Ex~590nm~; orange), for PC-rich_077 (green circle) and PE-rich_127 (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 450 and 620 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).](../Output/Figures/Fig_SigPig.png)
+
+## Growth rates vs. cumulative diel PSII electron flux {.unnumbered}
+
+<br>
+
+![<span id="fig:GrowthRateJVPSII"></span>**Fig. **7: Chlorophyll-specific exponential growth rates (d^−1^) vs. PSII electron flux (*JV*~PSII~; µmol e^−^ µmol Chl *a*^−1^ d^−1^) measured under diel peak PAR growth light. Growth rates (± SE falling within symbols) were estimated from logistic fits of chlorophyll proxy OD~680~ - OD~720~ (ΔOD) vs. elapsed time. *JV*~PSII~ was estimated using FRRf induction curves with excitations (Ex~445nm~; blue and Ex~590nm~; orange), for PC-rich_077 (green circle) and PE-rich_127 (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 450 and 620 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).](../Output/Figures/Fig_GrowthRate_JVPSII_Chla.png)
 
 <br>
 

@@ -213,58 +213,87 @@ Statistical differences for all analyses were determined at significance level �
 
 # Results {.unnumbered}
 
-## Growth curves and chlorophyll-specific exponential growth rate {.unnumbered}
+## Chlorophyll-specific exponential growth rate {.unnumbered}
 
-<br>
+We used logistic curve fits (Fig. Sxxx) to determine chlorophyll-specific exponential growth rates (μ; d^−1^), for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 450, 470, 530, 620, 660, and 730 nm and O~2~ concentration of 250 µM and 2.5 µM. Three-way factorial ANOVA showed that peak PAR, photoperiod, strain, and their interactions, significantly affected μ (ANOVA, *p* < 0.05 for all; Table Sxxx). 
 
-```{r GrowthCurve, fig.cap = GrowthCurve_cap, fig.height = 8, fig.width = 6, echo = FALSE}
-GrowthCurve_cap<- glue("**Growth curves, tracked as OD~680~ vs. elapsed time (d)**. Growth curves were estimated over 5-min intervals for  PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
-knitr::include_graphics(file.path(FiguresFP,"SFig_GrowthCurve_OD680.png"))
-```
+
+In general, PC-rich strains achieved faster growth rates under O~2~ concentration of 250 µM across tested spectral bandwidth (nm). On the other hand, PE-rich strain showed similar growth rates under 250 µM and 2.5 µM of O~2~ concentration across tested spectral bandwidth (nm). The exception was noted for the growth rate obtained at 405 nm, where higher growth rates were achieved under 2.5 µM O~2~ than under 250 µM O~2~ for both PC-rich and PE-rich strains.
+
+PC-rich *Synechococcus* sp. showed distinct growth peak at red light (μ = 1.17 d^−1^ at 620 nm and μ = 0.95 d^−1^ at 660 nm) under O~2~ concentration of 250 µM. PE-rich strain showed the highest growth rates under green light at 530 nm under 2.5 µM of O~2~ (μ = 0.80 d^−1^).
+
+
+0.53
+
+All tested strains, except PE-rich_048, grew even under peak PAR 900 µmol photons m^−2^s^−1^ and 24 h photoperiod. The highest growth rate was recorded for *Synechococcus* sp. PE-rich_127 (μ = 4.5 d^−1^; 3.7 h doubling time) and PC-rich_056 (μ = 3.4 d^−1^; 4.9 h doubling time) at 180 µmol photons m^−2^s^−1^ peak PAR and photoperiod of 24 h.
+
+
+
+
+ For the PE-rich strains growth decreased with decreasing photoperiod and decreasing peak PAR. Moreover, PE-rich strains showed photoinhibition of growth at peak PAR of 900 µmol photons m^−2^s^−1^ and photoperiods of 16- 24 h. The growth rate contours for PC-rich and PE-rich *Synechococcus* sp. did not generally follow isoclines of cumulative diel photon dose (µmol photons m^−2^d^−1^, dashed lines), showing that photoperiod, and peak PAR influenced growth rates beyond cumulative diel photon dose.
+
+A three parameter light response model fit [@harrisonPhotosynthesisirradianceRelationshipsPolar1986] of chlorophyll-specific exponential growth rates vs. cumulative diel PUR dose for two PC-rich and two PE-rich cultures of *Synechococcus* sp. showed significant differences between model fits of the pooled data vs. fits for all tested photoperiods (8, 12, 16, or 24 h; ANOVA, *p* < 0.05; Fig. \@ref(fig:GrowthRatePhotoperiodPUR)A, Table S3). The alpha parameters of the initial rise of growth rate (α) vs. cumulative diel PUR, estimated from data pooled for each photoperiod increased with increasing photoperiod for all strains. The highest increase (>2-fold) of α with increasing photoperiod was recorded for PC-rich_056 (Fig. \@ref(fig:GrowthRatePhotoperiodPUR)B). Strains also showed distinct growth rate responses to cumulative diel PUR, depending upon peak PAR (Fig. S4A, Table S4), that differ from a single light response model fit to the pooled data across all peak PAR from a strain. Exceptions were observed in the strains PC-rich_077 and PE-rich_048 with the peak PAR of 600 or 900 µmol photons m^−2^s^−1^, which were not significantly different from the pooled data model. A caveat to these findings is that cumulative diel photon dose is a product of photoperiod and PAR, so the highest levels of cumulative PUR dose are only achieved under the 600 or 900 µmol photons m^−2^s^−1^. The alpha parameters of the initial rise of growth rate (α) vs. cumulative diel PUR, estimated from data pooled for each peak PAR decreased across peak PAR for all tested strains (Fig. S4B).
+
+Growth rate saturated under increasing cumulative diel PUR for all strains, however, the achieved estimates of µ~max~ varied depending upon photoperiod and peak diel PAR. Growth rates vs. cumulative diel PAR relationships, estimated for exponential phase cultures, followed similar patterns (Fig. S5, Fig. S6 and Table S5, S6 in Supporting Information).
 
 <br>
 
 ```{r GrowthRate, fig.cap = GrowthRatePhotoperiodPUR_cap, fig.height = 8, fig.width = 6, echo = FALSE}
-GrowthRatePhotoperiodPUR_cap<- glue("**Chlorophyll-specific exponential growth rates (d^−1^) vs. growth wavelength (nm)**. Growth rates (± SE falling within symbols) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for PC-rich_077 (light green circle; solid line) and PE-rich_127 (dark red diamond; dashed line) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
-knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRate3.png"))
+GrowthRatePhotoperiodPUR_cap<- glue("Chlorophyll-specific exponential growth rates (d^−1^) vs. growth wavelength (nm). Growth rates (± SE falling within symbols) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 450, 470, 530, 620, 660, and 730 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRate.png"))
 ```
 
 <br>
 
-## Whole-cell spectra {.unnumbered}
+## Whole-cell spectra and PUR/PAR ratio {.unnumbered}
 
-```{r OlisSpectra, fig.cap = OlisSpectra_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+```{r PURPAR, fig.cap = PURPAR_cap, fig.height = 6, fig.width = 8, echo = FALSE}
 
-OlisSpectra_cap<- glue("(A) **Whole-cell absorbance spectra** of PC-rich_077 (solid light green lines) or PE-rich_127 (dashed dark red lines) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM. Representative absorbance spectra, normalized to 440 nm (NormA~440~), were measured together with emission spectra of the white LED lamp used for PAR, normalized to their emission peak (light gray area). Estimated Photosynthetically Usable Radiation (PUR) is shown as a green area for the PC-rich_077 strain and a red area for the PE-rich_127 strain. (B) **Changes in PUR/PAR ratio vs. growth wavelength (nm)**. PUR/PAR ratio was estimated for PC-rich_077 (light green circle; solid line) and PE-rich_127 (dark red diamond; dashed line) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
+PURPAR_cap<- glue("Whole-cell absorbance spectra vs. wavelength (nm) and PUR/PAR ratio vs. growth wavelength (nm). (*a*) Representative absorbance spectra, normalized to 440 nm (NormA~440~), were measured together with emission spectra of the colour LED lamp used for PAR, normalized to their emission peak. Estimated Photosynthetically Usable Radiation (PUR) is shown as a green area for the PC-rich strain and a red area for the PE-rich strain grown at spectral bandwidth of 405, 450, 470, 530, 620, 660, and 730 nm and O~2~ concentration of 250 µM (dashed line) and 2.5 µM (solid line). (*b*) PUR/PAR ratio was estimated for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 450, 470, 530, 620, 660, and 730 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).", .sep = " ")
 
 knitr::include_graphics(file.path( FiguresFP,"Fig_PURPARRatioSpectra.png")) 
 ```
 
+
 <br>
 
-## PUR/PAR ratio vs. spectral bandwidth {.unnumbered}
+## Pigment content and pigment ratio {.unnumbered}
 
-```{r PURPARRatio, fig.cap = PURPARRatio_cap, fig.height = 6, fig.width = 8, echo = FALSE}
-PURPARRatio_cap<- glue("**Changes in PUR/PAR ratio vs. growth wavelength (nm)**. PUR/PAR ratio was estimated for PC-rich_077 (light green circle; solid line) and PE-rich_127 (dark red diamond; dashed line) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
-knitr::include_graphics(file.path(FiguresFP,"Fig_PURPARRatio.png"))
+```{r Pigment, fig.cap = Pigment_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+Pigment_cap<- glue("Pigment content (pg cell ^−1^) (*a*) and pigment ratio (µg:µg) (*b*) vs. growth wavelength (nm) for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 450, 470, 530, 620, 660, and 730 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"Fig_Pigment.png"))
 ```
 
 <br>
 
 ## Effective absorption cross section of PSII {.unnumbered}
 
-```{r Sigma590, fig.cap = Sigma590_cap, fig.height = 6, fig.width = 8, echo = FALSE}
-Sigma590_cap<- glue("**Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. wavelength (nm)**. \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitations (Ex~445nm~, blue, Ex~470nm~, blue-green, Ex~505nm~, green, Ex~535nm~, green-yellow, Ex~590nm~, orange, Ex~590nm~, orange), for PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
-knitr::include_graphics(file.path( FiguresFP,"Fig_Sig2.png"))
+```{r SigLRC, fig.cap = SigLRC_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+SigLRC_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. Actinic PAR (µmol photons m^−2^s^−1^). \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitations (Ex~445nm~; blue, and Ex~590nm~; orange), for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 450 and 620 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"Fig_SigLRC.png"))
 ```
 
-## Uncalibrated PSII electron flux {.unnumbered}
+<br>
+
+```{r SigWL, fig.cap = SigWL_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+SigWL_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. wavelength (nm). \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitations (Ex~445nm~; blue and Ex~590nm~; orange), for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 450 and 620 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"Fig_SigWL_2.png"))
+```
+
+<br>
+
+```{r SigPig, fig.cap = SigPig_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+SigPig_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. the ratio of sum of µg Phycobiliprotein to µg Chl *a*. \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitations (Ex~445nm~; blue and Ex~590nm~; orange), for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 450 and 620 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"Fig_SigPig.png"))
+```
+
+## Growth rates vs. cumulative diel PSII electron flux {.unnumbered}
 
 <br>
 
 ```{r GrowthRateJVPSII, fig.cap = GrowthRateJVPSII_cap, fig.height = 8, fig.width = 6, echo = FALSE}
-GrowthRateJVPSII_cap<- glue("**Uncalibrated PSII electron flux  measured under diel peak PAR growth light vs. wavelength (nm)**. *JV*~PSII~ was estimated using FRRf induction curves with excitations (Ex~445nm~, blue, Ex~470nm~, blue-green, Ex~505nm~, green, Ex~535nm~, green-yellow, Ex~590nm~, orange, Ex~590nm~, orange), for PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
-knitr::include_graphics(file.path(FiguresFP,"Fig_UncalibJVPSII.png"))
+GrowthRateJVPSII_cap<- glue("Chlorophyll-specific exponential growth rates (d^−1^) vs. PSII electron flux (*JV*~PSII~; µmol e^−^ µmol Chl *a*^−1^ d^−1^) measured under diel peak PAR growth light. Growth rates (± SE falling within symbols) were estimated from logistic fits of chlorophyll proxy OD~680~ - OD~720~ (ΔOD) vs. elapsed time. *JV*~PSII~ was estimated using FRRf induction curves with excitations (Ex~445nm~; blue and Ex~590nm~; orange), for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 450 and 620 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRate_JVPSII_Chla.png"))
 ```
 
 <br>

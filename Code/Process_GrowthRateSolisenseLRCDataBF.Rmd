@@ -902,7 +902,7 @@ ggplot() +
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_GrowthRate_JVPSII_Chla",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("Fig_GrowthRate_JVPSII_Chla",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 

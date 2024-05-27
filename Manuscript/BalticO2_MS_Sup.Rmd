@@ -89,6 +89,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Supporting Information {.unnumbered}
 
+## Growth curves {.unnumbered}
+
+```{r GrowthCurve, fig.cap = GrowthCurve_cap, fig.height = 8, fig.width = 6, echo = FALSE}
+GrowthCurve_cap<- glue("**Growth curves, tracked as OD~680~ vs. elapsed time (d)**. Growth curves were estimated over 5-min intervals for  PC-rich_077 (light green) and PE-rich_127 (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 445, 470, 535, 620, 660, and 720 nm and O~2~ concentration of 250 µM and 2.5 µM.", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP,"SFig_GrowthCurve_OD680.png"))
+```
+
+
+
 ## Growth rates vs. cumulative diel PSII electron flux {.unnumbered}
 
 ```{r GrowthRateJVPSII, fig.cap = GrowthRateJVPSII_cap, fig.height = 8, fig.width = 6, echo = FALSE}
