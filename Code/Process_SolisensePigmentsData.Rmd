@@ -305,7 +305,7 @@ SolFitsPigmentExpChoose %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_SigPigCorr",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_SigPigCorr",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -547,19 +547,62 @@ SolFitsPigmentExp445590Choose %>%
 
 
 
+
+
+
+
+MultiCultiGrowth1PC21<-SolFitsPigmentExp445590Choose %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+    filter(WL == 450 | WL == 620) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-SolFitsPigmentExp445590Choose %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+    filter(WL == 450 | WL == 620) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-SolFitsPigmentExp445590Choose %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+    filter(WL == 450 | WL == 620) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-SolFitsPigmentExp445590Choose %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+    filter(WL == 450 | WL == 620) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+
 SolFitsPigmentExp445590Choose %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
   filter(WL == 450 | WL == 620) %>%
   filter(Ex_WL == 590 | Ex_WL == 445) %>%
   ggplot() +
-  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain), shape = as.factor(O2)), size = 4, show.legend = T) +
+  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, shape = as.factor(O2)), size = 4, show.legend = T) +
   #geom_line(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, linetype = as.factor(O2)), show.legend = T) +
+  
+    geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
+    geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
+    geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
+    geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  
+  
   geom_errorbar(aes(x = meanPhycoChlaRatio, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   # stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   # scale_fill_identity() +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
-  scale_shape_manual(values = c(17, 2), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Phycobiliprotein to Chl" ~italic(a)~ "ratio (µg:µg)") +
   #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
@@ -586,7 +629,7 @@ SolFitsPigmentExp445590Choose %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_SigPig445590_3",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("Fig_SigPig",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 

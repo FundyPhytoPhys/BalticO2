@@ -598,20 +598,53 @@ MCDataHourSVRPig %>%
 lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
+MultiCultiGrowth1PC21<-MCPigmentChoosenPlot %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-MCPigmentChoosenPlot %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-MCPigmentChoosenPlot %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-MCPigmentChoosenPlot %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+
 A<-MCPigmentChoosenPlot %>%
   filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   ggplot() +
-  geom_point(aes(x = WLNum, y = meanPigmentsRatio, colour = as.factor(Strain)), size = 4, show.legend = F) +
+  geom_point(aes(x = WLNum, y = meanPigmentsRatio, shape = as.factor(O2)), size = 4, show.legend = F) +
   #geom_line(aes(x = WLNum, y = meanPigmentsRatio, linetype = as.factor(O2)), show.legend = T) +
   
-  geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVRRatio) +
+    geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
+    geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
+    geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
+    geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  
+  geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = F, MCDataHourSVRRatio) +
   
   geom_errorbar(aes(x = WLNum, ymin = meanPigmentsRatio - sdPigmentsRatio, ymax = meanPigmentsRatio + sdPigmentsRatio, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   scale_fill_identity() +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
-  scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   labs(y = "Pigment ratio (µg:µg)", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(cols = vars(factor(PigmentsRatioName, levels=c("Phycobilins:Chlorophyll~italic(a)","Carotenoids:Chlorophyll~italic(a)"))), rows = vars(Strain), labeller = label_parsed) +
@@ -636,8 +669,13 @@ A
 B<-MCPigmentChoosenPlot %>%
   filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   ggplot() +
-  geom_point(aes(x = WLNum, y = meanPigmentspgcell, colour = as.factor(Strain)), size = 4, show.legend = F) +
+  geom_point(aes(x = WLNum, y = meanPigmentspgcell, shape = as.factor(O2)), size = 4, show.legend = T) +
   #geom_line(aes(x = WLNum, y = meanPigmentspgcell, linetype = as.factor(O2)), show.legend = T) +
+  
+    geom_point(aes(x = WLNum, y = meanPigmentspgcell), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
+    geom_point(aes(x = WLNum, y = meanPigmentspgcell), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
+    geom_point(aes(x = WLNum, y = meanPigmentspgcell), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
+    geom_point(aes(x = WLNum, y = meanPigmentspgcell), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
   
   geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVRPig) +
   
@@ -646,7 +684,7 @@ B<-MCPigmentChoosenPlot %>%
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = 0.000, alpha = 0.5) +
   scale_fill_identity() +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
-  scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   labs(y = "Pigment content " ~ "(pg"~cell^-1~")", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(cols = vars(factor(PigmentsName, levels=c("Chlorophyll~italic(a)","Phycobilins", "Carotenoids"))), rows = vars(Strain), labeller = label_parsed) +

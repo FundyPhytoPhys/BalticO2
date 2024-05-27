@@ -829,20 +829,6 @@ OLISAllPURTidyChoosen %>%
 
 
 
-
-
-
-```{r, warning = FALSE, fig.height = 9, fig.width = 12}
-ggp<-Spectra/PURPAR
-ggp                           
-```
-# Save plot 
-
-```{r save plot}
-# ggsave(file = file.path(FigPath, paste("Fig_PURPARRatioSpectra",".png",sep = "")), height=8, width= 9,  dpi = 300, limitsize = TRUE)
-```
-
-
 ------------------------------# Support Vector regression---------------------------------------------------
 
 https://www.geeksforgeeks.org/support-vector-regression-svr-using-linear-and-non-linear-kernels-in-scikit-learn/
@@ -928,21 +914,7 @@ OLISAllPURTidyChoosen %>%
   labs(y = "PUR/PAR ratio", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
   #ggh4x::facet_nested(rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.15,0.90),
-        legend.text = element_text(size=10))
+  theme_bw() 
 
 
 
@@ -954,9 +926,7 @@ OLISAllPURTidyChoosen %>%
   ggplot() +
   geom_point(aes(x = WLNum, y = meanPURPARRatio, colour = as.factor(Strain)), size = 4, show.legend = F) +
   #geom_line(aes(x = WLNum, y = meanPURPARRatio, linetype = as.factor(O2)), show.legend = T) +
-  
   geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
-  
   geom_errorbar(aes(x = WLNum, ymin = meanPURPARRatio - sdPURPARRatio, ymax = meanPURPARRatio + sdPURPARRatio, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.010, alpha = 0.5) +
@@ -970,25 +940,35 @@ OLISAllPURTidyChoosen %>%
   labs(y = "PUR/PAR ratio", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
   #ggh4x::facet_nested(rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.15,0.90),
-        legend.text = element_text(size=10))
+  theme_bw() 
 
 
 
 
+
+
+
+MultiCultiGrowth1PC21<-OLISAllPURTidyChoosen %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-OLISAllPURTidyChoosen %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-OLISAllPURTidyChoosen %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-OLISAllPURTidyChoosen %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
 
 PURPAR<-OLISAllPURTidyChoosen %>%
   #filter(E_days == 7 | E_days == 8) %>% 
@@ -998,6 +978,12 @@ PURPAR<-OLISAllPURTidyChoosen %>%
   geom_point(aes(x = WLNum, y = meanPURPARRatio, shape = as.factor(O2)), size = 4, show.legend = T) +
   #geom_line(aes(x = WLNum, y = meanPURPARRatio, linetype = as.factor(O2)), show.legend = T) +
   
+    geom_point(aes(x = WLNum, y = meanPURPARRatio), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
+    geom_point(aes(x = WLNum, y = meanPURPARRatio), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
+    geom_point(aes(x = WLNum, y = meanPURPARRatio), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
+    geom_point(aes(x = WLNum, y = meanPURPARRatio), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  
   geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
   
   geom_errorbar(aes(x = WLNum, ymin = meanPURPARRatio - sdPURPARRatio, ymax = meanPURPARRatio + sdPURPARRatio, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
@@ -1005,7 +991,7 @@ PURPAR<-OLISAllPURTidyChoosen %>%
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.010, alpha = 0.5) +
   scale_fill_identity() +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
-  scale_shape_manual(values = c(17, 2), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   scale_y_continuous(breaks=seq(0, 1.2, by = 0.4)) +
   coord_cartesian(ylim = c(0, 1.5)) +
