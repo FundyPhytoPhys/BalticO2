@@ -67,16 +67,17 @@ https://www.geeksforgeeks.org/how-to-make-world-map-with-ggplot2-in-r/
 
 ```{r}
 world_coordinates <- map_data("world") 
-world_coordinates$facetsSummerFull <- 'Season:~Summer~~~~~~~~~~~~~~Oxygen:~Full'
-world_coordinates$facetsSpringFull <- 'Season:~Spring/Fall~~~~~~~~~~~~~~Oxygen:~Full'
-world_coordinates$facetsWinterFull <- 'Season:~Winter~~~~~~~~~~~~~~Oxygen:~Full'
+
 world_coordinates$facetsTropicFull <- 'Season:~All~year~~~~~~~~~~~~~~Oxygen:~Full'
+world_coordinates$facetsSpringFull <- 'Season:~Spring/Fall~~~~~~~~~~~~~~Oxygen:~Full'
+world_coordinates$facetsSummerFull <- 'Season:~Summer~~~~~~~~~~~~~~Oxygen:~Full'
+world_coordinates$facetsWinterFull <- 'Season:~Winter~~~~~~~~~~~~~~Oxygen:~Full'
 
-
-world_coordinates$facetsSummerOMZ <- 'Season:~Summer~~~~~~~~~~~~~~Oxygen:~OMZ'
-world_coordinates$facetsSpringOMZ <- 'Season:~Spring/Fall~~~~~~~~~~~~~~Oxygen:~OMZ'
-world_coordinates$facetsWinterOMZ <- 'Season:~Winter~~~~~~~~~~~~~~Oxygen:~OMZ'
 world_coordinates$facetsTropicOMZ <- 'Season:~All~year~~~~~~~~~~~~~~Oxygen:~OMZ'
+world_coordinates$facetsSpringOMZ <- 'Season:~Spring/Fall~~~~~~~~~~~~~~Oxygen:~OMZ'
+world_coordinates$facetsSummerOMZ <- 'Season:~Summer~~~~~~~~~~~~~~Oxygen:~OMZ'
+world_coordinates$facetsWinterOMZ <- 'Season:~Winter~~~~~~~~~~~~~~Oxygen:~OMZ'
+
 ```
 
 
@@ -88,14 +89,13 @@ d2=data.frame(x1=c(-Inf), x2=c(Inf), y1=c(-35), y2=c(-55))
 d3=data.frame(x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 d4=data.frame(x1=c(-Inf), x2=c(Inf), y1=c(-15), y2=c(15))
 
-SummerFull<-ggplot() + 
-  geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "green", color="green", alpha=0.4) +
-  geom_rect(data=d2, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "green", color="green", alpha=0.4) +
+TropicFull<-ggplot() + 
+  geom_rect(data=d4, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "green", color="green", alpha=0.4) +
   geom_rect(data=d3, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "lightskyblue1", color="lightskyblue3", alpha=0.5) +
   geom_map(data = world_coordinates, map = world_coordinates, aes(long, lat, map_id = region), color = "white", fill = "gray50", size = 0.2) +
   #geom_text(data=data_textA, aes(x=-190, y=80, label=label), size=8, parse=TRUE) +
   labs(y = "Latitude", x = "Longitude") +
-  ggh4x::facet_nested(cols = vars(facetsSummerFull), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(facetsTropicFull), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
@@ -104,15 +104,14 @@ SummerFull<-ggplot() +
         strip.background = element_rect(fill="white"),
         strip.text = element_text(size=14),
         axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        #axis.title.x = element_blank(),
+        #axis.title.x = element_text(margin=margin(t=10)),
+        axis.title.x = element_blank(),
         legend.background = element_rect(fill="transparent"),
         legend.position = c(0.12,0.76),
         legend.key.height= unit(0.005, 'cm'),
         legend.spacing.x = unit(0.01, 'cm'),
         legend.text = element_text(size=14))
-SummerFull
-
+TropicFull
 
 SpringFull<-ggplot() + 
   geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "green", color="green", alpha=0.4) +
@@ -139,6 +138,30 @@ SpringFull<-ggplot() +
         legend.text = element_text(size=14))
 SpringFull
 
+SummerFull<-ggplot() + 
+  geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "green", color="green", alpha=0.4) +
+  geom_rect(data=d2, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "green", color="green", alpha=0.4) +
+  geom_rect(data=d3, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "lightskyblue1", color="lightskyblue3", alpha=0.5) +
+  geom_map(data = world_coordinates, map = world_coordinates, aes(long, lat, map_id = region), color = "white", fill = "gray50", size = 0.2) +
+  #geom_text(data=data_textA, aes(x=-190, y=80, label=label), size=8, parse=TRUE) +
+  labs(y = "Latitude", x = "Longitude") +
+  ggh4x::facet_nested(cols = vars(facetsSummerFull), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.text = element_text(size=14),
+        axis.title = element_text(size=18),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=14),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        #axis.title.x = element_blank(),
+        legend.background = element_rect(fill="transparent"),
+        legend.position = c(0.12,0.76),
+        legend.key.height= unit(0.005, 'cm'),
+        legend.spacing.x = unit(0.01, 'cm'),
+        legend.text = element_text(size=14))
+SummerFull
 
 WinterFull<-ggplot() + 
   geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "green", color="green", alpha=0.4) +
@@ -166,29 +189,7 @@ WinterFull<-ggplot() +
 WinterFull
 
 
-TropicFull<-ggplot() + 
-  geom_rect(data=d4, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "green", color="green", alpha=0.4) +
-  geom_rect(data=d3, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "lightskyblue1", color="lightskyblue3", alpha=0.5) +
-  geom_map(data = world_coordinates, map = world_coordinates, aes(long, lat, map_id = region), color = "white", fill = "gray50", size = 0.2) +
-  #geom_text(data=data_textA, aes(x=-190, y=80, label=label), size=8, parse=TRUE) +
-  labs(y = "Latitude", x = "Longitude") +
-  ggh4x::facet_nested(cols = vars(facetsTropicFull), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=14),
-        axis.title = element_text(size=18),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=14),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        #axis.title.x = element_blank(),
-        legend.background = element_rect(fill="transparent"),
-        legend.position = c(0.12,0.76),
-        legend.key.height= unit(0.005, 'cm'),
-        legend.spacing.x = unit(0.01, 'cm'),
-        legend.text = element_text(size=14))
-TropicFull
+
 ```
 
 
@@ -627,7 +628,7 @@ ggarrange(MapCombo1, MapCombo2,
 ggsave(file = file.path(FigPath, paste("Fig_MapComboMireillePro_2",".png",sep = "")), height=16, width= 22,  dpi = 300, limitsize = TRUE)
 ```
 
-
+----------------------------------------------- Different rainbow - Doug decay curve ---------------------------
 
 
 
