@@ -96,15 +96,17 @@ SolFitsMeta <- SolFits %>%
 ```{r}
 SolFitsMetaLRC<-SolFitsMeta %>%
   filter(Par_ue == 180) %>% 
-  filter(Run!= 118) %>% 
-  filter(Run!= 119) %>% 
-  filter(Run!= 122) %>% 
+  filter(Run!= 118) %>%
+  filter(Run!= 119) %>%
+  filter(Run!= 122) %>%
+  
   # filter(Sig!= 989.08) %>%
   #   filter(Sig!= 940.64) %>%
   #   filter(Sig!= 873.12) %>%
   #   filter(Sig!= 500.42) %>%
   #   filter(Sig!= 478.93) %>% 
-    filter(Sig>0)
+    
+  filter(Sig>0)
 ```
 
 # Convert Sig_m2psii to Sig_nm2psii and Sigdark_m2psii to Sigdark_nm2psii and calculated number of days when measurements were made
@@ -152,8 +154,8 @@ SolFitsMetaLRC %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   #filter(Strain == "PC-rich") %>% 
   #filter(O2 == 0) %>% 
-  filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
   ggplot() +
   geom_point(aes(x = ActPARCorr, y = Sig), size = 2, show.legend = T) +
   scale_fill_identity() +
@@ -207,8 +209,8 @@ SolFitsMetaLRC %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   #filter(Strain == "PC-rich") %>% 
   #filter(O2 == 0) %>% 
-  filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
   ggplot() +
   geom_point(aes(x = ActPARCorr, y = Sig_nm2psii), colour = "gray", size = 2, show.legend = T) +
   geom_point(aes(x = ActPARCorr, y = meanSig_nm2psii), colour = "darkgreen",size = 2, show.legend = T) +
@@ -224,23 +226,38 @@ SolFitsMetaLRC %>%
 lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
+drectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(10.5))
+
+drectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(10.5))
+
+drectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(10.5))
+
 
 SolFitsMetaLRC %>%
   #mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   #filter(Strain == "PC-rich") %>% 
   #filter(O2 == 0) %>% 
-  filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
   ggplot() +
   
-  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, colour = as.factor(Strain)), size = 4, show.legend = F) +
+    geom_rect(data=drectblue, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "transparent", color="blue", size=1, alpha=0.5) +
+    geom_rect(data=drectgreen, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "transparent", color="darkgreen", size=1, alpha=0.5) +
+    geom_rect(data=drectred, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "transparent", color="red", size=1, alpha=0.5) +
+  
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, colour = as.factor(Strain)), size = 2, show.legend = F) +
   geom_point(aes(x = ActPARCorr, y = Sig_nm2psii, colour = as.factor(Strain)), size = 1, alpha = 0.2, show.legend = F) +
   
   geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   
   geom_line(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, linetype = as.factor(O2)), size = 0.6, show.legend = T) +
+  geom_vline(xintercept = 180) +
   
   #geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  
+  scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
   
   scale_fill_identity() +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
@@ -248,7 +265,7 @@ SolFitsMetaLRC %>%
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   
   labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "ActPAR") +
-  ggh4x::facet_nested(cols = vars(Ex_WL, O2), rows = vars(Strain, WL), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
   theme_bw() 
 
 ```
@@ -281,8 +298,8 @@ MCDataHourSVR <- SolFitsMetaLRC %>%
   select(c(Strain, O2, Oxygen, WLNum, Ex_WL, WL, ActPARCorr, AllmeanSig_nm2psii)) %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>% 
-  filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590 | Ex_WL == 445) 
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) 
 
 # Function to train an SVM model and make predictions
 train_and_predict_svm <- function(data) {
@@ -333,8 +350,8 @@ SolFitsMetaLRC %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   #filter(Strain == "PC-rich") %>% 
   #filter(O2 == 0) %>% 
-  filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
   ggplot() +
   geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, colour = as.factor(Strain)), size = 4, show.legend = F) +
   geom_point(aes(x = ActPARCorr, y = Sig_nm2psii, colour = as.factor(Strain)), size = 1, alpha = 0.2, show.legend = F) +
@@ -370,31 +387,35 @@ SolFitsMetaLRC %>%
 
 
 
+drectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(10.5))
 
+drectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(10.5))
+
+drectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(10.5))
 
 MultiCultiGrowth1PC21<-SolFitsMetaLRC %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-    filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
   filter(Strain == "PC-rich") %>% 
   filter(O2 == 21)
 MultiCultiGrowth1PE21<-SolFitsMetaLRC %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-    filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
   filter(Strain == "PE-rich") %>% 
     filter(O2 == 21)
   
 MultiCultiGrowth1PC0<-SolFitsMetaLRC %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-    filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
   filter(Strain == "PC-rich") %>% 
   filter(O2 == 0)
 MultiCultiGrowth1PE0<-SolFitsMetaLRC %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-    filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
   filter(Strain == "PE-rich") %>% 
     filter(O2 == 0)
 
@@ -403,8 +424,8 @@ SolFitsMetaLRC %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   #filter(Strain == "PC-rich") %>% 
   #filter(O2 == 0) %>% 
-  filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
   ggplot() +
   geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, shape = as.factor(O2)), size = 4, show.legend = T) +
   #geom_point(aes(x = ActPARCorr, y = Sig_nm2psii, colour = as.factor(Strain)), size = 1, alpha = 0.2, show.legend = F) +
@@ -416,12 +437,20 @@ SolFitsMetaLRC %>%
   
   geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   geom_line(aes(x = ActPARCorr, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  geom_vline(xintercept = 180, linetype = "dotted", size = 0.7) +
+  
+  geom_rect(data=drectblue, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "transparent", color="blue", size=1) +
+  geom_rect(data=drectgreen, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "transparent", color="darkgreen", size=1) +
+  geom_rect(data=drectred, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "transparent", color="red", size=1) +
+  
   scale_fill_identity() +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
   scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
-  scale_y_continuous(breaks=seq(0, 8, by = 2)) +
-  coord_cartesian(ylim = c(0, 8)) +
+  scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  
   labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
   theme_bw() +
@@ -438,7 +467,7 @@ SolFitsMetaLRC %>%
         legend.background = element_rect(fill="transparent"),
         legend.key = element_blank(),
         legend.title = element_blank(),
-        legend.position = c(0.10,0.90),
+        legend.position = c(0.10,0.94),
         legend.text = element_text(size=10))
 
 
