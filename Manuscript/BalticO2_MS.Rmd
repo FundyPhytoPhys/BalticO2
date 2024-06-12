@@ -197,7 +197,7 @@ We calculated (Eq. \@ref(eq:JVPSII)) an uncalibrated fluorescence based estimato
 
 where σ~PSII~′ is effective absorption cross section for PSII photochemistry under the relevant actinic PAR step (nm^2^ quanta^−1^); qP is an estimate of the fraction of PSII open for photochemistry estimated according to @oxboroughResolvingChlorophyllFluorescence1997; I is the applied PAR (µmol photons m^−2^s^−1^); *F*~O~ is the minimum fluorescence from a given sample and excitation bandwidth (relative fluorescence) and σ~PSII~ is the maximum effective absorption cross section for PSII photochemistry from a given sample and excitation bandwidth (nm^2^ quanta^−1^). 
 
-We calibrated the *JV*~PSII~ estimator to absolute rates of electron transport (Eq. \@ref(eq:calibJVPSII)) using parallel measures of oxygen evolution (µmol O~2~ L^−1^ s^−1^), captured simultaneously with the FRRf measures, below light saturation of electron transport, using a FireSting robust oxygen probe (PyroScience, Germany) inserted in the cuvette for select Rapid Light Curve (RLC) runs. For the blue LED (Ex~445nm~) excitation we used a calibration slope of 108832, for the green LED (Ex~530nm~) excitation we used a calibration slope of XXX, while for orange LED (Ex~590nm~) excitation we used a calibration slope of 254327 (Fig. S2).
+We calibrated the *JV*~PSII~ estimator to absolute rates of electron transport (Eq. \@ref(eq:calibJVPSII)) using parallel measures of oxygen evolution (µmol O~2~ L^−1^ s^−1^), captured simultaneously with the FRRf measures, below light saturation of electron transport, using a FireSting robust oxygen probe (PyroScience, Germany) inserted in the cuvette for select Rapid Light Curve (RLC) runs. For the blue LED (Ex~445nm~) excitation we used a calibration slope of 108832, for the green LED (Ex~530nm~) excitation we used a calibration slope of 110082, while for orange LED (Ex~590nm~) excitation we used a calibration slope of 254327 (Tab. S2).
 
 \begin{equation}
   {JV_{PSII}(e^{−}~L^{−1}~s^{−1})} = \frac{Uncalibrated~JV_{PSII}(e^{−}~L^{−1}~s^{−1})}{Calibration~slope}
@@ -210,9 +210,9 @@ At the same time as the FRRf measurements were performed, Chl *a* (µg mL^−1^)
 
 ## Statistical analysis {.unnumbered}
 
-We used R version 4.3.0 [@rcore] running under RStudio [@posit]. We performed three-way factorial ANOVA (*aov()* function; R Base package) to determine whether strain, spectral bandwidth, oxygen concentration, and their interactions, significantly influence the chlorophyll-specific exponential growth rate (µ; d^−1^). 
+We used R version 4.3.0 [@rcore] running under RStudio [@posit]. We performed three-way factorial ANOVA (*aov()* function; R Base package) to determine whether strain, spectral bandwidth, oxygen concentration, and their interactions, significantly influence the chlorophyll-specific exponential growth rate (µ; d^−1^; Tab. S3). 
 
-Furthermore, to examine statistical differences between fits plotted for chlorophyll-specific exponential growth rate, pigments content, pigment ratio, σ~PSII~′, and *JV*~PSII~ measured under different oxygen concentrations for each strain, we performed one-way ANOVA (*aov()* function; R Base package). Statistical differences for all analyses were determined at significance level α = 0.05. 
+Furthermore, to examine statistical differences between fits plotted for chlorophyll-specific exponential growth rate (Tab. S4), pigments content (Tab. S5), pigment ratio (Tab. S6), σ~PSII~′ (Tab. S7), and *JV*~PSII~ (Tab. S8) measured under different oxygen concentrations for each strain, we performed one-way ANOVA (*aov()* function; R Base package). Statistical differences for all analyses were determined at significance level of α = 0.05. 
 
 The manuscript was prepared as a Rmarkdown document [@handelAndreasHandelCustom2020] with figures plotted using ggplot2 [@wickhamDataAnalysis2016] and patchwork [@pedersenPatchworkComposerPlots2024] packages. All metadata, data, and code is available on GitHub (https://github.com/FundyPhytoPhys/BalticO2).
 
@@ -224,7 +224,7 @@ The manuscript was prepared as a Rmarkdown document [@handelAndreasHandelCustom2
 
 We used logistic curve fits (Fig. S1) to determine chlorophyll-specific exponential growth rates (μ; d^−1^), for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 450, 470, 530, 620, 660, and 730 nm and O~2~ concentration of 250 µM and 2.5 µM (Fig. \@ref(fig:GrowthRate). 
 
-Three-way factorial ANOVA showed that peak PAR, photoperiod, strain, and their interactions, significantly affected μ (ANOVA, *p* < 0.05 for all; Table Sxxx). Significant differences between model fits of chlorophyll-specific exponential growth rates (d^−1^) vs. growth wavelength (nm) estimated for 250 µM and 2.5 µM O~2~ concentration for each *Synechococcus* sp. cultures was also recorded (ANOVA, *p* < 0.05; Table S2). 
+Three-way factorial ANOVA showed that peak PAR, photoperiod, strain, and their interactions, significantly affected μ (ANOVA, *p* < 0.05 for all; Table S3). Significant differences between model fits of chlorophyll-specific exponential growth rates (d^−1^) vs. growth wavelength (nm) estimated for 250 µM and 2.5 µM O~2~ concentration for each *Synechococcus* sp. cultures was also recorded (ANOVA, *p* < 0.05; Table S2). 
 
 In general, PC-rich strains achieved faster growth rates under O~2~ concentration of 250 µM than 2.5 µM whereas, PE-rich strain showed similar growth rates under 250 µM and 2.5 µM of O~2~ concentration across tested spectral bandwidth (nm). In the presence of high O~2~ concentrations (250 µM), PC-rich strain did not show growth at 405 nm and PE-rich strain did not growth at 405, 450, and 730 nm. On the other hand, in low O~2~ concentrations (2.5 µM), both PC-rich and PE-rich strain showed growth rates over the entire range of tested growth wavelength (405 – 730 nm). 
 
