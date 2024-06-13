@@ -60,8 +60,8 @@ library(tidyverse)
 #"..", takes up a level in the directory path
 Project <- "PICO"
 DataIn <- file.path("..", "Data", "ImportedData", "ImportedMCData")
-DataOut <- file.path("..", "Data","ProcessedData", "ProcessedMCData")
-DataOutFit <- file.path("..", "Data","ProcessedData", "ProcessedMCDataLogisticFit")
+DataOut <- file.path("..", "Data","ProcessedData", "ProcessedMCDataFit")
+#DataOutFit <- file.path("..", "Data","ProcessedData", "ProcessedMCDataLogisticFit")
 
 InitialTime <- 24 #hours to filter off start of data set to eliminate initial fluctuations common in SS120
 
@@ -118,7 +118,7 @@ list.files(path = DataIn, pattern = Project, full.names = TRUE)
 
 Run for each file in a session; all chunks below run for each file.
 ```{r read ProcessFile}
-ProcessFile <- "../Data/ImportedData/ImportedMCData/20230830_PICO_MCMIX006_RUN124_TargetDataMetaFilter.Rds"
+ProcessFile <- "../Data/ImportedData/ImportedMCData/20220329_PICO_MCMIX006_RUN57_TargetDataMetaFilter.Rds"
 
 ProcessFileName <- str_split(string = ProcessFile, "/")[[1]][5] %>%
   str_remove(pattern = ".Rds") %>%
@@ -358,17 +358,17 @@ ProcessDataNestGrowth <- ProcessDataNestGrowth %>%
          ) %>%  
   mutate(OD720trunc_TimetoMax = as.numeric(ifelse(OD720trunc_TimetoMax == "NULL" , NA, OD720trunc_TimetoMax))
          ) %>%
-   mutate(deltaOD_logistic = map(tubedata, possibly(~nlsLM(deltaOD+0.05 ~ logistic_eqn(x = time, Lmax, Lmu, Lintercept),
+   mutate(deltaOD_logistic = map(tubedata, possibly(~nlsLM(deltaOD ~ logistic_eqn(x = time, Lmax, Lmu, Lintercept),
                             data = .x,
-                            start = list(Lmax = max(.$rollmeandeltaOD+0.05, na.rm = TRUE),  Lmu = (log(max(.$rollmeandeltaOD+0.05, na.rm = TRUE)) - log(min(.$rollmeandeltaOD+0.05, na.rm =  TRUE)))/max(.$time), Lintercept = min(.$rollmeandeltaOD+0.05, na.rm = TRUE)),
+                            start = list(Lmax = max(.$rollmeandeltaOD, na.rm = TRUE),  Lmu = (log(max(.$rollmeandeltaOD, na.rm = TRUE)) - log(min(.$rollmeandeltaOD, na.rm =  TRUE)))/max(.$time), Lintercept = min(.$rollmeandeltaOD, na.rm = TRUE)),
                             control = list(maxiter = 500),
                             lower = c(Lmax = 0,
                                       Lmu = 0,
                                       Lintercept = 0),
-                            upper = c(Lmax = max(.$rollmeandeltaOD+0.05, na.rm = TRUE) * 1.5,
+                            upper = c(Lmax = max(.$rollmeandeltaOD, na.rm = TRUE) * 1.5,
                                       #Lmu = (log(max(.$rollmeandeltaOD, na.rm = TRUE)) - log(0.001))/max(.$time),
-                                      Lmu = (log(max(.$rollmeandeltaOD+0.05, na.rm = TRUE)) - log(min(.$rollmeandeltaOD+0.05, na.rm = TRUE)))/max(.$time),
-                                      Lintercept = max(.$rollmeandeltaOD+0.05, na.rm = TRUE))), 
+                                      Lmu = (log(max(.$rollmeandeltaOD, na.rm = TRUE)) - log(min(.$rollmeandeltaOD, na.rm = TRUE)))/max(.$time),
+                                      Lintercept = max(.$rollmeandeltaOD, na.rm = TRUE))), 
                             otherwise = NULL)),
          deltaOD_logistic_tidied =  map(deltaOD_logistic, possibly(tidy, otherwise = NULL)),
          deltaOD_logistic_param = map(deltaOD_logistic,possibly(glance, otherwise = NULL)),
