@@ -729,6 +729,62 @@ ggsave(file = file.path(FigPath, paste("Fig_Pigment",".png",sep = "")), height=9
 ```
 
 
+```{r}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+lab3=c(expression("405"), expression("450"), expression("470"), expression("530"), expression("620"), expression("660"), expression("730"))
+
+MCPigmentRatioPlot %>%
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  ggplot() +
+  geom_point(aes(x = PUR, y = PigmentsRatio, colour = as.factor(Strain), shape = as.factor(O2)), size = 4, show.legend = T) +
+  #geom_line(aes(x = WLNum, y = PigmentsRatio, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
+  # stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  # scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab1) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  #labs(y = "Pigment ratio", x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(cols = vars(factor(PigmentsRatioName, levels=c("Total~Phyco/Chl~italic(a)~ratio","Car/Chl~italic(a)~ratio"))), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+
+MCPigmentChoosenPlot %>%
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  ggplot() +
+  geom_point(aes(x = PUR, y = meanPigmentsRatio, shape = as.factor(O2), colour = as.factor(WL)), size = 4, show.legend = T) +
+  #geom_line(aes(x = PUR, y = meanPigmentsRatio, linetype = as.factor(O2)), show.legend = T) +
+  
+    # geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
+    # geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
+    # geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
+    # geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
+    # 
+  
+  #geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = F, MCDataHourSVRRatio) +
+  
+  geom_errorbar(aes(x = PUR, ymin = meanPigmentsRatio - sdPigmentsRatio, ymax = meanPigmentsRatio + sdPigmentsRatio), width=0, size=0.3, show.legend = F) +
+  #geom_text(data=data_textB, aes(x=720, y=4, label=label), size=6, parse = TRUE) +
+  # stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  # scale_fill_identity() +
+  
+    scale_colour_manual(values = c("royalblue4", "steelblue3", "lightseagreen", "limegreen", "coral","brown1","indianred4"), name="", labels = lab3) +
+  #scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  #labs(y = "Pigment ratio (µg:µg)", x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(cols = vars(factor(PigmentsRatioName, levels=c("Phycobilins:Chlorophyll~italic(a)","Carotenoids:Chlorophyll~italic(a)"))), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+
+
+```
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_PigmentvsPUR",".png",sep = "")), height=5, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+
 
 
 

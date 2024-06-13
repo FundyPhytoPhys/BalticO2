@@ -272,15 +272,15 @@ knitr::include_graphics(file.path( FiguresFP,"Fig_Pigment.png"))
 ## Effective absorption cross section of PSII {.unnumbered}
 
 ```{r SigLRC, fig.cap = SigLRC_cap, fig.height = 6, fig.width = 8, echo = FALSE}
-SigLRC_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. Actinic PAR (µmol photons m^−2^s^−1^). \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitations (Ex~445nm~; blue, and Ex~590nm~; orange), for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 450 and 620 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).", .sep = " ")
+SigLRC_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) vs. Actinic PAR (µmol photons m^−2^s^−1^). \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitations (Ex~445nm~; blue, Ex~535nm~; green, or Ex~590nm~; orange), for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 450, 530, or 620 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line). The vertical line shows diel peak PAR growth light of 180 µmol photons m^−2^s^−1^. The shaded area (blue, green, or red) shows situations in which cultures were excited and growing in correspondence conditions.", .sep = " ")
 knitr::include_graphics(file.path( FiguresFP,"Fig_SigLRC.png"))
 ```
 
 <br>
 
 ```{r SigWL, fig.cap = SigWL_cap, fig.height = 6, fig.width = 8, echo = FALSE}
-SigWL_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. wavelength (nm). \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitations (Ex~445nm~; blue and Ex~590nm~; orange), for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 450 and 620 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).", .sep = " ")
-knitr::include_graphics(file.path( FiguresFP,"Fig_SigWL_2.png"))
+SigWL_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. wavelength (nm). \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitations (Ex~445nm~; blue, Ex~535nm~; green, or Ex~590nm~; orange), for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidth of 450, 530, or 620 nm and O~2~ concentration of 250 µM (open symbols and dashed line) and 2.5 µM (closed symbols and solid line).", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"Fig_SigWL.png"))
 ```
 
 <br>
