@@ -122,8 +122,8 @@ MultiCultiGrowth<-MultiCultiGrowth %>%
 
 ```{r}
 MultiCultiGrowth<-MultiCultiGrowth %>% 
-  mutate(deltaOD_Lmu_se=case_when(deltaOD_Lmu_se>0.2~0,
-         deltaOD_Lmu_se<=0.2~deltaOD_Lmu_se))
+  mutate(deltaOD_Lmu_se=case_when(deltaOD_Lmu_se>0.12~0,
+         deltaOD_Lmu_se<=0.12~deltaOD_Lmu_se))
 ```
 
 
@@ -131,15 +131,15 @@ MultiCultiGrowth<-MultiCultiGrowth %>%
 MultiCultiGrowth %>%
   filter(WL != "WW") %>% 
   ggplot() +
-  geom_point(aes(x = WL, y = deltaOD_Lmu_corr,colour=as.factor(Strain)), size = 3.5, alpha = 0.9, show.legend = T) +
-  ggh4x::facet_nested(cols = vars(O2), rows = vars(Strain)) +
+  geom_point(aes(x = WL, y = deltaOD_Lmu_corr,colour=as.factor(O2)), size = 3.5, alpha = 0.9, show.legend = T) +
+  ggh4x::facet_nested(rows = vars(Strain)) +
   theme_bw()
 
 MultiCultiGrowth %>%
   filter(WL != "WW") %>% 
   ggplot() +
-  geom_point(aes(x = WL, y = deltaOD_Lmu_corr,colour=as.factor(Strain)), size = 3.5, alpha = 0.9, show.legend = T) +
-  ggh4x::facet_nested(cols = vars(Oxygen), rows = vars(Strain)) +
+  geom_point(aes(x = WL, y = deltaOD_Lmu_corr,colour=as.factor(O2)), size = 3.5, alpha = 0.9, show.legend = T) +
+  ggh4x::facet_nested(rows = vars(Strain)) +
   theme_bw()
 ```
 
@@ -170,29 +170,6 @@ MultiCultiGrowth %>%
   ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
  #ggh4x::facet_nested(cols = vars(Strain), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() 
-
-
-MultiCultiGrowth %>%
-  filter(deltaOD_Lmu_se<0.2) %>% 
-  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  filter(WL != "WW") %>%
-  ggplot() +
-  geom_point(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
-  geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
-  geom_errorbar(aes(x = WLNum, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
-  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
-  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
-  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
-  
-  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.1, alpha = 0.5) +
-  scale_fill_identity() +
-  labs(y = "µ " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
-  # scale_x_continuous(breaks=seq(0, 1.2, by = 0.4)) +
-  # coord_cartesian(xlim = c (0, 1.2)) +
-
-  coord_flip()+
-  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
-  theme_bw()
 
 ```
 
@@ -853,13 +830,13 @@ MultiCultiGrowth1PE0<-MultiCultiGrowth1 %>%
 
 JazDataRoundMeta2 %>%
   ggplot() +
-  geom_area(aes(x = nm, y = EmNormJaz722, fill = "indianred4"), alpha = 0.1, show.legend = F) +
-  geom_area(aes(x = nm, y = EmNormJaz647, fill = "brown1"), alpha = 0.1, show.legend = F) +
-  geom_area(aes(x = nm, y = EmNormJaz612, fill = "coral"), alpha = 0.1, show.legend = F) +
-  geom_area(aes(x = nm, y = EmNormJaz521, fill = "limegreen"), alpha = 0.1, show.legend = F) +
-  geom_area(aes(x = nm, y = EmNormJaz469, fill = "lightseagreen"), alpha = 0.1, show.legend = F) +
-  geom_area(aes(x = nm, y = EmNormJaz441, fill = "steelblue3"), alpha = 0.1, show.legend = F) +
-  geom_area(aes(x = nm, y = EmNormJaz393, fill = "royalblue4"), alpha = 0.1, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz722/10, fill = "indianred4"), alpha = 0.1, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz647/10, fill = "brown1"), alpha = 0.1, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz612/10, fill = "coral"), alpha = 0.1, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz521/10, fill = "limegreen"), alpha = 0.1, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz469/10, fill = "lightseagreen"), alpha = 0.1, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz441/10, fill = "steelblue3"), alpha = 0.1, show.legend = F) +
+  geom_area(aes(x = nm, y = EmNormJaz393/10, fill = "royalblue4"), alpha = 0.1, show.legend = F) +
   
   geom_point(aes(x = WLNum, y = deltaOD_Lmu_corr, shape = as.factor(O2)), size = 4, show.legend = T, MultiCultiGrowth1) +
   
@@ -878,7 +855,7 @@ JazDataRoundMeta2 %>%
   scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   
-  stat_wl_strip(aes(x = nm), ymin = -Inf, ymax = -0.080, alpha = 0.5) +
+  stat_wl_strip(aes(x = nm), ymin = -Inf, ymax = -0.09, alpha = 0.5) +
   scale_fill_identity() +
   labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
@@ -905,5 +882,4 @@ JazDataRoundMeta2 %>%
 ```{r save plot}
 ggsave(file = file.path(FigPath, paste("Fig_GrowthRate",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
-
 

@@ -121,8 +121,8 @@ MultiCultiDataAll <- MultiCultiDataAll %>%
 
 
 # Create GrowthCurve plot
-
-```{r create GrowthCurve plot, fig.height = 8, fig.width = 8, warning = FALSE}
+fig.height = 8, fig.width = 8, warning = FALSE
+```{r create GrowthCurve plot}
 data_textA <- data.frame(facetsPar_ue = c("PAR~(µmol~photons~m^{-2}~s^{-1})"), Par_ue = c(900), Photoperiod  = c(8), facetsPhotoperiod = c("Photoperiod~(h)"), label = c('A'))
 
 OD680<-MultiCultiDataAll %>%
@@ -131,14 +131,14 @@ OD680<-MultiCultiDataAll %>%
   ggplot() +
   
   #geom_area(aes(x = Time_h, y = meanActinic_par_h), size = 0.1, fill = "tan1", alpha = 0.6) +
-  geom_line(aes(x = Time_h/24, y = meanOD680_h, colour = as.factor(Strain)), size = 0.5, show.legend = T) +
-  scale_colour_discrete(type=c("palegreen3", "brown4")) +
+  geom_line(aes(x = Time_h/24, y = meanOD680_h, colour = as.factor(O2)), size = 0.5, show.legend = T) +
+  #scale_colour_discrete(type=c("palegreen3", "brown4")) +
   #scale_colour_discrete(type=c("palegreen3", "brown4"), name="") +
   labs(y = "Optical density ("~OD[680]~")", x = "Elapsed time (d)") +
 
   #ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
-    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
-  
+  #ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+      ggh4x::facet_nested(cols = vars(WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
@@ -156,17 +156,46 @@ OD680<-MultiCultiDataAll %>%
         legend.text = element_text(size=10))
 OD680
 ```
+# Create GrowthCurve plot
+fig.height = 8, fig.width = 8, warning = FALSE
+```{r create GrowthCurve plot}
+data_textA <- data.frame(facetsPar_ue = c("PAR~(µmol~photons~m^{-2}~s^{-1})"), Par_ue = c(900), Photoperiod  = c(8), facetsPhotoperiod = c("Photoperiod~(h)"), label = c('A'))
 
-# Save plot 
+OD720<-MultiCultiDataAll %>%
+  filter(WL!= "WW") %>% 
+  filter(Time_h <= 192) %>% 
+  ggplot() +
+  
+  #geom_area(aes(x = Time_h/24, y = meanActinic_par_h), size = 0.1, fill = "tan1", alpha = 0.3) +
+  geom_line(aes(x = Time_h/24, y = meanOD720_h, colour = as.factor(O2)), size = 0.5, show.legend = T) +
+  #scale_colour_discrete(type=c("palegreen3", "brown4")) +
+  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="") +
+  labs(y = "Optical density ("~OD[720]~")", x = "Elapsed time (d)") +
 
-```{r save plot}
-#ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_OD680",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
+  #ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+        ggh4x::facet_nested(cols = vars(WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        #panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.title = element_blank(),
+        legend.position = c(0.09,0.90),
+        legend.text = element_text(size=10))
+OD720
 ```
 
-
 # Create GrowthCurve plot
-
-```{r create GrowthCurve plot, fig.height = 8, fig.width = 8, warning = FALSE}
+fig.height = 8, fig.width = 8, warning = FALSE
+```{r create GrowthCurve plot}
 data_textA <- data.frame(facetsPar_ue = c("PAR~(µmol~photons~m^{-2}~s^{-1})"), Par_ue = c(900), Photoperiod  = c(8), facetsPhotoperiod = c("Photoperiod~(h)"), label = c('A'))
 
 ODDelta<-MultiCultiDataAll %>%
@@ -175,13 +204,13 @@ ODDelta<-MultiCultiDataAll %>%
   ggplot() +
   
   #geom_area(aes(x = Time_h, y = meanActinic_par_h), size = 0.1, fill = "tan1", alpha = 0.6) +
-  geom_line(aes(x = Time_h/24, y = meanDeltaOD_h, colour = as.factor(Strain)), size = 0.5, show.legend = T) +
-  scale_colour_discrete(type=c("palegreen3", "brown4")) +
+  geom_line(aes(x = Time_h/24, y = meanDeltaOD_h, colour = as.factor(O2)), size = 0.5, show.legend = T) +
+  #scale_colour_discrete(type=c("palegreen3", "brown4")) +
   #scale_colour_discrete(type=c("palegreen3", "brown4"), name="") +
-  labs(y = "Optical density (chlorophyll proxy"~OD[680]~"-"~OD[720]~")", x = "Elapsed time (d)") +
-
+  #labs(y = "Optical density (chlorophyll proxy"~OD[680]~"-"~OD[720]~")", x = "Elapsed time (d)") +
+  labs(y = "Optical density (ΔOD)", x = "Elapsed time (d)") +
   #ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
-    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
+    ggh4x::facet_nested(cols = vars(WL), rows = vars(Strain), labeller = label_parsed) +
   
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
@@ -201,53 +230,15 @@ ODDelta<-MultiCultiDataAll %>%
 ODDelta
 ```
 
+```{r fig.height = 6, fig.width = 6, warning = FALSE}
+ggp<- OD680/OD720/ODDelta
+ggp  
+```
+
 # Save plot 
 
 ```{r save plot}
-#ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_Delta",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
-```
-
-
-# Create GrowthCurve plot
-
-```{r create GrowthCurve plot, fig.height = 8, fig.width = 8, warning = FALSE}
-data_textA <- data.frame(facetsPar_ue = c("PAR~(µmol~photons~m^{-2}~s^{-1})"), Par_ue = c(900), Photoperiod  = c(8), facetsPhotoperiod = c("Photoperiod~(h)"), label = c('A'))
-
-OD720<-MultiCultiDataAll %>%
-  filter(WL!= "WW") %>% 
-  filter(Time_h <= 192) %>% 
-  ggplot() +
-  
-  #geom_area(aes(x = Time_h/24, y = meanActinic_par_h), size = 0.1, fill = "tan1", alpha = 0.3) +
-  geom_line(aes(x = Time_h/24, y = meanOD720_h, colour = as.factor(Strain)), size = 0.5, show.legend = T) +
-  scale_colour_discrete(type=c("palegreen3", "brown4")) +
-  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="") +
-  labs(y = "Optical density ("~OD[720]~")", x = "Elapsed time (d)") +
-
-  #ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
-    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
-  
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        #panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.title = element_blank(),
-        legend.position = c(0.09,0.90),
-        legend.text = element_text(size=10))
-OD720
-```
-# Save plot 
-
-```{r save plot}
-#ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve_OD720",".png",sep = "")), height=5, width= 8,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("SFig_GrowthCurve",".png",sep = "")), height=10, width= 8,  dpi = 300, limitsize = TRUE)
 ```
 
 -------------------------------------------------------------------------------------------------------------------

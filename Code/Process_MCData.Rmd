@@ -118,7 +118,7 @@ list.files(path = DataIn, pattern = Project, full.names = TRUE)
 
 Run for each file in a session; all chunks below run for each file.
 ```{r read ProcessFile}
-ProcessFile <- "../Data/ImportedData/ImportedMCData/20230701_PICO_MCMIX006_RUN119_TargetDataMetaFilter.Rds"
+ProcessFile <- "../Data/ImportedData/ImportedMCData/20220329_PICO_MCMIX006_RUN57_TargetDataMetaFilter.Rds"
 
 ProcessFileName <- str_split(string = ProcessFile, "/")[[1]][5] %>%
   str_remove(pattern = ".Rds") %>%
@@ -127,7 +127,9 @@ ProcessFileName <- str_split(string = ProcessFile, "/")[[1]][5] %>%
 ProcessFileName
 
 ProcessData <- readRDS(ProcessFile)  %>%
-  ungroup()
+  ungroup()  %>% 
+    filter(time <= 192)  # weird problem with fits - 
+    #filter(time > 72) # weird problem with fits - 
 
 # colnames(ProcessData)
 ```
@@ -319,7 +321,15 @@ ProcessDataNestGrowth <- ProcessDataNestGrowth %>%
   mutate(OD720_logistic = map(tubedata, possibly(~nlsLM(OD720 ~ logistic_eqn(x = time, Lmax, Lmu, Lintercept),
                             data = .x,
                             start = list(Lmax = max(.$rollmeanOD720, na.rm = TRUE),  Lmu = (log(max(.$rollmeanOD720, na.rm = TRUE)) - log(min(.$rollmeanOD720, na.rm = TRUE)))/max(.$time), Lintercept = min(.$rollmeanOD720, na.rm = TRUE)),
-                            control = list(maxiter = 500)), otherwise = NULL)),
+                            control = list(maxiter = 500),
+                            lower = c(Lmax = 0,
+                                      Lmu = 0,
+                                      Lintercept = min(.$rollmeanOD720, na.rm = TRUE)),
+                            upper = c(Lmax = max(.$rollmeanOD720, na.rm = TRUE) * 1.5,
+                                      Lmu = (log(max(.$rollmeanOD720, na.rm = TRUE)) - log(min(.$rollmeanOD720, na.rm = TRUE)))/max(.$time),
+                                      Lintercept = max(.$rollmeanOD720, na.rm = TRUE))), 
+                            otherwise = NULL)),
+                            
          OD720_logistic_tidied =  map(OD720_logistic, possibly(tidy, otherwise = NULL)),
          OD720_logistic_param = map(OD720_logistic,possibly(glance, otherwise = NULL)),
          OD720_logistic_predict = map(OD720_logistic, possibly(augment, otherwise = NULL))
@@ -332,7 +342,14 @@ ProcessDataNestGrowth <- ProcessDataNestGrowth %>%
                             data = .x %>%
                             filter(OD720 <= (max(OD720) * TruncFactor)),
                             start = list(Lmax = max(.$rollmeanOD720, na.rm = TRUE),  Lmu = (log(max(.$rollmeanOD720, na.rm = TRUE)) - log(min(.$rollmeanOD720, na.rm = TRUE)))/max(.$time), Lintercept = min(.$rollmeanOD720, na.rm = TRUE)),
-                            control = list(maxiter = 500)), otherwise = NULL)),
+                            control = list(maxiter = 500),
+                            lower = c(Lmax = 0,
+                                      Lmu = 0,
+                                      Lintercept = min(.$rollmeanOD720, na.rm = TRUE)),
+                            upper = c(Lmax = max(.$rollmeanOD720, na.rm = TRUE) * 1.5,
+                                      Lmu = (log(max(.$rollmeanOD720, na.rm = TRUE)) - log(min(.$rollmeanOD720, na.rm = TRUE)))/max(.$time),
+                                      Lintercept = max(.$rollmeanOD720, na.rm = TRUE))), 
+                            otherwise = NULL)),
          OD720trunc_logistic_tidied =  map(OD720trunc_logistic, possibly(tidy, otherwise = NULL)),
          OD720trunc_logistic_param = map(OD720trunc_logistic,possibly(glance, otherwise = NULL)),
          OD720trunc_logistic_predict = map(OD720trunc_logistic, possibly(augment, otherwise = NULL))
@@ -341,10 +358,18 @@ ProcessDataNestGrowth <- ProcessDataNestGrowth %>%
          ) %>%  
   mutate(OD720trunc_TimetoMax = as.numeric(ifelse(OD720trunc_TimetoMax == "NULL" , NA, OD720trunc_TimetoMax))
          ) %>%
-   mutate(deltaOD_logistic = map(tubedata, possibly(~nlsLM(deltaOD ~ logistic_eqn(x = time, Lmax, Lmu, Lintercept),
+   mutate(deltaOD_logistic = map(tubedata, possibly(~nlsLM(deltaOD+0.05 ~ logistic_eqn(x = time, Lmax, Lmu, Lintercept),
                             data = .x,
-                            start = list(Lmax = max(.$rollmeandeltaOD, na.rm = TRUE),  Lmu = (log(max(.$rollmeandeltaOD, na.rm = TRUE)) - log(min(.$rollmeandeltaOD, na.rm =  TRUE)))/max(.$time), Lintercept = min(.$rollmeandeltaOD, na.rm = TRUE)),
-                            control = list(maxiter = 500)), otherwise = NULL)),
+                            start = list(Lmax = max(.$rollmeandeltaOD+0.05, na.rm = TRUE),  Lmu = (log(max(.$rollmeandeltaOD+0.05, na.rm = TRUE)) - log(min(.$rollmeandeltaOD+0.05, na.rm =  TRUE)))/max(.$time), Lintercept = min(.$rollmeandeltaOD+0.05, na.rm = TRUE)),
+                            control = list(maxiter = 500),
+                            lower = c(Lmax = 0,
+                                      Lmu = 0,
+                                      Lintercept = 0),
+                            upper = c(Lmax = max(.$rollmeandeltaOD+0.05, na.rm = TRUE) * 1.5,
+                                      #Lmu = (log(max(.$rollmeandeltaOD, na.rm = TRUE)) - log(0.001))/max(.$time),
+                                      Lmu = (log(max(.$rollmeandeltaOD+0.05, na.rm = TRUE)) - log(min(.$rollmeandeltaOD+0.05, na.rm = TRUE)))/max(.$time),
+                                      Lintercept = max(.$rollmeandeltaOD+0.05, na.rm = TRUE))), 
+                            otherwise = NULL)),
          deltaOD_logistic_tidied =  map(deltaOD_logistic, possibly(tidy, otherwise = NULL)),
          deltaOD_logistic_param = map(deltaOD_logistic,possibly(glance, otherwise = NULL)),
          deltaOD_logistic_predict = map(deltaOD_logistic, possibly(augment, otherwise = NULL))
@@ -356,8 +381,15 @@ ProcessDataNestGrowth <- ProcessDataNestGrowth %>%
    mutate(deltaODtrunc_logistic = map(tubedata, possibly(~nlsLM(deltaOD ~ logistic_eqn(x = time, Lmax, Lmu, Lintercept),
                             data = .x %>%
                             filter(deltaOD <= (max(deltaOD) * TruncFactor)),
-                            start = list(Lmax = max(.$rollmeandeltaOD, na.rm = TRUE),  Lmu = (log(max(.$rollmeandeltaOD, na.rm = TRUE)) - log(min(.$rollmeandeltaOD, na.rm = TRUE)))/max(.$time), Lintercept = min(.$rollmeandeltaOD, na.rm = TRUE)),
-                            control = list(maxiter = 500)), otherwise = NULL)),
+                            start = list(Lmax = max(.$rollmeandeltaOD, na.rm = TRUE),  Lmu = (log(max(.$rollmeandeltaOD, na.rm = TRUE)) - log(min(.$rollmeandeltaOD, na.rm =  TRUE)))/max(.$time), Lintercept = min(.$rollmeandeltaOD, na.rm = TRUE)),
+                            control = list(maxiter = 500),
+                            lower = c(Lmax = 0,
+                                      Lmu = 0,
+                                      Lintercept = min(.$rollmeandeltaOD, na.rm = TRUE)),
+                            upper = c(Lmax = max(.$rollmeandeltaOD, na.rm = TRUE) * 1.5,
+                                      Lmu = (log(max(.$rollmeandeltaOD, na.rm = TRUE)) - log(min(.$rollmeandeltaOD, na.rm = TRUE)))/max(.$time),
+                                      Lintercept = max(.$rollmeandeltaOD, na.rm = TRUE))), 
+                            otherwise = NULL)),
          deltaODtrunc_logistic_tidied =  map(deltaODtrunc_logistic, possibly(tidy, otherwise = NULL)),
          deltaODtrunc_logistic_param = map(deltaODtrunc_logistic, possibly(glance, otherwise = NULL)),
          deltaODtrunc_logistic_predict = map(deltaODtrunc_logistic, possibly(augment, otherwise = NULL))
@@ -396,6 +428,15 @@ remove(ProcessDataNestGrowth2)
 #failed attempt with map2
 # test = map2(.x = lognormOD720_Gompertz_tidied, .y = lognormOD720_Gompertz_predict, ~if_else(as.numeric(~pluck(.x, 2, 1)) <= as.numeric(~.y$time[which.max(.$`.fitted`)]), 1, 0))
 ```
+
+
+
+
+
+```{r}
+#Test35 <- ProcessDataNestGrowth %>% filter(SampleID =="SySl1335")
+```
+
 ```{r}
 
 # ProcessDataNestGrowth %>%
