@@ -568,7 +568,7 @@ Olis <- readRDS(OlisFile)  %>%
 #          Strain=="PC-rich_077"~"PC-rich"))
 
 MCGrowthRate <- MultiCultiGrowth %>% 
-  left_join(., Olis, by = c("Run" = "Run", "SampleID" = "SampleID","Strain" = "Strain", "Par_ue" = "Par_ue", "Photoperiod" = "Photoperiod",  "O2" = "O2", "WL" = "WL", "Tube" = "Tube", "ExpDate" = "ExpDate", "LightShape" = "LightShape", "PARPhotonDose_day" = "PARPhotonDose_day", "Oxygen"="Oxygen")) 
+  left_join(., Olis, by = c("Run" = "Run", "SampleID" = "SampleID","Strain" = "Strain", "Par_ue" = "Par_ue", "Photoperiod" = "Photoperiod",  "O2" = "O2", "WL" = "WL", "ExpDate" = "ExpDate", "PARPhotonDose_day" = "PARPhotonDose_day", "Oxygen"="Oxygen")) 
   
 ```
 

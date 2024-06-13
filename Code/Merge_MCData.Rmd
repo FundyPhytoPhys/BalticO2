@@ -58,7 +58,7 @@ Project <- "PICO"
 
 DataOut <- file.path("..", "Data", "CleanedData", "CleanedMCData")
 DataIn <- file.path("..", "Data","ProcessedData", "ProcessedMCData")
-
+#DataIn <- file.path("..", "Data","ProcessedData", "ProcessedMCDataFit")
 
 GrowthFlagError <- 0.2     # percentage of mu that std error must be less than
 

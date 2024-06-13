@@ -89,7 +89,7 @@ DeclineWindow <- 12 #duration in hours overwhich we test for decline from max in
 
 ```{r set colours}
 MyWavelengths = c(405, 450, 470, 530, 620, 660, 730, "WW")
-MCMIXColours = c(c(w_length2rgb(405), w_length2rgb(450), w_length2rgb(470), w_length2rgb(530),            w_length2rgb(620), w_length2rgb(660), w_length2rgb(730), "black"))
+MCMIXColours = c(c(w_length2rgb(405), w_length2rgb(450), w_length2rgb(470), w_length2rgb(530),  w_length2rgb(620), w_length2rgb(660), w_length2rgb(730), "black"))
 
 
 names(MCMIXColours) <- MyWavelengths
@@ -118,7 +118,7 @@ list.files(path = DataIn, pattern = Project, full.names = TRUE)
 
 Run for each file in a session; all chunks below run for each file.
 ```{r read ProcessFile}
-ProcessFile <- "../Data/ImportedData/ImportedMCData/20220329_PICO_MCMIX006_RUN57_TargetDataMetaFilter.Rds"
+ProcessFile <- "../Data/ImportedData/ImportedMCData/20230830_PICO_MCMIX006_RUN124_TargetDataMetaFilter.Rds"
 
 ProcessFileName <- str_split(string = ProcessFile, "/")[[1]][5] %>%
   str_remove(pattern = ".Rds") %>%
@@ -127,8 +127,8 @@ ProcessFileName <- str_split(string = ProcessFile, "/")[[1]][5] %>%
 ProcessFileName
 
 ProcessData <- readRDS(ProcessFile)  %>%
-  ungroup()  %>% 
-    filter(time <= 192)  # weird problem with fits - 
+  ungroup()  
+    #filter(time <= 192)  # weird problem with fits - 
     #filter(time > 72) # weird problem with fits - 
 
 # colnames(ProcessData)
