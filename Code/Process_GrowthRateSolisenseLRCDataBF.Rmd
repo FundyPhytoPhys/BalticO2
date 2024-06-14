@@ -907,7 +907,7 @@ ggplot() +
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_GrowthRate_JVPSII_Chla",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_GrowthRate_JVPSII_Chla",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -1018,9 +1018,6 @@ ggplot() +
 
 
 
-
-
-
 MCGrowthJVPSIISPmean445590 %>% 
   filter(WL != "WW") %>% 
 ggplot() +
@@ -1053,15 +1050,125 @@ ggplot() +
         legend.title = element_blank(),
         legend.position = c(0.90,0.60),
         legend.text = element_text(size=10))
+
+
+
+MCGrowthJVPSIISPmean445590 %>% 
+  filter(WL != "WW") %>% 
+ggplot() +
+  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(O2)), alpha = 0.8, size = 3.5, show.legend = T) +
+  # geom_line(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, linetype = as.factor(O2)), alpha = 0.8, show.legend = T) +
+  
+  geom_line(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), show.legend = T, size = 0.6) +
+  #geom_line(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, y = svr_pred, linetype = as.factor(O2)), show.legend = T, size = 0.6, MCDataHourSVR) +
+  
+  geom_errorbar(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se), width=0, size=0.3, show.legend = F) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  # scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_x_continuous(label=scientific_10) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, O2), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.90,0.60),
+        legend.text = element_text(size=10))
+
 ```
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_GrowthRate_JVPSII_Chla445590_3",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_GrowthRate_JVPSII_Chla445590_3",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+--------------------------- Trim no growth ---------------------------------
+
+
+# Filter condition where no growt
+
+```{r}
+SolFitsMetaLightCorr445590Trim1<-MCGrowthJVPSIISPmean445590 %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21) %>% 
+  filter(WL != 405) 
+
+SolFitsMetaLightCorr445590Trim3<-MCGrowthJVPSIISPmean445590 %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0) 
+
+SolFitsMetaLightCorr445590Trim4<-MCGrowthJVPSIISPmean445590 %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 21) %>% 
+  filter(WL != 405) %>% 
+  filter(WL != 450) %>% 
+  filter(WL != 730) 
+  
+SolFitsMetaLightCorr445590Trim5<-MCGrowthJVPSIISPmean445590 %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 0) 
+
+
+MCGrowthJVPSIISPmean445590Trim<-rbind(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMetaLightCorr445590Trim4, SolFitsMetaLightCorr445590Trim5)
+
+rm(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMetaLightCorr445590Trim4, SolFitsMetaLightCorr445590Trim5)
 ```
 
 
+```{r}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+lab3=c(expression("405"), expression("450"), expression("470"), expression("530"), expression("620"),  expression("660"),  expression("730"))
 
+scientific_10 <- function(x) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(x))) }
+
+
+
+MCGrowthJVPSIISPmean445590Trim %>% 
+  filter(WL != "WW") %>% 
+ggplot() +
+  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(O2)), alpha = 0.8, size = 3.5, show.legend = T) +
+  # geom_line(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, linetype = as.factor(O2)), alpha = 0.8, show.legend = T) +
+  
+  geom_line(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), show.legend = T, size = 0.6) +
+  #geom_line(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, y = svr_pred, linetype = as.factor(O2)), show.legend = T, size = 0.6, MCDataHourSVR) +
+  
+  geom_errorbar(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se), width=0, size=0.3, show.legend = F) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  # scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_x_continuous(label=scientific_10) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, O2), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.90,0.60),
+        legend.text = element_text(size=10))
+
+```
 
 
 
