@@ -1541,27 +1541,6 @@ lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
 
-SolFitsMetaLightCorr445590 %>%
-  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  filter(WL != "WW") %>%
-  ggplot() +
-    geom_point(aes(x = WLNum, y = meanSig_nm2psii, colour = as.factor(Strain), shape = as.factor(Strain)), size = 4, show.legend = T) +
-    # geom_line(aes(x = WLNum, y = meanSig_nm2psii, colour = as.factor(Strain), linetype = as.factor(Strain)), show.legend = F) +
-    geom_errorbar(aes(x = WLNum, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
-    geom_line(aes(x = WLNum, y = svr_pred, colour = as.factor(Strain), linetype = as.factor(Strain)), size = 0.6, MCDataHourSVR) +
-
-  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
-  scale_fill_identity() +
-  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
-  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
-  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
-  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Growth wavelength (nm)") +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
-  theme_bw() 
-
-
-
-
 MultiCultiGrowth1PC21<-SolFitsMetaLightCorr445590 %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
@@ -1706,6 +1685,207 @@ SolFitsMetaLightCorr445590 %>%
 ```{r save plot}
 #ggsave(file = file.path(FigPath, paste("Fig_SigWL",".png",sep = "")), height=6, width= 6, dpi = 300, limitsize = TRUE)
 ```
+
+# Filter condition where no growt
+
+```{r}
+SolFitsMetaLightCorr445590Trim1<-SolFitsMetaLightCorr445590 %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21) %>% 
+  filter(WL != 405) 
+
+SolFitsMetaLightCorr445590Trim3<-SolFitsMetaLightCorr445590 %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0) 
+
+SolFitsMetaLightCorr445590Trim4<-SolFitsMetaLightCorr445590 %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 21) %>% 
+  filter(WL != 405) %>% 
+  filter(WL != 450) %>% 
+  filter(WL != 730) 
+  
+SolFitsMetaLightCorr445590Trim5<-SolFitsMetaLightCorr445590 %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 0) 
+
+
+SolFitsMetaLightCorr445590Trim<-rbind(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMetaLightCorr445590Trim4, SolFitsMetaLightCorr445590Trim5)
+
+rm(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMetaLightCorr445590Trim4, SolFitsMetaLightCorr445590Trim5)
+```
+
+# Create preliminary plots 
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+
+rectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(440), x2=c(460), y1=c(0), y2=c(8))
+
+rectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(520), x2=c(540), y1=c(0), y2=c(8))
+
+rectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(610), x2=c(630), y1=c(0), y2=c(8))
+
+
+
+MultiCultiGrowth1PC21<-SolFitsMetaLightCorr445590Trim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-SolFitsMetaLightCorr445590Trim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-SolFitsMetaLightCorr445590Trim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-SolFitsMetaLightCorr445590Trim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+SolFitsMetaLightCorr445590Trim %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  ggplot() +
+  geom_point(aes(x = WLNum, y = AllmeanSig_nm2psii, shape = as.factor(O2), shape = as.factor(O2)), size = 4, show.legend = T) +
+    geom_point(aes(x = WLNum, y = AllmeanSig_nm2psii), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
+    geom_point(aes(x = WLNum, y = AllmeanSig_nm2psii), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
+    geom_point(aes(x = WLNum, y = AllmeanSig_nm2psii), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
+    geom_point(aes(x = WLNum, y = AllmeanSig_nm2psii), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
+    #geom_line(aes(x = WLNum, y = meanSig_nm2psii, linetype = as.factor(O2)), show.legend = T) +
+    geom_errorbar(aes(x = WLNum, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii), width=0, size=0.3, show.legend = F) +
+  
+    geom_rect(data=rectblue, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), color="steelblue3", fill="steelblue3", alpha = 0.1, size=1) +
+  geom_rect(data=rectgreen, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), color="limegreen", fill="limegreen", alpha = 0.1, size=1) +
+  geom_rect(data=rectred, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), color="coral", fill="coral", alpha = 0.1, size=1) +
+  
+  
+  
+  #geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.1, alpha = 0.5) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_y_continuous(breaks=seq(0, 8, by = 2)) +
+  coord_cartesian(ylim = c(0, 8)) +
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.15,0.90),
+        legend.text = element_text(size=10))
+
+
+
+
+
+MultiCultiGrowth1PC21<-SolFitsMetaLightCorr445590Trim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(WL == 450 | WL == 620 | WL == 530) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445 | Ex_WL == 535) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-SolFitsMetaLightCorr445590Trim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(WL == 450 | WL == 620 | WL == 530) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445 | Ex_WL == 535) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-SolFitsMetaLightCorr445590Trim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(WL == 450 | WL == 620 | WL == 530) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445 | Ex_WL == 535) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-SolFitsMetaLightCorr445590Trim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(WL == 450 | WL == 620 | WL == 530) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445 | Ex_WL == 535) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+SolFitsMetaLightCorr445590Trim %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(WL == 450 | WL == 620 | WL == 530) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445 | Ex_WL == 535) %>%
+  ggplot() +
+    geom_point(aes(x = WLNum, y = AllmeanSig_nm2psii, shape = as.factor(O2)), size = 4, show.legend = T) +
+    #geom_line(aes(x = WLNum, y = meanSig_nm2psii, linetype = as.factor(O2)), show.legend = T) +
+  
+    geom_point(aes(x = WLNum, y = AllmeanSig_nm2psii), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
+    geom_point(aes(x = WLNum, y = AllmeanSig_nm2psii), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
+    geom_point(aes(x = WLNum, y = AllmeanSig_nm2psii), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
+    geom_point(aes(x = WLNum, y = AllmeanSig_nm2psii), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
+  
+    geom_errorbar(aes(x = WLNum, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+    #geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  
+  geom_rect(data=rectblue, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), color="steelblue3", fill="steelblue3", alpha = 0.1, size=1) +
+  geom_rect(data=rectgreen, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), color="limegreen", fill="limegreen", alpha = 0.1, size=1) +
+  geom_rect(data=rectred, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), color="coral", fill="coral", alpha = 0.1, size=1) +
+  
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.1, alpha = 0.5) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_y_continuous(breaks=seq(0, 8, by = 2)) +
+  coord_cartesian(ylim = c(0, 8)) +
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+
+```
+
+
+
+
+
+
+
 
 ```{r}
 
