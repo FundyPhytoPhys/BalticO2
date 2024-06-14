@@ -143,7 +143,7 @@ print(MCFiles)
 # Set Target File and read in csv
 ```{r set TargetFile and read csv}
 
-TargetFile <- "20230701_PICO_MCMIX006_RUN119.csv"
+TargetFile <- "20220407_PICO_MCMIX006_RUN61.csv"
 
 
 # This opens a compressed file without decompressing.
@@ -212,7 +212,7 @@ TargetData <- TargetData %>%
   filter(grepl("od-", key)) %>%
   #filter(grepl("od-sensors-", key)) %>%
   ggplot(data = .) +
-  geom_point(aes(x = time, y = value, colour = as.factor(str_detect(key, "680"))), size = 0.5) +
+  geom_point(aes(x = time, y = value, colour = as.factor(str_detect(key, "720"))), size = 0.5) +
   #scale_x_continuous(breaks=seq(0, 800, by = 125)) + 
   #coord_cartesian(xlim = c(-5, 800)) +
   geom_vline(aes(xintercept = 7 * 24), linetype = "dashed") + 
@@ -416,12 +416,17 @@ TargetDataMetaFilter %>%
 
 ```
 
+```{r}
+# TargetDataMetaFilter <-TargetDataMetaFilter %>% 
+#   filter(OD720>0)
+```
+
 
 ```{r filterdataplotexpand}
 
 #labelling dynamically offset from data traces.
 #use 'median' for 'x' and OD680 + offset for 'y'
-ExpandTube = 2
+ExpandTube = 4
 
 OD680_x = median(TargetDataMetaFilter$time)
 OD720_x = median(TargetDataMetaFilter$time) 

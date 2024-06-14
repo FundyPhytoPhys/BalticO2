@@ -57,8 +57,8 @@ library(tidyverse)
 Project <- "PICO"
 
 DataOut <- file.path("..", "Data", "CleanedData", "CleanedMCData")
-#DataIn <- file.path("..", "Data","ProcessedData", "ProcessedMCData")
-DataIn <- file.path("..", "Data","ProcessedData", "ProcessedMCDataFit")
+DataIn <- file.path("..", "Data","ProcessedData", "ProcessedMCData")
+#DataIn <- file.path("..", "Data","ProcessedData", "ProcessedMCDataFit")
 
 GrowthFlagError <- 0.2     # percentage of mu that std error must be less than
 
@@ -346,9 +346,9 @@ remove(LogFitsData)
 
 # Save Long DF for GAM and Nested for further analysis 
 ```{r save files}
-saveRDS(object = MCGrowthFits, file = file.path(DataOut, paste(Project, "Cleaned_MCDataFit.Rds",  sep = "_")), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+# saveRDS(object = MCGrowthFits, file = file.path(DataOut, paste(Project, "Cleaned_MCDataFit.Rds",  sep = "_")), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 
-# saveRDS(object = MCGrowthFits, file = file.path(DataOut, paste(Project, "Cleaned_MCData.Rds",  sep = "_")), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(object = MCGrowthFits, file = file.path(DataOut, paste(Project, "Cleaned_MCData.Rds",  sep = "_")), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 ```
 
 # Variable names used in Data Dictionary

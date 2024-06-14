@@ -722,7 +722,10 @@ Spectra<-OLISSpectraMetaPURmean %>%
 
 
   # geom_area(aes(x = nm, y = PURNormBA77G, fill = "palegreen3"), alpha = 0.5, show.legend = F) +
+
+  
   geom_line(aes(x = nm, y = meanAbsNorm440, linetype = as.factor(O2)), show.legend = F, size = 0.4) +
+  
   #geom_line(aes(x = nm, y = AbsNorm440, linetype = as.factor(O2)), show.legend = F, size = 0.4, OLISSpectraMetaPUR127405) +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
@@ -1135,7 +1138,7 @@ PURPAR<-OLISAllPURTidy %>%
   filter(WL != "WW") %>%
   ggplot() +
   geom_point(aes(x = WLNum, y = meanPURPARRatio, shape = as.factor(O2)), size = 4, show.legend = T) +
-  #geom_line(aes(x = WLNum, y = meanPURPARRatio, linetype = as.factor(O2)), show.legend = T) +
+  geom_line(aes(x = WLNum, y = meanPURPARRatio, linetype = as.factor(O2)), size = 0.6, show.legend = T) +
   
     geom_point(aes(x = WLNum, y = meanPURPARRatio), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
     geom_point(aes(x = WLNum, y = meanPURPARRatio), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
@@ -1143,7 +1146,7 @@ PURPAR<-OLISAllPURTidy %>%
     geom_point(aes(x = WLNum, y = meanPURPARRatio), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
   
   
-  geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  #geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
   
   geom_errorbar(aes(x = WLNum, ymin = meanPURPARRatio - sdPURPARRatio, ymax = meanPURPARRatio + sdPURPARRatio, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   

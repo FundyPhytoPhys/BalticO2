@@ -677,8 +677,11 @@ SolFitsMetaLRCGrowthCorr1<-SolFitsMetaLRCGrowth %>%
 SolFitsMetaLRCGrowthCorr2<-SolFitsMetaLRCGrowth %>% 
   filter(Ex_WL == 590)
 
-SolFitsMetaLRCGrowth445590<-rbind(SolFitsMetaLRCGrowthCorr1, SolFitsMetaLRCGrowthCorr2)
-  rm(SolFitsMetaLRCGrowthCorr1, SolFitsMetaLRCGrowthCorr2)
+SolFitsMetaLRCGrowthCorr3<-SolFitsMetaLRCGrowth %>% 
+  filter(Ex_WL == 535)
+
+SolFitsMetaLRCGrowth445590<-rbind(SolFitsMetaLRCGrowthCorr1, SolFitsMetaLRCGrowthCorr2, SolFitsMetaLRCGrowthCorr3)
+  rm(SolFitsMetaLRCGrowthCorr1, SolFitsMetaLRCGrowthCorr2, SolFitsMetaLRCGrowthCorr3)
   
 ```
 

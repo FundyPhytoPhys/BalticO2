@@ -356,7 +356,8 @@ MCGrowthRateFitData <- MCGrowthRateFitData %>%
 ```{r}
 MCGrowthRateFitData <-MCGrowthRateFitData %>%
   filter(WL!= "WW") %>% 
-  filter(Par_ue == 180)
+  filter(Par_ue == 180) %>% 
+  filter(time_h<=192) 
 ```
 
 
