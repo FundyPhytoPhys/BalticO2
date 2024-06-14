@@ -74,7 +74,8 @@ list.files(path = DataIn, pattern = Project, full.names = TRUE)
 # Also, conteined mean sig - mean for replica measured on the same day
 
 ```{r read ProcessFile Sol}
-SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseDataCorr.Rds"  
+#SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseDataCorr.Rds"  
+SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseDataCorrHalfPAR.Rds"  
 
 SolisenseFileName <- str_split(string = SolisenseFile, "/")[[1]][3] %>%
   str_remove(pattern = ".Rds")
@@ -345,7 +346,7 @@ SolFitsPigmentExpChoose %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_SigPig",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_SigPig",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -354,7 +355,8 @@ ggsave(file = file.path(FigPath, paste("Fig_SigPig",".png",sep = "")), height=5.
 -------------------------------------------------------------------------------------------------------------------------
 
 ```{r read ProcessFile Sol}
-SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseData445590.Rds"
+#SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseData445590.Rds"
+SolisenseFile <- "../Data/ProcessedData/ProcessedSolisenseData/BalticO2_Processed_SolisenseData445590HalfPAR.Rds"
 
 SolisenseFileName <- str_split(string = SolisenseFile, "/")[[1]][3] %>%
   str_remove(pattern = ".Rds")
@@ -794,9 +796,14 @@ SolFitsPigmentExp445590ChooseTrim %>%
 # Save rds for further analysis
 
 ```{r save rds}
-saveRDS(SolFitsPigmentExpChoose, file.path(DataOut, paste(Project, "Processed_SolisensePigmentsDataCorr.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
-
-saveRDS(SolFitsPigmentExp445590Choose, file.path(DataOut, paste(Project, "Processed_SolisensePigmentsData445590.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+# saveRDS(SolFitsPigmentExpChoose, file.path(DataOut, paste(Project, "Processed_SolisensePigmentsDataCorr.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+# 
+# saveRDS(SolFitsPigmentExp445590Choose, file.path(DataOut, paste(Project, "Processed_SolisensePigmentsData445590.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+# 
+# 
+# saveRDS(SolFitsPigmentExpChoose, file.path(DataOut, paste(Project, "Processed_SolisensePigmentsDataCorrHalfPAR.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+# 
+# saveRDS(SolFitsPigmentExp445590Choose, file.path(DataOut, paste(Project, "Processed_SolisensePigmentsData445590HalfPAR.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 
 ```
 

@@ -637,14 +637,14 @@ SolFitsMetaLight1 <- SolFitsMeta %>%
   filter(Dark1s == 0) %>%
   filter(Par_ue == 180) %>%
   filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>% 
-  filter(ActPAR == 80) # 158.1 for 445; 114.2 for 470; 79.6 for 505; 123.1 for 535; and 195.0 for 590
+  filter(ActPAR == 40) # 79 for 445; 61.5 for 535; and 97.5 for 590
 
 
 SolFitsMetaLight2 <- SolFitsMeta %>%
   filter(Dark1s == 0) %>%
   filter(Par_ue == 180) %>%
   filter(Ex_WL == 505 | Ex_WL == 470) %>% 
-  filter(ActPAR == 160) # 159.2 for 505; 228.4 for 470; 
+  filter(ActPAR == 80) # 79.6 for 505; 114.2 for 470; 
 
 SolFitsMetaLight<-rbind(SolFitsMetaLight1, SolFitsMetaLight2)
   rm(SolFitsMetaLight1, SolFitsMetaLight2)
@@ -1432,7 +1432,7 @@ SolFitsExpStTurnerMD<-SolFitsExpStTurnerMD %>%
 # Save Rds for further analysis
 
 ```{r save rds}
-saveRDS(SolFitsExpStTurnerMD, file.path(DataOut, paste(Project, "Processed_SolisenseDataCorr.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(SolFitsExpStTurnerMD, file.path(DataOut, paste(Project, "Processed_SolisenseDataCorrHalfPAR.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 ```
 
 # Variable names used in Data Dictionary
@@ -2130,7 +2130,7 @@ SolFitsExpStTurnerMD445590<-SolFitsExpStTurnerMD445590 %>%
 # Save Rds for further analysis
 
 ```{r save rds}
-saveRDS(SolFitsExpStTurnerMD445590, file.path(DataOut, paste(Project, "Processed_SolisenseData445590.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(SolFitsExpStTurnerMD445590, file.path(DataOut, paste(Project, "Processed_SolisenseData445590HalfPAR.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 ```
 
 # Variable names used in Data Dictionary

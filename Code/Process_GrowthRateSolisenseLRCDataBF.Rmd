@@ -430,12 +430,12 @@ ggplot() +
   theme_bw() 
 ```
 #Cleaning the df
-
+JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_cell_day, JVPSII_umol_eLs_HalfPar_ue_ugChl_day
 ```{r}
 #colnames(GrowthRateSoliExpDay)
 
 GrowthRateSoliExpDay2<-GrowthRateSoliExpDay %>% 
-  select(-c(Tube, MC, LightShape, meanPURPARRatio, sdPURPARRatio, JVPSII_umol_eLs_HalfPar_ue, JVPSII_umol_eLs_Par_ue, JVPSII_umol_eLs_Par_ue_ugChl, JVPSII_umol_eLs_Par_ue_umolChl, JVPSII_umol_eLs_Par_ue_cell, JVPSII_umol_eLs_HalfPar_ue_ugChl, JVPSII_umol_eLs_HalfPar_ue_umolChl, JVPSII_umol_eLs_HalfPar_ue_cell, JVPSII_umol_eLs_HalfPar_ue_ugChl, JVPSII_umol_eLs_HalfPar_ue_umolChl, JVPSII_umol_eLs_HalfPar_ue_cell, JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_cell_day)) %>% 
+  select(-c(Tube, MC, LightShape, meanPURPARRatio, sdPURPARRatio, JVPSII_umol_eLs_HalfPar_ue, JVPSII_umol_eLs_Par_ue, JVPSII_umol_eLs_Par_ue_ugChl, JVPSII_umol_eLs_Par_ue_umolChl, JVPSII_umol_eLs_Par_ue_cell, JVPSII_umol_eLs_HalfPar_ue_ugChl, JVPSII_umol_eLs_HalfPar_ue_umolChl, JVPSII_umol_eLs_HalfPar_ue_cell, JVPSII_umol_eLs_HalfPar_ue_ugChl, JVPSII_umol_eLs_HalfPar_ue_umolChl, JVPSII_umol_eLs_HalfPar_ue_cell)) %>% 
   unique()
 ```
 
@@ -452,6 +452,7 @@ MCGrowthJVPSIISPmean<-GrowthRateSoliExpDay2 %>%
   
   group_by(Strain, O2, Oxygen, WL, Ex_WL) %>%
   summarize(Strain, Par_ue, Photoperiod, O2, Oxygen, WL, Ex_WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, 
+JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_cell_day, 
     
             meanJVPSII_umol_eLs_Par_ue_ugChl_day = mean(JVPSII_umol_eLs_Par_ue_ugChl_day),
             sdJVPSII_umol_eLs_Par_ue_ugChl_day = sd(JVPSII_umol_eLs_Par_ue_ugChl_day),
@@ -460,7 +461,17 @@ MCGrowthJVPSIISPmean<-GrowthRateSoliExpDay2 %>%
             sdJVPSII_umol_eLs_Par_ue_umolChl_day = sd(JVPSII_umol_eLs_Par_ue_umolChl_day),
             
             meanJVPSII_umol_eLs_Par_ue_cell_day = mean(JVPSII_umol_eLs_Par_ue_cell_day),
-            sdJVPSII_umol_eLs_Par_ue_cell_day = sd(JVPSII_umol_eLs_Par_ue_cell_day)) %>%
+            sdJVPSII_umol_eLs_Par_ue_cell_day = sd(JVPSII_umol_eLs_Par_ue_cell_day),
+            
+            
+            meanJVPSII_umol_eLs_HalfPar_ue_ugChl_day = mean(JVPSII_umol_eLs_HalfPar_ue_ugChl_day),
+            sdJVPSII_umol_eLs_HalfPar_ue_ugChl_day = sd(JVPSII_umol_eLs_HalfPar_ue_ugChl_day),
+            
+            meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day = mean(JVPSII_umol_eLs_HalfPar_ue_umolChl_day),
+            sdJVPSII_umol_eLs_HalfPar_ue_umolChl_day = sd(JVPSII_umol_eLs_HalfPar_ue_umolChl_day),
+            
+            meanJVPSII_umol_eLs_HalfPar_ue_cell_day = mean(JVPSII_umol_eLs_HalfPar_ue_cell_day),
+            sdJVPSII_umol_eLs_HalfPar_ue_cell_day = sd(JVPSII_umol_eLs_HalfPar_ue_cell_day)) %>%
   ungroup()
   
 
@@ -538,6 +549,22 @@ ggplot() +
   #scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
   theme_bw() 
+
+
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+MCGrowthJVPSIISPmean %>% 
+  filter(WL != "WW") %>% 
+ggplot() +
+  geom_point(aes(meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Ex_WL), shape = as.factor(O2)), alpha = 0.8, size = 3.5, show.legend = T) +
+    geom_smooth(aes(meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(O2)), alpha = 0.2, size = 1, method = "lm") +
+  
+  #scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  #scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+
 
 
   #labs(y = "Logistic growth rate " ~ "("~d^-1~")", x = "Photon dose ( µmol photons "~m^-2~""~d^-1~")") +
