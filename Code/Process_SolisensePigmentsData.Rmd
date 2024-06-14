@@ -482,15 +482,15 @@ SolFitsPigmentExp445590Choose %>%
   drop_na(meanSig_nm2psii) %>% 
   ggplot() +
 
-  geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 4, show.legend = F) +
-  geom_line(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, linetype = as.factor(O2)), show.legend = T) +
+  geom_point(aes(x = meanPhycoChlaRatio, y = AllmeanSig_nm2psii, colour = as.factor(Strain)), size = 4, show.legend = F) +
+  geom_line(aes(x = meanPhycoChlaRatio, y = AllmeanSig_nm2psii, linetype = as.factor(O2)), show.legend = T) +
   geom_errorbar(aes(x = meanPhycoChlaRatio, ymin = meanSig_nm2psii - sdSig_nm2psii, ymax = meanSig_nm2psii + sdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
   scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Phycobiliprotein to Chl" ~italic(a)~ "ratio (µg:µg)") +
   #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, O2), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
@@ -597,30 +597,30 @@ SolFitsPigmentExp445590Choose %>%
 MultiCultiGrowth1PC21<-SolFitsPigmentExp445590Choose %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
-    filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(WL == 450 | WL == 620 | WL == 530) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445 | Ex_WL == 535) %>%
   filter(Strain == "PC-rich") %>% 
   filter(O2 == 21)
 MultiCultiGrowth1PE21<-SolFitsPigmentExp445590Choose %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
-    filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(WL == 450 | WL == 620 | WL == 530) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445 | Ex_WL == 535) %>%
   filter(Strain == "PE-rich") %>% 
     filter(O2 == 21)
   
 MultiCultiGrowth1PC0<-SolFitsPigmentExp445590Choose %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
-    filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(WL == 450 | WL == 620 | WL == 530) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445 | Ex_WL == 535) %>%
   filter(Strain == "PC-rich") %>% 
   filter(O2 == 0)
 MultiCultiGrowth1PE0<-SolFitsPigmentExp445590Choose %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
-    filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(WL == 450 | WL == 620 | WL == 530) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445 | Ex_WL == 535) %>%
   filter(Strain == "PE-rich") %>% 
     filter(O2 == 0)
 
@@ -628,8 +628,8 @@ MultiCultiGrowth1PE0<-SolFitsPigmentExp445590Choose %>%
 SolFitsPigmentExp445590Choose %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
-  filter(WL == 450 | WL == 620) %>%
-  filter(Ex_WL == 590 | Ex_WL == 445) %>%
+  filter(WL == 450 | WL == 620 | WL == 530) %>%
+  filter(Ex_WL == 590 | Ex_WL == 445 | Ex_WL == 535) %>%
   ggplot() +
   geom_point(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, shape = as.factor(O2)), size = 4, show.legend = T) +
   #geom_line(aes(x = meanPhycoChlaRatio, y = meanSig_nm2psii, linetype = as.factor(O2)), show.legend = T) +
