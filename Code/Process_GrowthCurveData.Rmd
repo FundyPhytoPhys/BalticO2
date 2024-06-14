@@ -124,7 +124,11 @@ MultiCultiDataAll <- MultiCultiDataAll %>%
 # Create GrowthCurve plot
 fig.height = 8, fig.width = 8, warning = FALSE
 ```{r create GrowthCurve plot}
-data_textA <- data.frame(facetsPar_ue = c("PAR~(µmol~photons~m^{-2}~s^{-1})"), Par_ue = c(900), Photoperiod  = c(8), facetsPhotoperiod = c("Photoperiod~(h)"), label = c('A'))
+data_textA <- data.frame(facetsPar_ue = c("PAR~(µmol~photons~m^{-2}~s^{-1})"), Par_ue = c(900), Photoperiod  = c(8), facetsPhotoperiod = c("Photoperiod~(h)"), label = c('a'))
+
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
 
 OD680<-MultiCultiDataAll %>%
   filter(WL!= "WW") %>% 
@@ -132,9 +136,11 @@ OD680<-MultiCultiDataAll %>%
   ggplot() +
   
   #geom_area(aes(x = Time_h, y = meanActinic_par_h), size = 0.1, fill = "tan1", alpha = 0.6) +
-  geom_line(aes(x = Time_h/24, y = meanOD680_h, colour = as.factor(O2)), size = 0.5, show.legend = T) +
+  geom_line(aes(x = Time_h/24, y = meanOD680_h, colour = as.factor(O2)), size = 0.8, show.legend = T) +
   #scale_colour_discrete(type=c("palegreen3", "brown4")) +
-  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="") +
+  scale_colour_discrete(type=c("dodgerblue4", "deepskyblue2"), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  #scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
   labs(y = "Optical density ("~OD[680]~")", x = "Elapsed time (d)") +
 
   #ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
@@ -207,7 +213,7 @@ ODDelta<-MultiCultiDataAll %>%
   #geom_area(aes(x = Time_h, y = meanActinic_par_h), size = 0.1, fill = "tan1", alpha = 0.6) +
   geom_line(aes(x = Time_h/24, y = meanDeltaOD_h, colour = as.factor(O2)), size = 0.5, show.legend = T) +
   
-  geom_line(aes(x = time_h/24, y = meanfittedDeltaOD_h, colour = as.factor(O2)), size = 1, alpha = 0.9, show.legend = T, MCGrowthRateFitData) +
+  #geom_line(aes(x = time_h/24, y = meanfittedDeltaOD_h, colour = as.factor(O2)), size = 1, alpha = 0.9, show.legend = T, MCGrowthRateFitData) +
   #scale_colour_discrete(type=c("palegreen3", "brown4")) +
   #scale_colour_discrete(type=c("palegreen3", "brown4"), name="") +
   #labs(y = "Optical density (chlorophyll proxy"~OD[680]~"-"~OD[720]~")", x = "Elapsed time (d)") +
