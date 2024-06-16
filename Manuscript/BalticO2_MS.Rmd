@@ -245,7 +245,7 @@ PE-rich strain showed the highest growth rate under green light at 530 nm under 
 
 ```{r GrowthRate, fig.cap = GrowthRatePhotoperiodPUR_cap, fig.height = 8, fig.width = 6, echo = FALSE}
 GrowthRatePhotoperiodPUR_cap<- glue("Chlorophyll-specific exponential growth rates (d^−1^) vs. growth waveband (nm, shaded regions). Growth rates (± SE) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line).", .sep = " ")
-knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRate.png"))
+knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRateDelta.png"))
 ```
 
 <br>

@@ -567,6 +567,20 @@ ggplot() +
 
 
 
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+MCGrowthJVPSIISPmean %>% 
+  filter(WL != "WW") %>% 
+ggplot() +
+  geom_point(aes(y=meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, x=Ex_WL, colour = as.factor(Ex_WL), shape = as.factor(O2)), alpha = 0.8, size = 3.5, show.legend = T) +
+    geom_smooth(aes(y=meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, x=Ex_WL, colour = as.factor(O2)), alpha = 0.2, size = 1, method = "lm") +
+  
+  #scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  #scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+
   #labs(y = "Logistic growth rate " ~ "("~d^-1~")", x = "Photon dose ( µmol photons "~m^-2~""~d^-1~")") +
   #labs(y = "Chlorophyll specific exponential growth rate " ~ "("~d^-1~")") +
 ```
