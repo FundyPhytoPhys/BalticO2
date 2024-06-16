@@ -243,9 +243,23 @@ PE-rich strain showed the highest growth rate under green light at 530 nm under 
 
 <br>
 
-```{r GrowthRate, fig.cap = GrowthRatePhotoperiodPUR_cap, fig.height = 8, fig.width = 6, echo = FALSE}
-GrowthRatePhotoperiodPUR_cap<- glue("Chlorophyll-specific exponential growth rates (d^−1^) vs. growth waveband (nm, shaded regions). Growth rates (± SE) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line).", .sep = " ")
+```{r GrowthRate, fig.cap = GrowthRate_cap, fig.height = 8, fig.width = 6, echo = FALSE}
+GrowthRate_cap<- glue("Chlorophyll-specific exponential growth rates (d^−1^) vs. growth waveband (nm, shaded regions). Growth rates (± SE) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line).", .sep = " ")
 knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRateDelta.png"))
+```
+
+<br>
+
+```{r GrowthRatePig, fig.cap = GrowthRatePig_cap, fig.height = 8, fig.width = 6, echo = FALSE}
+GrowthRatePig_cap<- glue("Chlorophyll-specific exponential growth rates (d^−1^) vs. growth waveband (nm, shaded regions). Growth rates (± SE) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line).", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP,"Fig.GrowthDeltaPigRatioTrim.png"))
+```
+
+<br>
+
+```{r PigPUR, fig.cap = PigPUR_cap, fig.height = 8, fig.width = 6, echo = FALSE}
+PigPUR_cap<- glue("Chlorophyll-specific exponential growth rates (d^−1^) vs. growth waveband (nm, shaded regions). Growth rates (± SE) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line).", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP,"Fig_PigmentvsPURTrim2.png"))
 ```
 
 <br>
@@ -259,7 +273,7 @@ Whole-cell absorbance spectra of PC-rich and PE-rich *Synechococcus* sp. culture
 ```{r PURPAR, fig.cap = PURPAR_cap, fig.height = 6, fig.width = 8, echo = FALSE}
 PURPAR_cap<- glue("Whole-cell absorbance spectra vs. wavelength (nm) and PUR/PAR ratio vs. growth wavelength (nm). (*a*) Representative absorbance spectra, normalized to 440 nm (NormA~440~), were measured together with emission spectra of the colour LED lamp used for PAR, normalized to their emission peak. Estimated Photosynthetically Usable Radiation (PUR) is shown as a green area for the PC-rich strain and a red area for the PE-rich strain grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentration of 250 µM (dashed line) or 2.5 µM (solid line). (*b*) PUR/PAR ratio was estimated for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Note that PE-rich cultures showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; while PC-rich cultures showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
 
-knitr::include_graphics(file.path( FiguresFP,"Fig_PURPARRatioSpectra.png")) 
+knitr::include_graphics(file.path( FiguresFP,"Fig_PURPARRatioSpectraTrim.png")) 
 ```
 
 <br>
