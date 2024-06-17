@@ -697,33 +697,15 @@ Spectra
 lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
-Spectra<-OLISSpectraMetaPURmean %>%
-  #filter(E_days == 7 | E_days == 8) %>% 
-  # filter(E_days == 4 | E_days == 7 | E_days == 6) %>% 
+OLISSpectraMetaPURmean %>%
   ggplot() +
-  # geom_area(aes(x = nm, y = EmNormJaz722, fill = "gray84"), alpha = 0.6, show.legend = F) +
-  # #geom_area(aes(x = nm, y = EmNormJaz600, fill = "gray84"), alpha = 0.6, show.legend = F) +
-  # geom_area(aes(x = nm, y = EmNormJaz647, fill = "gray84"), alpha = 0.6, show.legend = F) +
-  # geom_area(aes(x = nm, y = EmNormJaz612, fill = "gray84"), alpha = 0.6, show.legend = F) +
-  # geom_area(aes(x = nm, y = EmNormJaz521, fill = "gray84"), alpha = 0.6, show.legend = F) +
-  # geom_area(aes(x = nm, y = EmNormJaz469, fill = "gray84"), alpha = 0.6, show.legend = F) +
-  # geom_area(aes(x = nm, y = EmNormJaz441, fill = "gray84"), alpha = 0.6, show.legend = F) +
-  # geom_area(aes(x = nm, y = EmNormJaz393, fill = "gray84"), alpha = 0.6, show.legend = F) +
-  
   geom_area(aes(x = nm, y = meanPURNorm, fill = "palegreen3"), alpha = 0.2, show.legend = F, OLISSpectraMetaPUR77) +
   geom_area(aes(x = nm, y = meanPURNorm, fill = "brown4"), alpha = 0.2, show.legend = F, OLISSpectraMetaPUR127) +
   #geom_area(aes(x = nm, y = PURNorm, fill = "brown4"), alpha = 0.2, show.legend = F, OLISSpectraMetaPUR127405) +
 
   geom_line(aes(x = nm, y = meanPURNorm), colour = "palegreen3", size = 0.5, show.legend = F, OLISSpectraMetaPUR77) +
   geom_line(aes(x = nm, y = meanPURNorm), colour = "brown4", size = 0.5, show.legend = F, OLISSpectraMetaPUR127) +
- #geom_line(aes(x = nm, y = PURNorm), colour = "brown4", show.legend = F, OLISSpectraMetaPUR127405) +
-  
-  
 
-
-  # geom_area(aes(x = nm, y = PURNormBA77G, fill = "palegreen3"), alpha = 0.5, show.legend = F) +
-
-  
   geom_line(aes(x = nm, y = meanAbsNorm440, linetype = as.factor(O2)), show.legend = F, size = 0.4) +
   
   #geom_line(aes(x = nm, y = AbsNorm440, linetype = as.factor(O2)), show.legend = F, size = 0.4, OLISSpectraMetaPUR127405) +
@@ -739,22 +721,7 @@ Spectra<-OLISSpectraMetaPURmean %>%
   ggh4x::facet_nested(rows = vars(WL),  cols = vars(Strain), labeller = label_parsed) +
   
   #ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))),labeller = labeller(Ex_WL = label_value, WL = label_value)) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.08,0.90),
-        legend.text = element_text(size=10))
-Spectra
+  theme_bw() 
 ```
 
 ------------------------------ Trim no growth ----------------------------
@@ -794,6 +761,8 @@ rm(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMeta
 lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
+data_textA <- data.frame(Strain  = c("PE-rich"), WL  = c("405"), label = c('italic(a)'))
+
 Spectra<-OLISSpectraMetaPURmeanTrim %>%
   #filter(E_days == 7 | E_days == 8) %>% 
   # filter(E_days == 4 | E_days == 7 | E_days == 6) %>% 
@@ -815,7 +784,7 @@ Spectra<-OLISSpectraMetaPURmeanTrim %>%
   geom_line(aes(x = nm, y = meanPURNorm), colour = "brown4", size = 0.5, show.legend = F, OLISSpectraMetaPUR127) +
  #geom_line(aes(x = nm, y = PURNorm), colour = "brown4", show.legend = F, OLISSpectraMetaPUR127405) +
   
-  
+  geom_text(data=data_textA, aes(x=720, y=1.0, label=label), size=6, parse = TRUE) +
 
 
   # geom_area(aes(x = nm, y = PURNormBA77G, fill = "palegreen3"), alpha = 0.5, show.legend = F) +
@@ -862,8 +831,9 @@ Spectra
 ```{r Create plot}
 lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
+data_textA <- data.frame(Strain  = c("PE-rich"), WL  = c("405"), label = c('italic(a)'))
 
-OLISSpectraMetaPURmean %>%
+SpectraRaw<-OLISSpectraMetaPURmeanTrim %>%
   #filter(E_days == 7 | E_days == 8) %>% 
   #filter(E_days == 6) %>% 
   ggplot() +
@@ -875,7 +845,7 @@ OLISSpectraMetaPURmean %>%
   # geom_line(aes(x = nm, y = PURNorm), colour = "palegreen3", show.legend = F, OLISSpectraMetaPUR77) +
   # geom_line(aes(x = nm, y = PURNorm), colour = "brown4", show.legend = F, OLISSpectraMetaPUR127) +
   # geom_line(aes(x = nm, y = PURNorm), colour = "brown4", show.legend = F, OLISSpectraMetaPUR127405) +
-  
+    geom_text(data=data_textA, aes(x=720, y=0.1, label=label), size=6, parse = TRUE) +
   
   # geom_area(aes(x = nm, y = PURNormBA77G, fill = "palegreen3"), alpha = 0.5, show.legend = F) +
   geom_line(aes(x = nm, y = meanAbsorbance, colour = as.factor(Strain), linetype = as.factor(O2)), show.legend = T, size = 0.6) +
@@ -907,7 +877,7 @@ OLISSpectraMetaPURmean %>%
         legend.title = element_blank(),
         legend.position = c(0.08,0.80),
         legend.text = element_text(size=10))
-
+SpectraRaw
 ```
 
 # Save plot 
@@ -1234,7 +1204,7 @@ MultiCultiGrowth1PE0<-OLISAllPURTidy %>%
   filter(Strain == "PE-rich") %>% 
     filter(O2 == 0)
 
-PURPAR<-OLISAllPURTidy %>%
+OLISAllPURTidy %>%
   #filter(E_days == 7 | E_days == 8) %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
@@ -1278,18 +1248,9 @@ PURPAR<-OLISAllPURTidy %>%
         legend.title = element_blank(),
         legend.position = c(0.15,0.90),
         legend.text = element_text(size=10))
-PURPAR
-```
-# Save plot 
 
-```{r save plot}
-#ggsave(file = file.path(FigPath, paste("Fig_PURPARRatio",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
-```{r, warning = FALSE, fig.height = 9, fig.width = 8}
-ggp<-Spectra/PURPAR
-ggp                           
-```
 
 # Save plot 
 
@@ -1334,6 +1295,7 @@ rm(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMeta
 lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
+data_textB <- data.frame(Strain  = c("PC-rich"), label = c('italic(b)'))
 
 MultiCultiGrowth1PC21<-OLISAllPURTidyTrim %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
@@ -1374,6 +1336,7 @@ PURPAR<-OLISAllPURTidyTrim %>%
   #geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
   
   geom_errorbar(aes(x = WLNum, ymin = meanPURPARRatio - sdPURPARRatio, ymax = meanPURPARRatio + sdPURPARRatio, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_text(data=data_textB, aes(x=720, y=1.2, label=label), size=6, parse = TRUE) +
   
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.010, alpha = 0.5) +
   scale_fill_identity() +
@@ -1412,7 +1375,7 @@ ggp
 # Save plot 
 
 ```{r save plot}
-#ggsave(file = file.path(FigPath, paste("Fig_PURPARRatioSpectraTrim",".png",sep = "")), height=8, width= 7,  dpi = 300, limitsize = TRUE)
+# ggsave(file = file.path(FigPath, paste("Fig_PURPARRatioSpectraTrim",".png",sep = "")), height=8, width= 7,  dpi = 300, limitsize = TRUE)
 ```
 
 

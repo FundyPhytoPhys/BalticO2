@@ -984,7 +984,7 @@ JazDataRoundMeta2 %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_GrowthRateDelta",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_GrowthRateDelta",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 ```{r Create plot}
@@ -1056,7 +1056,7 @@ JazDataRoundMeta2 %>%
 ```
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_GrowthRateOD720",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("SFig_GrowthRateOD720",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -1106,11 +1106,14 @@ MCGrowthPig <- MultiCultiGrowth %>%
 lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
+data_textD <- data.frame(Strain  = c("PC-rich"), label = c('italic(c)'))
+
 MCGrowthPig %>%
   filter(OD720_Lmu_corr>0) %>% 
   ggplot() +
   geom_point(aes(x = meanPhycoChlaRatio, y = OD720_Lmu_corr, colour = as.factor(Strain), shape = as.factor(O2)), size = 4, show.legend = T) +
-  geom_line(aes(x = meanPhycoChlaRatio, y = OD720_Lmu_corr, linetype = as.factor(O2)), show.legend = T) +
+  geom_smooth(aes(x = meanPhycoChlaRatio, y = OD720_Lmu_corr, linetype = as.factor(O2)), show.legend = T, alpha = 0.2, method = "lm") +
+  # geom_line(aes(x = meanPhycoChlaRatio, y = OD720_Lmu_corr, linetype = as.factor(O2)), show.legend = T) +
   geom_errorbar(aes(x = meanPhycoChlaRatio, ymin = OD720_Lmu_corr - OD720_Lmu_se, ymax = OD720_Lmu_corr + OD720_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
     #geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), size = 0.6, show.legend = T) +
   #geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
@@ -1122,25 +1125,48 @@ MCGrowthPig %>%
   theme_bw() 
 
 
-MCGrowthPig %>%
+FigGrowthPig<-MCGrowthPig %>%
   filter(deltaOD_Lmu_corr>0) %>% 
   ggplot() +
   geom_point(aes(x = meanPhycoChlaRatio, y = deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(O2)), size = 4, show.legend = T) +
-  geom_line(aes(x = meanPhycoChlaRatio, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), show.legend = T) +
+  geom_smooth(aes(x = meanPhycoChlaRatio, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), show.legend = T, alpha = 0.2, method = "lm") +
+  # geom_line(aes(x = meanPhycoChlaRatio, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), show.legend = T) +
   geom_errorbar(aes(x = meanPhycoChlaRatio, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
     #geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), size = 0.6, show.legend = T) +
   #geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  geom_text(data=data_textD, aes(x=6, y=0.2, label=label), size=6, parse = TRUE) +
+  
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
   scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   #labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth wavelength (nm)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
-  theme_bw() 
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+FigGrowthPig
 ```
+
+
+
+
 # Save Rds for further analysis
 
 ```{r save rds}
-saveRDS(MCGrowthPig, file.path(DataOut, paste(Project, "Processed_GrowthRatePigments.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+# saveRDS(MCGrowthPig, file.path(DataOut, paste(Project, "Processed_GrowthRatePigmentsCombine.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 
 ```
 

@@ -628,7 +628,7 @@ MultiCultiGrowth1PE0<-MCPigmentChoosenPlot %>%
     filter(O2 == 0)
 
 
-A<-MCPigmentChoosenPlot %>%
+MCPigmentChoosenPlot %>%
   filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   ggplot() +
   geom_point(aes(x = WLNum, y = meanPigmentspgcell, shape = as.factor(O2)), size = 4, show.legend = T) +
@@ -666,14 +666,10 @@ A<-MCPigmentChoosenPlot %>%
         legend.title = element_blank(),
         legend.position = c(0.10,0.90),
         legend.text = element_text(size=10))
-A
 
 
 
-
-
-
-B<-MCPigmentChoosenPlot %>%
+MCPigmentChoosenPlot %>%
   filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   ggplot() +
   geom_point(aes(x = WLNum, y = meanPigmentsRatio, shape = as.factor(O2)), size = 4, show.legend = F) +
@@ -712,15 +708,12 @@ B<-MCPigmentChoosenPlot %>%
         legend.title = element_blank(),
         legend.position = c(0.10,0.90),
         legend.text = element_text(size=10))
-B
+
 
 
 ```
 
-```{r fig.height = 6, fig.width = 6, warning = FALSE}
-ggp<- A/B
-ggp  
-```
+
 
 # Save plot 
 
@@ -812,16 +805,16 @@ lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 lab3=c(expression("405"), expression("450"), expression("470"), expression("530"), expression("620"), expression("660"), expression("730"))
 
+data_textA <- data.frame(Strain  = c("PC-rich"), label = c('italic(b)'))
 
 
-
-MCPigmentChoosenPlotTrim %>%
+PigRatioPUR<-MCPigmentChoosenPlotTrim %>%
   filter(PigmentsRatioName!= "Carotenoids:Chlorophyll~italic(a)") %>% 
   filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   ggplot() +
-  geom_point(aes(x = meanPUR, y = meanPigmentsRatio, shape = as.factor(O2), colour = as.factor(WL)), size = 4, show.legend = T) +
+  geom_point(aes(x = meanPUR, y = meanPigmentsRatio, shape = as.factor(O2), colour = as.factor(Strain)), size = 4, show.legend = T) +
   
-  geom_smooth(aes(x = meanPUR, y = meanPigmentsRatio, colour = as.factor(O2)), alpha = 0.5, size = 1, method = "lm") +
+  geom_smooth(aes(x = meanPUR, y = meanPigmentsRatio, linetype = as.factor(O2)), alpha = 0.5, size = 1, method = "lm", show.legend = T) +
   
   #geom_line(aes(x = PUR, y = meanPigmentsRatio, linetype = as.factor(O2)), show.legend = T) +
   
@@ -838,18 +831,33 @@ MCPigmentChoosenPlotTrim %>%
   # stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   # scale_fill_identity() +
   
-    #scale_colour_manual(values = c("royalblue4", "steelblue3", "lightseagreen", "limegreen", "coral","brown1","indianred4"), name="", labels = lab3) +
-  #scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
-  
+  #scale_colour_manual(values = c("royalblue4", "steelblue3", "lightseagreen", "limegreen", "coral","brown1","indianred4"), name="", labels = lab3) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  geom_text(data=data_textA, aes(x=150, y=5, label=label), size=6, parse = TRUE) +
   
   scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
-  #labs(y = "Pigment ratio (µg:µg)", x = "Growth wavelength (nm)") +
-  ggh4x::facet_nested(cols = vars(factor(PigmentsRatioName, levels=c("Phycobilins:Chlorophyll~italic(a)"))), rows = vars(Strain), labeller = label_parsed) +
+  labs(y = "Phycobilin:Chlorophyll a ratio (µg:µg)", x = "PUR") +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
   
   #ggh4x::facet_nested(cols = vars(factor(PigmentsRatioName, levels=c("Phycobilins:Chlorophyll~italic(a)","Carotenoids:Chlorophyll~italic(a)"))), rows = vars(Strain), labeller = label_parsed) +
-  theme_bw() 
-
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+PigRatioPUR
 
 ```
 #Create preliminary plot
@@ -858,8 +866,9 @@ MCPigmentChoosenPlotTrim %>%
 lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
-data_textA <- data.frame(PigmentsName  = c("Carotenoids"), Strain  = c("PC-rich"), label = c('italic(a)'))
-data_textB <- data.frame(PigmentsRatioName  = c("Carotenoids:Chlorophyll~italic(a)"), Strain  = c("PC-rich"), label = c('italic(b)'))
+data_textA <- data.frame(PigmentsName  = c("Carotenoids"), Strain  = c("PC-rich"), label = c('italic(b)'))
+
+data_textB <- data.frame(PigmentsRatioName  = c("Phycobilins:Chlorophyll~italic(a)"), Strain  = c("PC-rich"), label = c('italic(a)'))
 
 MultiCultiGrowth1PC21<-MCPigmentChoosenPlotTrim %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
@@ -888,7 +897,7 @@ MultiCultiGrowth1PE0<-MCPigmentChoosenPlotTrim %>%
     filter(O2 == 0)
 
 
-A<-MCPigmentChoosenPlotTrim %>%
+PigPlot<-MCPigmentChoosenPlotTrim %>%
   filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   ggplot() +
   geom_point(aes(x = WLNum, y = meanPigmentspgcell, shape = as.factor(O2)), size = 4, show.legend = T) +
@@ -927,14 +936,12 @@ A<-MCPigmentChoosenPlotTrim %>%
         legend.title = element_blank(),
         legend.position = c(0.10,0.90),
         legend.text = element_text(size=10))
-A
+PigPlot
 
 
 
 
-
-
-B<-MCPigmentChoosenPlotTrim %>%
+MCPigmentChoosenPlotTrim %>%
   filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   ggplot() +
   geom_point(aes(x = WLNum, y = meanPigmentsRatio, shape = as.factor(O2)), size = 4, show.legend = F) +
@@ -949,7 +956,7 @@ B<-MCPigmentChoosenPlotTrim %>%
   #geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = F, MCDataHourSVRRatio) +
   
   geom_errorbar(aes(x = WLNum, ymin = meanPigmentsRatio - sdPigmentsRatio, ymax = meanPigmentsRatio + sdPigmentsRatio, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
-  geom_text(data=data_textB, aes(x=720, y=4, label=label), size=6, parse = TRUE) +
+  #geom_text(data=data_textB, aes(x=720, y=4, label=label), size=6, parse = TRUE) +
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   scale_fill_identity() +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
@@ -973,13 +980,66 @@ B<-MCPigmentChoosenPlotTrim %>%
         legend.title = element_blank(),
         legend.position = c(0.10,0.90),
         legend.text = element_text(size=10))
-B
 
+
+
+
+PigRatioPlot<-MCPigmentChoosenPlotTrim %>%
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  #filter(meanPigmentsRatio == "Phycobilins:Chlorophyll~italic(a)") %>% 
+    filter(PigmentsRatioName == "Phycobilins:Chlorophyll~italic(a)") %>% 
+  ggplot() +
+  geom_point(aes(x = WLNum, y = meanPigmentsRatio, shape = as.factor(O2)), size = 4, show.legend = F) +
+  #geom_line(aes(x = WLNum, y = meanPigmentsRatio, linetype = as.factor(O2)), show.legend = T) +
+  
+    geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
+    geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
+    geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
+    geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
+  
+    geom_line(aes(x = WLNum, y = meanPigmentsRatio, linetype = as.factor(O2)), size = 0.6, show.legend = F) +
+  #geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = F, MCDataHourSVRRatio) +
+  
+  geom_errorbar(aes(x = WLNum, ymin = meanPigmentsRatio - sdPigmentsRatio, ymax = meanPigmentsRatio + sdPigmentsRatio, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_text(data=data_textB, aes(x=720, y=4, label=label), size=6, parse = TRUE) +
+  
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  #labs(y = "Pigment ratio (µg:µg)", x = "Growth wavelength (nm)") +
+    labs(y = "Phycobilin:Chlorophyll a ratio (µg:µg)", x = "Growth wavelength (nm)") +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+PigRatioPlot
 
 ```
 
-```{r fig.height = 6, fig.width = 6, warning = FALSE}
-ggp<- A/B
+
+```{r fig.height = 7, fig.width = 6, warning = FALSE}
+ggp<- SpectraRaw/PigPlot
+ggp  
+```
+
+
+```{r fig.height = 6, fig.width = 8, warning = FALSE}
+ggp<- (PigRatioPlot+PigRatioPUR)/FigGrowthPig
 ggp  
 ```
 
