@@ -278,14 +278,14 @@ knitr::include_graphics(file.path( FiguresFP,"Fig_PigPURGrowth.png"))
 ## Effective absorption cross section of PSII {.unnumbered}
 
 ```{r SigLRC, fig.cap = SigLRC_cap, fig.height = 6, fig.width = 8, echo = FALSE}
-SigLRC_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) vs. Actinic PAR (µmol photons m^−2^s^−1^). \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitation at Ex~445nm~, blue; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 450, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). The vertical lines show diel peak PAR growth light of 180 µmol photons m^−2^s^−1^. The shaded areas (blue, green, or red) show situations in which cultures were excited by, and growing in, corresponding wavebands. Data not presented for PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; and for PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
-knitr::include_graphics(file.path( FiguresFP,"Fig_SigLRCTrim.png"))
+SigLRC_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) vs. Actinic PAR (µmol photons m^−2^s^−1^). \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitation at Ex~445nm~, blue; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 450, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. The shaded areas (blue, green, or red) show situations in which cultures were excited by, and growing in, corresponding wavebands. Data not presented for PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; and for PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"Fig_SigLRCTrim90.png"))
 ```
 
 <br>
 
 ```{r SigPig, fig.cap = SigPig_cap, fig.height = 6, fig.width = 8, echo = FALSE}
-SigPig_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. the ratio of sum of µg Phycobiliprotein to µg Chl *a*. \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitation at Ex~445nm~, blue; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; and for PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+SigPig_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) measured under half diel peak PAR growth light vs. the ratio of sum of µg Phycobiliprotein to µg Chl *a*. \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitation at Ex~445nm~, blue; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; and for PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
 knitr::include_graphics(file.path( FiguresFP,"Fig_SigPigTrim90.png"))
 ```
 
@@ -295,7 +295,7 @@ knitr::include_graphics(file.path( FiguresFP,"Fig_SigPigTrim90.png"))
 
 ```{r GrowthRateJVPSII, fig.cap = GrowthRateJVPSII_cap, fig.height = 8, fig.width = 6, echo = FALSE}
 GrowthRateJVPSII_cap<- glue("Chlorophyll-specific exponential growth rates (d^−1^) vs. PSII electron flux (*JV*~PSII~; µmol e^−^ µmol Chl *a*^−1^ d^−1^) measured under diel peak PAR growth light. Growth rates (± SE) were estimated from logistic fits of chlorophyll proxy OD~680~ - OD~720~ (ΔOD) vs. elapsed time. *JV*~PSII~ was estimated using FRRf induction curves with excitation at Ex~445nm~, blue; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). The vertical lines show diel peak PAR growth light of 180 µmol photons m^−2^s^−1^.", .sep = " ")
-knitr::include_graphics(file.path(FiguresFP,"JVPSIIHalf_Chla.png"))
+knitr::include_graphics(file.path(FiguresFP,"Fig_JVPSIIHalf_Chla.png"))
 ```
 
 <br>

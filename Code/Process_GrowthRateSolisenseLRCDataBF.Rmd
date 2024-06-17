@@ -556,10 +556,10 @@ lab2=c(expression("2.5 µM"), expression("250 µM"))
 MCGrowthJVPSIISPmean %>% 
   filter(WL != "WW") %>% 
 ggplot() +
-  geom_point(aes(meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Ex_WL), shape = as.factor(O2)), alpha = 0.8, size = 3.5, show.legend = T) +
-    geom_smooth(aes(meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(O2)), alpha = 0.2, size = 1, method = "lm") +
+  geom_point(aes(meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(O2)), alpha = 0.8, size = 3.5, show.legend = T) +
+    geom_smooth(aes(meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, deltaOD_Lmu_corr, linetype = as.factor(O2)), alpha = 0.2, size = 1, method = "lm") +
   
-  #scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
   scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
   #scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
