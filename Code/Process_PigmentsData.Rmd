@@ -805,7 +805,7 @@ lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 lab3=c(expression("405"), expression("450"), expression("470"), expression("530"), expression("620"), expression("660"), expression("730"))
 
-data_textA <- data.frame(Strain  = c("PC-rich"), label = c('italic(b)'))
+data_textA <- data.frame(Strain  = c("PC-rich"), label = c('italic(a)'))
 
 
 PigRatioPUR<-MCPigmentChoosenPlotTrim %>%
@@ -1033,13 +1033,14 @@ PigRatioPlot
 
 
 ```{r fig.height = 7, fig.width = 6, warning = FALSE}
-ggp<- SpectraRaw/PigPlot
-ggp  
+ggp<- PigRatioPUR/GrowthPURPlot
+ggp
+
 ```
 
 
 ```{r fig.height = 6, fig.width = 8, warning = FALSE}
-ggp<- (PigRatioPlot+PigRatioPUR)/FigGrowthPig
+ggp<- PigRatioPlot/FigGrowthPig
 ggp  
 ```
 

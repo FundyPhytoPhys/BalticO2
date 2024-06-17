@@ -635,6 +635,50 @@ MCGrowthRate %>%
  #ggh4x::facet_nested(cols = vars(Strain), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() 
 
+
+data_textD <- data.frame(Strain  = c("PC-rich"), label = c('italic(b)'))
+
+GrowthPURPlot<-MCGrowthRate %>%
+  filter(deltaOD_Lmu_se<0.2) %>% 
+  filter(deltaOD_Lmu_corr>0) %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  ggplot() +
+  geom_point(aes(x = meanPUR, y = deltaOD_Lmu_corr, colour = as.factor(WL)), alpha = 0.4, size = 4, show.legend = T) +
+  geom_smooth(aes(x = meanPUR, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), show.legend = T, method = "lm") +
+  geom_errorbar(aes(x = meanPUR, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(WL)), width=0, size=0.3, show.legend = F) +
+    geom_text(data=data_textD, aes(x=150, y=0.2, label=label), size=6, parse = TRUE) +
+  #stat_wl_strip(aes(x = meanPUR), ymin = -Inf, ymax = -0.08, alpha = 0.5) +
+  scale_fill_identity() +
+  #scale_colour_manual(values = c("royalblue4", "steelblue3", "lightseagreen", "limegreen", "coral","brown1","indianred4"), name="", labels = lab3) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
+  #scale_x_continuous(breaks=seq(0, 200, by = 50)) +
+  #coord_cartesian(xlim = c (0, 200)) +
+  #coord_cartesian(xlim = c (400, 800)) +
+  # guides(colour = FALSE) +
+  #ggh4x::facet_nested(rows = vars(O2), cols = vars(Strain), labeller = label_parsed) +
+  #labs(y = "µ " ~ "("~d^-1~")", x = "Wavelength (nm)") +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+ #ggh4x::facet_nested(cols = vars(Strain), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.70),
+        legend.text = element_text(size=10))
+GrowthPURPlot
 ```
 # Save plot 
 
@@ -1106,7 +1150,7 @@ MCGrowthPig <- MultiCultiGrowth %>%
 lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
-data_textD <- data.frame(Strain  = c("PC-rich"), label = c('italic(c)'))
+data_textD <- data.frame(Strain  = c("PC-rich"), label = c('italic(b)'))
 
 MCGrowthPig %>%
   filter(OD720_Lmu_corr>0) %>% 
@@ -1159,6 +1203,7 @@ FigGrowthPig<-MCGrowthPig %>%
         legend.text = element_text(size=10))
 FigGrowthPig
 ```
+
 
 
 

@@ -311,7 +311,7 @@ SolFitsMeta <- CultureCatalog %>%
 ```{r estimate parameters, warning = FALSE, echo=FALSE}
 
 SolFitsMeta <- SolFitsMeta %>%
-  group_by(SourceDataFile, Filename, SampleID, ObsDate, Ex_WL, TempCont) %>%
+  group_by(SourceDataFile, Filename, SampleID, ObsDate, Ex_WL, TempCont, O2, Strain) %>%
   mutate(Sig_m2psii = Sig/A2_m2,
          Fodark = Fo[1],
          Fmdark = Fm[1],

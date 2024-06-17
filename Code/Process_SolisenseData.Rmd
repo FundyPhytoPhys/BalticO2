@@ -130,12 +130,26 @@ SolFitsMetaLRC<-SolFitsMetaLRC %>%
 ```{r preliminary plot}
 lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
+
+
 SolFitsMetaLRC %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
   filter(E_days>=4) %>% 
   ggplot() +
   geom_point(aes(x = WLNum, y = Sig, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(E_days>=4) %>% 
+  ggplot() +
+  geom_point(aes(x = WLNum, y = TauAv, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
   scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   scale_fill_identity() +
@@ -177,6 +191,13 @@ SolFitsMetaLRC <- SolFitsMetaLRC %>%
   summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, WLNum, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, ActPARCorr, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days,
             meanSig_nm2psii = mean(Sig_nm2psii),
             sdSig_nm2psii = sd(Sig_nm2psii),
+            
+            meanTauAv = mean(TauAv),
+            sdTauAv = sd(TauAv),
+            
+            meanqpOxbo = mean(qpOxbo),
+            sdqpOxbo = sd(qpOxbo),
+            
             meanSigdark_nm2psii = mean(Sigdark_nm2psii),
             sdSigdark_nm2psii = sd(Sigdark_nm2psii)) %>%
   ungroup() 
@@ -190,13 +211,56 @@ SolFitsMetaLRC <- SolFitsMetaLRC %>%
   # filter(E_days <=10) %>% 
   group_by(Strain, Ex_WL, Par_ue, Photoperiod, WLNum, WL, O2, Oxygen, ActPARCorr) %>%
   
-  summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, WLNum, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, meanSig_nm2psii, sdSig_nm2psii, meanSigdark_nm2psii, sdSigdark_nm2psii, ActPARCorr, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days,
+  summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, WLNum, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, meanSig_nm2psii, sdSig_nm2psii, meanSigdark_nm2psii, sdSigdark_nm2psii, ActPARCorr, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days, meanTauAv, sdTauAv, meanqpOxbo, sdqpOxbo, 
             AllmeanSig_nm2psii = mean(meanSig_nm2psii),
             AllsdSig_nm2psii = sd(sdSig_nm2psii),
+            
+            AllmeanTauAv = mean(meanTauAv),
+            AllsdTauAv = sd(sdTauAv),
+            
+            AllmeanqpOxbo = mean(meanqpOxbo),
+            AllsdqpOxbo = sd(sdqpOxbo),
+            
             AllmeanSigdark_nm2psii = mean(meanSigdark_nm2psii),
             AllsdSigdark_nm2psii = sd(sdSigdark_nm2psii)) %>%
   ungroup() 
 ```
+
+```{r}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+#colnames(SolFitsMetaLRC)
+
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(E_days>=4) %>% 
+  ggplot() +
+  geom_point(aes(x = WLNum, y = meanSig_nm2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(E_days>=4) %>% 
+  ggplot() +
+  geom_point(aes(x = WLNum, y = AllmeanTauAv, colour = as.factor(O2)), size = 3.5, show.legend = T) +
+  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+
+```
+
+
+
+
+
 
 
 # Create preliminary plots sig vs ActPAR
@@ -219,6 +283,39 @@ SolFitsMetaLRC %>%
   ggh4x::facet_nested(cols = vars(Ex_WL, O2), rows = vars(Strain, WL), labeller = label_parsed) +
   theme_bw()
 
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv, shape = as.factor(O2)), size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = meanSig_nm2psii), colour = "darkgreen",size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "red",size = 2, show.legend = T) +
+    scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw()
+
+
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo, shape = as.factor(O2)), size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = meanSig_nm2psii), colour = "darkgreen",size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "red",size = 2, show.legend = T) +
+    scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw()
+
+#colnames(SolFitsMetaLRC)
 ```
 # Create preliminary plots sig vs ActPAR
 
