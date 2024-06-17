@@ -144,18 +144,6 @@ SolFitsMetaLRC %>%
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() 
 
-SolFitsMetaLRC %>%
-  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  filter(WL != "WW") %>%
-  filter(E_days>=4) %>% 
-  ggplot() +
-  geom_point(aes(x = WLNum, y = TauAv, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
-  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
-  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
-  scale_fill_identity() +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
-  theme_bw() 
-
 ```
 
 # Create preliminary plots sig vs ActPAR
@@ -241,18 +229,6 @@ SolFitsMetaLRC %>%
   stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
   scale_fill_identity() +
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
-  theme_bw() 
-
-SolFitsMetaLRC %>%
-  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  filter(WL != "WW") %>%
-  filter(E_days>=4) %>% 
-  ggplot() +
-  geom_point(aes(x = WLNum, y = AllmeanTauAv, colour = as.factor(O2)), size = 3.5, show.legend = T) +
-  #scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
-  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
-  scale_fill_identity() +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw() 
 
 ```
@@ -711,7 +687,7 @@ SolFitsMetaLRCTrim %>%
 # Save plot 
 
 ```{r save plot}
-#ggsave(file = file.path(FigPath, paste("Fig_SigLRCTrim",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+# ggsave(file = file.path(FigPath, paste("Fig_SigLRCTrim",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 

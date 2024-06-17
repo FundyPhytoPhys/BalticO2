@@ -1039,8 +1039,8 @@ ggp
 ```
 
 
-```{r fig.height = 6, fig.width = 8, warning = FALSE}
-ggp<- PigRatioPlot/FigGrowthPig
+```{r fig.height = 10, fig.width = 8, warning = FALSE}
+ggp<- PigPlot/PigRatioPlot/FigGrowthPig
 ggp  
 ```
 
