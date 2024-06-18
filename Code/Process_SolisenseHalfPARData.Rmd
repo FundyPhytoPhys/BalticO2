@@ -53,6 +53,7 @@ library(googledrive)
 library(googlesheets4)
 library(readxl)
 library(multcompView)
+library("patchwork") # merging plots
 ```
 
 ```{r set project variables}
@@ -398,6 +399,10 @@ rm(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMeta
 ```
 
 
+```{r}
+SolFitsMetaLRCTrim$facetsExcitation<-c("Excitation~(nm)")
+```
+
 # Create preliminary plots sig vs ActPAR
 
 ```{r preliminary plot}
@@ -405,13 +410,13 @@ lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
 
-drectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(10.5))
+drectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 
-drectsemiblue <- data.frame(Ex_WL = c("470", "470"), Strain = c("PC-rich", "PE-rich"), WL = c("470", "470"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(10.5))
+drectsemiblue <- data.frame(Ex_WL = c("470", "470"), Strain = c("PC-rich", "PE-rich"), WL = c("470", "470"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 
-drectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(10.5))
+drectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 
-drectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(10.5))
+drectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 
 
 
@@ -480,7 +485,7 @@ SolFitsMetaLRCTrim %>%
   scale_x_continuous(breaks=seq(0, 800, by = 200)) +
   coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
   
-  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  labs(y=expression(paste(sigma,""["PSII"]*" (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
@@ -504,7 +509,7 @@ SolFitsMetaLRCTrim %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_Sig",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("SFig_Sig",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -513,13 +518,13 @@ lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
 
-drectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(2000))
+drectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 
-drectsemiblue <- data.frame(Ex_WL = c("470", "470"), Strain = c("PC-rich", "PE-rich"), WL = c("470", "470"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(2000))
+drectsemiblue <- data.frame(Ex_WL = c("470", "470"), Strain = c("PC-rich", "PE-rich"), WL = c("470", "470"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 
-drectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(2000))
+drectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 
-drectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(-35), x2=c(835), y1=c(-0.5), y2=c(2000))
+drectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 
 
 
@@ -587,7 +592,7 @@ SolFitsMetaLRCTrim %>%
   # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
   # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
   # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
-  
+    labs(y=expression(paste(tau,""["PSII"]*" (µs"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
   theme_bw() +
@@ -610,7 +615,7 @@ SolFitsMetaLRCTrim %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_Tau",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("SFig_Tau",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 ```{r}
@@ -618,14 +623,13 @@ lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
 
-drectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(-35), x2=c(835), y1=c(0), y2=c(1))
+drectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 
-drectsemiblue <- data.frame(Ex_WL = c("470", "470"), Strain = c("PC-rich", "PE-rich"), WL = c("470", "470"), x1=c(-35), x2=c(835), y1=c(0), y2=c(1))
+drectsemiblue <- data.frame(Ex_WL = c("470", "470"), Strain = c("PC-rich", "PE-rich"), WL = c("470", "470"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 
-drectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(-35), x2=c(835), y1=c(0), y2=c(1))
+drectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 
-drectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(-35), x2=c(835), y1=c(0), y2=c(1))
-
+drectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
 
 
 MultiCultiGrowth1PC21<-SolFitsMetaLRCTrim %>% 
@@ -692,7 +696,7 @@ SolFitsMetaLRCTrim %>%
   # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
   # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
   # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
-  
+    labs(y="qP", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
   theme_bw() +
@@ -716,9 +720,359 @@ SolFitsMetaLRCTrim %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_qpOxbo",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("SFig_qpOxbo",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
+
+# Choosen only corresponding data
+
+```{r}
+SolFitsMetaLRCTrimChoosen450<-SolFitsMetaLRCTrim %>% 
+  filter(WL == 450) %>%
+  filter(Ex_WL == 445) 
+SolFitsMetaLRCTrimChoosen470<-SolFitsMetaLRCTrim %>% 
+  filter(WL == 470) %>%
+  filter(Ex_WL == 470) 
+SolFitsMetaLRCTrimChoosen530<-SolFitsMetaLRCTrim %>% 
+  filter(WL == 530) %>%
+  filter(Ex_WL == 535)  
+SolFitsMetaLRCTrimChoosen620<-SolFitsMetaLRCTrim %>% 
+  filter(WL == 620) %>%
+  filter(Ex_WL == 590) 
+  
+SolFitsMetaLRCTrimChoosen<-rbind(SolFitsMetaLRCTrimChoosen450, SolFitsMetaLRCTrimChoosen470, SolFitsMetaLRCTrimChoosen530, SolFitsMetaLRCTrimChoosen620)
+
+rm(SolFitsMetaLRCTrimChoosen450, SolFitsMetaLRCTrimChoosen470, SolFitsMetaLRCTrimChoosen530, SolFitsMetaLRCTrimChoosen620)
+
+
+```
+
+
+# Create preliminary plots sig vs ActPAR
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, shape = as.factor(O2)), size = 3, show.legend = T) +
+
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  geom_line(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw() 
+
+```
+
+```{r}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv, shape = as.factor(O2)), size = 3, show.legend = T) +
+
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanTauAv - AllsdTauAv, ymax = AllmeanTauAv + AllsdTauAv, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  geom_line(aes(x = ActPARCorr, y = AllmeanTauAv, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw() 
+```
+
+```{r}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo, shape = as.factor(O2)), size = 3, show.legend = T) +
+
+  geom_line(aes(x = ActPARCorr, y = AllmeanqpOxbo, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanqpOxbo - AllsdqpOxbo, ymax = AllmeanqpOxbo + AllsdqpOxbo, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw() 
+```
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+
+
+SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanTauAv - AllsdTauAv, ymax = AllmeanTauAv + AllsdTauAv, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanTauAv, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+
+
+SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanqpOxbo, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanqpOxbo - AllsdqpOxbo, ymax = AllmeanqpOxbo + AllsdqpOxbo, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+```
+
+```{r}
+SolFitsMetaLRCTrimChoosen$facetsExcitation<-c("Excitation~(nm)")
+```
+
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+MultiCultiGrowth1PC21<-SolFitsMetaLRCTrimChoosen %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-SolFitsMetaLRCTrimChoosen %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-SolFitsMetaLRCTrimChoosen %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-SolFitsMetaLRCTrimChoosen %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+
+
+
+
+data_textA <- data.frame(facetsExcitation  = c("Excitation~(nm)"), Ex_WL  = c("590"), Strain  = c("PC-rich"), label = c('italic(a)'))
+data_textB <- data.frame(Ex_WL  = c("590"), Strain  = c("PC-rich"), label = c('italic(b)'))
+data_textC <- data.frame(Ex_WL  = c("590"), Strain  = c("PC-rich"), label = c('italic(c)'))
+
+Sig<-SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, shape = as.factor(O2)), size = 3, show.legend = T) +
+  
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "palegreen3", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PC21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "brown4", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PE21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "palegreen3", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PC0) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "brown4", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.4) +
+  geom_text(data=data_textA, aes(x=750, y=9, label=label), size=6, parse = TRUE) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  scale_x_continuous(breaks=seq(0, 900, by = 300)) +
+  coord_cartesian(ylim = c(0, 10), xlim = c(0, 900)) +
+  labs(y=expression(paste(sigma,""["PSII"]*" (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  # labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(facetsExcitation, Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_blank(),
+        axis.title = element_text(size=16),
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        #axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+Sig
+
+Tau<-SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv, shape = as.factor(O2)), size = 3, show.legend = F) +
+  
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv), colour = "palegreen3", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PC21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv), colour = "brown4", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PE21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv), colour = "palegreen3", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PC0) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv), colour = "brown4", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanTauAv - AllsdTauAv, ymax = AllmeanTauAv + AllsdTauAv, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanTauAv, linetype = as.factor(O2)), size = 0.3, show.legend = F) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.4) +
+  geom_text(data=data_textB, aes(x=750, y=1400, label=label), size=6, parse = TRUE) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  #scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  scale_x_continuous(breaks=seq(0, 900, by = 300)) +
+  coord_cartesian(xlim = c(0, 900)) +
+  
+  labs(y=expression(paste(tau,""["PSII"]*" (µs"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  #labs(y=expression(paste(tau," (ms"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_blank(),
+        axis.title = element_text(size=16),
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        #axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+Tau
+
+qp<-SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo, shape = as.factor(O2)), size = 3, show.legend = F) +
+  
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo), colour = "palegreen3", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PC21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo), colour = "brown4", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PE21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo), colour = "palegreen3", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PC0) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo), colour = "brown4", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  geom_line(aes(x = ActPARCorr, y = AllmeanqpOxbo, linetype = as.factor(O2)), size = 0.3, show.legend = F) +
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanqpOxbo - AllsdqpOxbo, ymax = AllmeanqpOxbo + AllsdqpOxbo, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.4) +
+  geom_text(data=data_textC, aes(x=750, y=0.85, label=label), size=6, parse = TRUE) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  #scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  scale_x_continuous(breaks=seq(0, 900, by = 300)) +
+  coord_cartesian(xlim = c(0, 900)) +
+  labs(y="qP", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+qp
+```
+
+
+
+```{r fig.height = 8, fig.width = 6, warning = FALSE}
+ggp<-Sig/Tau/qp
+ggp
+```
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_SigTauqp",".png",sep = "")), height=8, width= 6,  dpi = 300, limitsize = TRUE)
+```
 
 
 

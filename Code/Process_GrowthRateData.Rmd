@@ -451,7 +451,7 @@ JazDataRoundMeta2 %>%
   
   stat_wl_strip(aes(x = nm), ymin = -Inf, ymax = -0.080, alpha = 0.5) +
   scale_fill_identity() +
-  labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth wavelength (nm)") +
+  labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth waveband (nm)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
   theme_bw() 
 
@@ -537,13 +537,13 @@ MCGrowthRate %>%
   scale_colour_manual(values = c("royalblue4", "steelblue3", "lightseagreen", "limegreen", "coral","brown1","indianred4"), name="", labels = lab3) +
   scale_shape_manual(values = c(15, 16, 17, 18, 3, 4, 8), name="", labels = lab3) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
-  #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
+  #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth waveband (nm)") +
   #scale_x_continuous(breaks=seq(0, 200, by = 50)) +
   #coord_cartesian(xlim = c (0, 200)) +
   #coord_cartesian(xlim = c (400, 800)) +
   # guides(colour = FALSE) +
   #ggh4x::facet_nested(rows = vars(O2), cols = vars(Strain), labeller = label_parsed) +
-  #labs(y = "µ " ~ "("~d^-1~")", x = "Wavelength (nm)") +
+  #labs(y = "µ " ~ "("~d^-1~")", x = "waveband (nm)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
  #ggh4x::facet_nested(cols = vars(Strain), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() 
@@ -565,13 +565,13 @@ GrowthPURPlot<-MCGrowthRate %>%
   #scale_colour_manual(values = c("royalblue4", "steelblue3", "lightseagreen", "limegreen", "coral","brown1","indianred4"), name="", labels = lab3) +
   scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
-  #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth wavelength (nm)") +
+  #labs(y = "Chlorophyll-specific exponential growth rate " ~ "("~d^-1~")", x = "Growth waveband (nm)") +
   #scale_x_continuous(breaks=seq(0, 200, by = 50)) +
   #coord_cartesian(xlim = c (0, 200)) +
   #coord_cartesian(xlim = c (400, 800)) +
   # guides(colour = FALSE) +
   #ggh4x::facet_nested(rows = vars(O2), cols = vars(Strain), labeller = label_parsed) +
-  #labs(y = "µ " ~ "("~d^-1~")", x = "Wavelength (nm)") +
+  #labs(y = "µ " ~ "("~d^-1~")", x = "waveband (nm)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
  #ggh4x::facet_nested(cols = vars(Strain), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
   theme_bw() +
@@ -711,7 +711,7 @@ https://minimatech.org/non-linear-regression-with-r/
 #   
 #   stat_wl_strip(aes(x = nm), ymin = -Inf, ymax = -0.09, alpha = 0.5) +
 #   scale_fill_identity() +
-#   labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth wavelength (nm)") +
+#   labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth waveband (nm)") +
 #   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
 #   theme_bw() +
 #   theme(panel.grid.minor = element_blank(),
@@ -788,7 +788,7 @@ JazDataRoundMeta2 %>%
   
   stat_wl_strip(aes(x = nm), ymin = -Inf, ymax = -0.035, alpha = 0.5) +
   scale_fill_identity() +
-  labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth wavelength (nm)") +
+  labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth waveband (nm)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
@@ -864,7 +864,7 @@ JazDataRoundMeta2 %>%
   
   stat_wl_strip(aes(x = nm), ymin = -Inf, ymax = -0.055, alpha = 0.5) +
   scale_fill_identity() +
-  labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth wavelength (nm)") +
+  labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth waveband (nm)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
@@ -949,7 +949,7 @@ MCGrowthPig %>%
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
   scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
-  #labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth wavelength (nm)") +
+  #labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth waveband (nm)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
   theme_bw() 
 
@@ -972,7 +972,7 @@ FigGrowthPig<-MCGrowthPig %>%
   scale_y_continuous(breaks=seq(-0.5, 0.2, by = 0.1)) +
   coord_cartesian(ylim = c(-0.05, 0.2)) +
   
-  #labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth wavelength (nm)") +
+  #labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth waveband (nm)") +
   labs(y = "µ " ~ "("~d^-1~")", x = "Phycobiliprotein to Chl" ~italic(a)~ "ratio (µg:µg)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
   theme_bw() +
@@ -1105,8 +1105,8 @@ data_textb <- data.frame(Strain  = c("PC-rich"), label = c('italic(b)'))
 
 data_text_PC1<- data.frame(Strain  = c("PC-rich"), label = c('a'))
 data_text_PC2<- data.frame(Strain  = c("PC-rich"), label = c('a'))
-data_text_PE1<- data.frame(Strain  = c("PE-rich"), label = c('c'))
-data_text_PE2<- data.frame(Strain  = c("PE-rich"), label = c('d'))
+data_text_PE1<- data.frame(Strain  = c("PE-rich"), label = c('b'))
+data_text_PE2<- data.frame(Strain  = c("PE-rich"), label = c('c'))
 
 data_text_Anova<- data.frame(Strain  = c("PE-rich"),  label = c(' , \u03B1 = 0.05'))
 data_text_Anova2<- data.frame(Strain  = c("PE-rich"),  label = c('italic(t)~-test'))
@@ -1137,8 +1137,8 @@ FigGrowthPig<-MCGrowthPig %>%
   
   geom_text(data=data_text_Anova, aes(x=5.5, y=0, label=label), colour = "blue", size=5) +
   geom_text(data=data_text_Anova2, aes(x=4.7, y=0, label=label), colour = "blue", size=5, parse = TRUE) +
-  #labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth wavelength (nm)") +
-  labs(y = "µ " ~ "("~d^-1~")", x = "Phycobiliprotein to Chl" ~italic(a)~ "ratio (µg:µg)") +
+  #labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth waveband (nm)") +
+  labs(y = "µ " ~ "("~d^-1~")", x = "Phycobiliproteins to Chl" ~italic(a)~ "ratio (µg:µg)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),

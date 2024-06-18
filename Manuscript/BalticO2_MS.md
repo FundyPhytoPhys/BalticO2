@@ -195,21 +195,29 @@ PE-rich strain showed the highest growth rate under green light at 530 nm under 
 
 <br>
 
-![<span id="fig:GrowthRate"></span>**Fig. **1: Chlorophyll-specific exponential growth rates (µ; d^−1^) vs. growth waveband (nm, shaded regions). Growth rates (± SE) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time, for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line).](../Output/Figures/Fig_GrowthRateDelta.png)
+![<span id="fig:GrowthRate"></span>**Fig. **1: Chlorophyll-specific exponential growth rates (µ; d^−1^) vs. growth waveband (nm, shaded regions). Growth rates (± SE) were estimated from logistic fits of chlorophyll proxy OD~680~ – OD~720~ (ΔOD) vs. elapsed time (Fig. S1), for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line).](../Output/Figures/Fig_GrowthRateDelta.png)
 
 <br>
 
-## Whole-cell absorbance spectra, PUR/PAR ratio, and pigment content {.unnumbered}
+## Pigment content and pigment ratio {.unnumbered}
 
 Whole-cell absorbance spectra of PC-rich and PE-rich *Synechococcus* sp. cultures showed that XXX (Fig. <a href="#fig:PURPAR"><strong>??</strong></a>*a*)... 
 
 <br>
 
-![<span id="fig:Pigment2"></span>**Fig. **2: Phycobilin:Chl *a* ratio (µg:µg) vs. growth waveband (nm; *a*) and Chlorophyll-specific exponential growth rates (µ; d^−1^) vs. Phycobilin:Chl *a* ratio (µg:µg) (*b*) for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.](../Output/Figures/Fig_GrowthPig.png)
+![<span id="fig:Pigment"></span>**Fig. **2: Pigment content (pg cell ^−1^) vs. growth waveband (nm; *a*) and Chlorophyll-specific exponential growth rates (µ; d^−1^) vs. Phycobiliproteins:Chlorophyll *a* ratio (µg:µg) (*b*) for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~. Blue lines (solid for 2.5 µM O~2~ or dashed for 250 µM O~2~) shows linear model fit for data from each strain across spectral bandwidths. Different blue lowercase letters indicate statistically significant differences between the fit models for different strains or given O~2~ concentrations (*t*-test; *p* < 0.05).](../Output/Figures/Fig_GrowthPig.png)
 
-## Effective absorption cross section of PSII {.unnumbered}
+## Effective absorption cross section of PSII, minimum turnover time of PSII photochemistry, and photochemical quenching coefficient {.unnumbered}
 
-![<span id="fig:SigLRC"></span>**Fig. **3: Effective absorption cross section of PSII (σ~PSII~ʹ; nm^2^ quanta^−1^) vs. Actinic PAR (µmol photons m^−2^s^−1^). σ~PSII~ʹ was estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths (rows) of 450, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. The shaded areas (blue, green, or red) show situations in which cultures were excited by, and growing in, corresponding wavebands. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.](../Output/Figures/Fig_Sig.png)
+σPSII′ - Effective absorption cross section of PSII photochemistry under actinic light -> A2 (quanta)-1 or m2
+
+TauPSII - Minimum turnover time of PSII photochemistry -> s-1
+
+qP = (PSII efficiency factor under actinic light; photochemical quenching coefficient) 
+
+Data show situations in which cultures were excited by, and growing in, corresponding wavebands. 
+
+![<span id="fig:SigLRC"></span>**Fig. **3: Effective absorption cross section of PSII (σ~PSII~; nm^2^ quanta^−1^, *a*), minimum turnover time of PSII photochemistry (τ; µs^−1^, *b*), or photochemical quenching coefficient (qP, *c*) vs. Actinic PAR (µmol photons m^−2^s^−1^). Parameters was estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. Data show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.](../Output/Figures/Fig_SigTauqp.png)
 
 <br>
 
@@ -217,7 +225,7 @@ Whole-cell absorbance spectra of PC-rich and PE-rich *Synechococcus* sp. culture
 
 <br>
 
-![<span id="fig:GrowthRateJVPSII"></span>**Fig. **4: Chlorophyll-specific exponential growth rates (d^−1^) vs. PSII electron flux (*JV*~PSII~; µmol e^−^ µmol Chl *a*^−1^ d^−1^) measured under diel peak PAR growth light. Growth rates (± SE) were estimated from logistic fits of chlorophyll proxy OD~680~ - OD~720~ (ΔOD) vs. elapsed time. *JV*~PSII~ was estimated using FRRf induction curves with excitation at Ex~445nm~, blue; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). The vertical lines show diel peak PAR growth light of 180 µmol photons m^−2^s^−1^.](../Output/Figures/Fig_JVPSIIHalf_Chla.png)
+![<span id="fig:GrowthRateJVPSII"></span>**Fig. **4: Chlorophyll-specific exponential growth rates (µ; d^−1^) vs. PSII electron flux (*JV*~PSII~; µmol e^−^ µmol Chl *a*^−1^ d^−1^) measured under half diel peak PAR growth light. Growth rates (± SE) were estimated from logistic fits of chlorophyll proxy OD~680~ - OD~720~ (ΔOD) vs. elapsed time (Fig. S1). *JV*~PSII~ was estimated using FRRf induction curves with excitation at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. Data show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Blue lines (solid for 2.5 µM O~2~ or dashed for 250 µM O~2~) shows linear model fit for data from each strain across spectral bandwidths. Different blue lowercase letters indicate statistically significant differences between the fit models for different strains or given O~2~ concentrations (*t*-test; *p* < 0.05).](../Output/Figures/Fig_GrowthRateJVPSII.png)
 
 <br>
 

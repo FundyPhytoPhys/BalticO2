@@ -108,6 +108,18 @@ GrowthPUR_cap<- glue("Chlorophyll-specific exponential growth rates (d^−1^) vs
 knitr::include_graphics(file.path(FiguresFP,"SFig_GrowthRatevsPURDeltaTrim.png"))
 ```
 
+
+```{r PURPAR, fig.cap = PURPAR_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+PURPAR_cap<- glue("Normalized whole-cell absorbance spectra vs. wavelength (nm) and PUR/PAR ratio vs. growth wavelength (nm). (*a*) Representative absorbance spectra, normalized to 440 nm (NormA~440~), were measured together with emission spectra of the colour LED lamp used for PAR, normalized to their emission peak. Estimated Photosynthetically Usable Radiation (PUR) is shown as a green area for the PC-rich strain and a red area for the PE-rich strain grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentration of 250 µM (dashed line) or 2.5 µM (solid line). (*b*) PUR/PAR ratio was estimated for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; and for PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+
+knitr::include_graphics(file.path( FiguresFP,"Fig_PURPARRatioSpectraTrim.png")) 
+```
+
+```{r Pigment, fig.cap = Pigment_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+Pigment_cap<- glue("Whole-cell absorbance spectra vs. wavelength (nm; *a*) and pigment content (pg cell ^−1^) vs. growth waveband (nm; *b*) for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; and for PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"Fig_PigmentTrim.png"))
+```
+
 ```{r GrowthPUR, fig.cap = GrowthPUR_cap, fig.height = 8, fig.width = 6, echo = FALSE}
 GrowthPUR_cap<- glue("Pigment ratio (µg:µg) vs. PUR for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Note that PE-rich cultures showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; while PC-rich cultures showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
 knitr::include_graphics(file.path(FiguresFP,"Fig_PigmentvsPURTrim.png"))
@@ -116,6 +128,10 @@ knitr::include_graphics(file.path(FiguresFP,"Fig_PigmentvsPURTrim.png"))
 ```{r SigWL, fig.cap = SigWL_cap, fig.height = 6, fig.width = 8, echo = FALSE}
 SigWL_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) measured under diel peak PAR growth light vs. wavelength (nm). \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitation at Ex~445nm~, blue; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Note that PE-rich cultures showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; while PC-rich cultures showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
 knitr::include_graphics(file.path( FiguresFP,"Fig_SigWL.png"))
+```
+```{r SigPig, fig.cap = SigPig_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+SigPig_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~ʹ; nm^2^ quanta^−1^) measured under half diel peak PAR growth light vs. the ratio of sum of µg Phycobiliprotein to µg Chl *a*. \u03C3~PSII~ʹ was estimated using FRRf induction curves with excitation at Ex~445nm~, blue; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"Fig_SigPigTrim90.png"))
 ```
 
 ## Growth rates vs. cumulative diel PSII electron flux {.unnumbered}
