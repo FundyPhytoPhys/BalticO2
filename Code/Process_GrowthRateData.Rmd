@@ -154,6 +154,15 @@ MultiCultiGrowth %>%
   ggh4x::facet_nested(rows = vars(Strain)) +
   theme_bw()
 
+
+MultiCultiGrowth %>%
+  #filter(WL != "WW") %>% 
+  ggplot() +
+  geom_point(aes(x = OD720_Lmu_corr, y = deltaOD_Lmu_corr,colour=as.factor(WL)), size = 3.5, alpha = 0.9, show.legend = T) +
+  geom_smooth(aes(x = OD720_Lmu_corr, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.2, show.legend = T, method = "lm") +
+  # geom_errorbar(aes(x = WLNum, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(rows = vars(Strain), cols = vars(O2)) +
+  theme_bw()
 ```
 
 

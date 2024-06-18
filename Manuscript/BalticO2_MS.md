@@ -112,20 +112,9 @@ Picocyanobacterial growth was monitored every 5 minutes by automatically recordi
 
 <br>
 
-## Whole-cell absorbance spectra, PUR/PAR ratio, and pigment content {.unnumbered}
+## Pigment content and pigment ratio {.unnumbered}
 
-Whole-cell absorbance spectra of picocyanobacteria cells were collected using an integrating cavity upgrade spectrophotometer (CLARiTY 17 UV/Vis/NIR, On-Line Instrument Systems, Inc., Bogart, GA, USA) according to the method proposed by @blakeSituSpectroscopyIntact2012. Each sample and reference observation cavity of the spectrophotometer was filled with 8 mL of f/2 medium. After establishing a baseline absorbance ranging from 375 to 710 nm (f/2 media of salinity 8 PSU), 4 mL of PC-rich_077 or PE-rich_127 culture cell suspension was introduced into the sample cavity, replacing an equal volume of culture medium. Pathlength corrected absorbance per cm was calculated using Jávorfi coefficients [@javorfiQuantitativeSpectrophotometryUsing2006].
-
-We also estimated the Photosynthetically Usable Radiation (PUR)/Photosynthetically Active Radiation (PAR) ratio which is the fraction of PAR that can be captured by the absorbance of the cells. First, we obtained an emission profile from 370 nm to 750 nm of each coloured LED light of the MCMIX-OD Multicultivator (spectral bandwidth of 405, 450, 470, 530, 620, 660, and 730 nm) using a Jaz spectrometer (Ocean Optics, Inc.,Dunedin, FL, USA) equipped with a fiber optic cable, HH2 FiberOpticJmp (Part number A901073, Malvern Panalytical Ltd, Malvern, UK). Next, each LED spectrum (Em) was normalized to its emission peak maximum (393, 441, 469, 521, 612, 647, and 722 nm). We also normalized the obtained whole-cell absorbance spectra of *Synechococcus* sp. cultures from 375 nm to 710 nm to a reference wavelength of Chl *a* maximum peak wavelength (440 nm). PUR (µE = µmol photons m^−2^s^−1^) was estimated from the formula Eq. (1) according to method proposed by @morelAvailableUsableStored1978. 
-
-$$\begin{equation}
-  PUR~(µE)=\frac{∑(NormA_440~×~NormEm)}{∑(NormEm)}~×~PAR~(µE)
-  \qquad(1)
-\end{equation}$$
-
-where NormA~440~ is the Absorbance Normalized to 440 nm, NormEm is the Emission spectra Normalized to maximum peak of each colur light, and PAR in this case is 180 µmol photons m^−2^s^−1^. Chlorophyll-specific exponential growth rates (d^−1^) vs. PUR was shown in Fig. S2. 
-
-Using an integrating cavity upgrade CLARiTY 17 UV/Vis/NIR spectrophotometer, we also conducted estimations of pigment content (µg mL^-1^) including Chlorophyll *a* (Chl *a*), Carotenoids (Car), Phycoerythrin (PE), Phycocyanin (PC), and Allophycocyanin (APC) in PC-rich_077 and PE-rich_127 *Synechococcus* sp. cultures. These estimations were based on established linear correlations between pigment content, determined through extraction methods [@stricklandPracticalHandBook1972; @bennettComplementaryChromaticAdaptation1973], and absorbance values of individual pigment peaks (Car; 480 nm, PE; 565 nm, PC; 620 nm, APC; 650 nm, and Chl *a*; 665 nm) obtained from whole-cell absorbance spectra (Table S1). We also summed PE, PC, and APC protein to receive Phycobilins (Phyco) content. Additionally, we calculated the Car to Chl *a* ratio and the ratio of the sum of Phyco to Chl *a* (µg:µg) for each strain.
+Whole-cell absorbance spectra of picocyanobacteria cells were collected using an integrating cavity upgrade spectrophotometer (CLARiTY 17 UV/Vis/NIR, On-Line Instrument Systems, Inc., Bogart, GA, USA) according to the method proposed by @blakeSituSpectroscopyIntact2012. Each sample and reference observation cavity of the spectrophotometer was filled with 8 mL of f/2 medium. After establishing a baseline absorbance ranging from 375 to 710 nm (f/2 media of salinity 8 PSU), 4 mL of PC-rich_077 or PE-rich_127 culture cell suspension was introduced into the sample cavity, replacing an equal volume of culture medium. Pathlength corrected absorbance per cm was calculated using Jávorfi coefficients [@javorfiQuantitativeSpectrophotometryUsing2006]. Using an integrating cavity upgrade CLARiTY 17 UV/Vis/NIR spectrophotometer, we conducted estimations of pigment content (µg mL^-1^) including Chlorophyll *a* (Chl *a*), Carotenoids (Car), Phycoerythrin (PE), Phycocyanin (PC), and Allophycocyanin (APC) in PC-rich_077 and PE-rich_127 *Synechococcus* sp. cultures. These estimations were based on established linear correlations between pigment content, determined through extraction methods [@stricklandPracticalHandBook1972; @bennettComplementaryChromaticAdaptation1973], and absorbance values of individual pigment peaks (Car; 480 nm, PE; 565 nm, PC; 620 nm, APC; 650 nm, and Chl *a*; 665 nm) obtained from whole-cell absorbance spectra (Table S1). We also summed PE, PC, and APC protein to receive Phycobiliproteins content. Additionally, we calculated the Car to Chl *a* ratio and the ratio of the sum of Phycobiliproteins to Chl *a* (µg:µg) for each strain.
 
 Additionally, we measured Chl *a* (µg mL^−1^) using Trilogy Laboratory Fluorometer (Turner Designs, Inc., CA, USA) equipped with Chlorophyll In-Vivo Module. Quantitative analysis of Chl *a* was obtained after adding 50 µL of picocyanobacteria culture and 2 mL of a 90% acetone:DMSO solution in a 3:2 ratio.
 
@@ -147,22 +136,22 @@ We used a double tap protocol [@xuConnectivityPhotosystemII2017], where FRRf ind
 
 Flash Power for 445 excitation was 60000 µmol photons m^−2^s^−1^ PAR, for 530 nm excitation power was 25000 µmol photons m^−2^s^−1^ PAR, while for 590 nm excitation power was 14000 µmol photons m^−2^s^−1^, calibrated using a quantum sensor (LI-250, LI-COR, Inc.). We applied 1 s darkness between sequential light steps, to allow re-opening of PSII. FRRf excitation flashlets were applied at the same wavebands, 445, 530, or 590 nm, as the actinic light steps.
 
-We calculated (Eq. (2)) an uncalibrated fluorescence based estimator for volumetric electron transport, *JV*~PSII~, (k × e^−^ L^−1^ s^−1^) under 445 nm (blue), 530 nm (green), and 590 nm (orange) excitation bands [@oxboroughDirectEstimationFunctional2012; @boatmanImprovingAccuracySingle2019; @tortellUserGuideApplication2021].
+We calculated (Eq. (1)) an uncalibrated fluorescence based estimator for volumetric electron transport, *JV*~PSII~, (k × e^−^ L^−1^ s^−1^) under 445 nm (blue), 530 nm (green), and 590 nm (orange) excitation bands [@oxboroughDirectEstimationFunctional2012; @boatmanImprovingAccuracySingle2019; @tortellUserGuideApplication2021].
 
 
 $$\begin{equation}
   {JV_{PSII}} = \frac{σ_{PSII}′ × qP × I × F_O}{σ_{PSII} }
-  \qquad(2)
+  \qquad(1)
 \end{equation}$$
 
 
 where σ~PSII~′ is effective absorption cross section for PSII photochemistry under the relevant actinic PAR step (nm^2^ quanta^−1^); qP is an estimate of the fraction of PSII open for photochemistry estimated according to @oxboroughResolvingChlorophyllFluorescence1997; I is the applied PAR (µmol photons m^−2^s^−1^); *F*~O~ is the minimum fluorescence from a given sample and excitation bandwidth (relative fluorescence) and σ~PSII~ is the maximum effective absorption cross section for PSII photochemistry from a given sample and excitation bandwidth (nm^2^ quanta^−1^). 
 
-We calibrated the *JV*~PSII~ estimator to absolute rates of electron transport (Eq. (3)) using parallel measures of oxygen evolution (µmol O~2~ L^−1^ s^−1^), captured simultaneously with the FRRf measures, below light saturation of electron transport, using a FireSting robust oxygen probe (PyroScience, Germany) inserted in the cuvette for select Rapid Light Curve (RLC) runs. For the blue LED (Ex~445nm~) excitation we used a calibration slope of 108832, for the green LED (Ex~530nm~) excitation we used a calibration slope of 110082, while for orange LED (Ex~590nm~) excitation we used a calibration slope of 254327 (Tab. S2).
+We calibrated the *JV*~PSII~ estimator to absolute rates of electron transport (Eq. (2)) using parallel measures of oxygen evolution (µmol O~2~ L^−1^ s^−1^), captured simultaneously with the FRRf measures, below light saturation of electron transport, using a FireSting robust oxygen probe (PyroScience, Germany) inserted in the cuvette for select Rapid Light Curve (RLC) runs. For the blue LED (Ex~445nm~) excitation we used a calibration slope of 108832, for the green LED (Ex~530nm~) excitation we used a calibration slope of 110082, while for orange LED (Ex~590nm~) excitation we used a calibration slope of 254327 (Tab. S2).
 
 $$\begin{equation}
   {JV_{PSII}(e^{−}~L^{−1}~s^{−1})} = \frac{Uncalibrated~JV_{PSII}(e^{−}~L^{−1}~s^{−1})}{Calibration~slope}
-  \qquad(3)
+  \qquad(2)
 \end{equation}$$
 
 At the same time as the FRRf measurements were performed, Chl *a* (µg mL^−1^) and cell count (N mL^−1^) measurements were also investigated.
@@ -207,7 +196,7 @@ Whole-cell absorbance spectra of PC-rich and PE-rich *Synechococcus* sp. culture
 
 ![<span id="fig:Pigment"></span>**Fig. **2: Pigment content (pg cell ^−1^) vs. growth waveband (nm; *a*) and Chlorophyll-specific exponential growth rates (µ; d^−1^) vs. Phycobiliproteins:Chlorophyll *a* ratio (µg:µg) (*b*) for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~. Blue lines (solid for 2.5 µM O~2~ or dashed for 250 µM O~2~) shows linear model fit for data from each strain across spectral bandwidths. Different blue lowercase letters indicate statistically significant differences between the fit models for different strains or given O~2~ concentrations (*t*-test; *p* < 0.05).](../Output/Figures/Fig_GrowthPig.png)
 
-## Effective absorption cross section of PSII, minimum turnover time of PSII photochemistry, and photochemical quenching coefficient {.unnumbered}
+## Effective absorption cross section of PSII, turnover time of PSII photochemistry, and photochemical quenching coefficient {.unnumbered}
 
 σPSII′ - Effective absorption cross section of PSII photochemistry under actinic light -> A2 (quanta)-1 or m2
 
@@ -217,7 +206,7 @@ qP = (PSII efficiency factor under actinic light; photochemical quenching coeffi
 
 Data show situations in which cultures were excited by, and growing in, corresponding wavebands. 
 
-![<span id="fig:SigLRC"></span>**Fig. **3: Effective absorption cross section of PSII (σ~PSII~; nm^2^ quanta^−1^, *a*), minimum turnover time of PSII photochemistry (τ; µs^−1^, *b*), or photochemical quenching coefficient (qP, *c*) vs. Actinic PAR (µmol photons m^−2^s^−1^). Parameters was estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. Data show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.](../Output/Figures/Fig_SigTauqp.png)
+![<span id="fig:SigLRC"></span>**Fig. **3: Effective absorption cross section of PSII (σ~PSII~; nm^2^ quanta^−1^, *a*); turnover time of PSII photochemistry (τ~PSII~; µs, *b*); or photochemical quenching coefficient (q~P~, *c*) vs. Actinic PAR (µmol photons m^−2^s^−1^). Parameters were estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. Data show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.](../Output/Figures/Fig_SigTauqp.png)
 
 <br>
 

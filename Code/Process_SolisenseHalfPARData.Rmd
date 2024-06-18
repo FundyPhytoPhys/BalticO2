@@ -999,7 +999,7 @@ Tau<-SolFitsMetaLRCTrimChoosen %>%
   scale_x_continuous(breaks=seq(0, 900, by = 300)) +
   coord_cartesian(xlim = c(0, 900)) +
   
-  labs(y=expression(paste(tau,""["PSII"]*" (µs"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  labs(y=expression(paste(tau,""["PSII"]*" (µs)")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   #labs(y=expression(paste(tau," (ms"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw() +
@@ -1043,7 +1043,9 @@ qp<-SolFitsMetaLRCTrimChoosen %>%
   #scale_y_continuous(breaks=seq(0, 10, by = 2)) +
   scale_x_continuous(breaks=seq(0, 900, by = 300)) +
   coord_cartesian(xlim = c(0, 900)) +
-  labs(y="qP", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  labs(y=expression(paste(q,""["P"]*"")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  
+  #labs(y="qP", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
