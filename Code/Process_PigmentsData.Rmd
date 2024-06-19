@@ -969,6 +969,94 @@ ggsave(file = file.path(FigPath, paste("Fig_GrowthPig",".png",sep = "")), height
 ```
 
 
+----------------------------------------------- ANOVA ------------------------------------
+
+------------------------------ Trim no growt data ------------------------------
+
+# Filter condition where no growt
+
+```{r}
+SolFitsMetaLightCorr445590Trim1<-MCPigmentChoosen %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21) %>% 
+  filter(WL != 405) 
+
+SolFitsMetaLightCorr445590Trim3<-MCPigmentChoosen %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0) 
+
+SolFitsMetaLightCorr445590Trim4<-MCPigmentChoosen %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 21) %>% 
+  filter(WL != 405) %>% 
+  filter(WL != 450) %>% 
+  filter(WL != 730) 
+  
+SolFitsMetaLightCorr445590Trim5<-MCPigmentChoosen %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 0) 
+
+
+MCPigmentChoosenTrim<-rbind(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMetaLightCorr445590Trim4, SolFitsMetaLightCorr445590Trim5)
+
+rm(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMetaLightCorr445590Trim4, SolFitsMetaLightCorr445590Trim5)
+```
+
+
+
+
+
+
+  ggh4x::facet_nested(cols = vars(factor(PigmentsName, levels=c("Chlorophyll~italic(a)","Phycobiliproteins", "Carotenoids"))), rows = vars(Strain), labeller = label_parsed) +
+
+  
+# Calculated Anova and Tukey test
+
+Pig
+```{r calculated statistics}
+Stat<-MCPigmentChoosenTrim %>% 
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) 
+  #filter(PigmentsName=="Chlorophyll~italic(a)")
+Stat$O2 <- factor(Stat$O2)
+Stat$WL <- factor(Stat$WL)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(Chlapgcell~O2*WL*Strain, data=Stat)
+AnovaTest_Chla<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_Chla$Pigments<-"Chla"
+
+Stat<-MCPigmentChoosenTrim %>% 
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) 
+  #filter(PigmentsName=="Phycobiliproteins")
+Stat$O2 <- factor(Stat$O2)
+Stat$WL <- factor(Stat$WL)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(Phycopgcell~O2*WL*Strain, data=Stat)
+AnovaTest_Phyco<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_Phyco$Pigments<-"Phyco"
+
+Stat<-MCPigmentChoosenTrim %>% 
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) 
+  #filter(PigmentsName=="Carotenoids")
+Stat$O2 <- factor(Stat$O2)
+Stat$WL <- factor(Stat$WL)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(Carpgcell~O2*WL*Strain, data=Stat)
+AnovaTest_Car<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_Car$Pigments<-"Car"
+
+AnovaPigments<-rbind(AnovaTest_Chla, AnovaTest_Phyco, AnovaTest_Car)
+rm(AnovaTest_Chla, AnovaTest_Phyco, AnovaTest_Car)
+```
+
+# Save RDS that create stats and tables
+
+```{r}
+saveRDS(AnovaPigments, file.path(TableRdsPath, paste(Project, "Anova_Pig.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
+```
 
 
 
