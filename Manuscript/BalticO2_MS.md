@@ -179,7 +179,7 @@ The manuscript was prepared as a Rmarkdown document [@handelAndreasHandelCustom2
 
 We used logistic curve fits (Fig. S1) to determine chlorophyll-specific exponential growth rates (μ; d^−1^), for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM or 2.5 µM (Fig. <a href="#fig:GrowthRate">1</a>. 
 
-Three-way factorial ANOVA showed that peak PAR, photoperiod, strain, and their interactions, significantly affected μ (ANOVA, *p* < 0.05 for all; Table S3). 
+Three-way factorial ANOVA showed that strain, growth waveband, O~2~ concentration, and their interactions, significantly affected μ (ANOVA, *p* < 0.05 for all; Table S4). 
 
 In general, PE-rich strains achieved faster growth rates under O~2~ concentration of 2.5 µM than 250 µM whereas, PC-rich strain showed similar growth rates under 250 µM and 2.5 µM of O~2~ concentration across tested spectral bandwidth (nm). In the presence of high O~2~ concentrations (250 µM), PC-rich strain did not show growth at 405 nm and PE-rich strain did not growth at 405, 450, and 730 nm. On the other hand, in low O~2~ concentrations (2.5 µM), both PC-rich and PE-rich strain showed growth rates over the entire range of tested growth wavelength (405 – 730 nm). 
 
@@ -195,13 +195,30 @@ PE-rich strain showed the highest growth rate under green light at 530 nm under 
 
 ## Pigment content and pigment ratio {.unnumbered}
 
-Whole-cell absorbance spectra of PC-rich and PE-rich *Synechococcus* sp. cultures showed that XXX (Fig. <a href="#fig:PURPAR"><strong>??</strong></a>*a*)... 
+Three-way factorial ANOVA showed that strain, growth waveband, O~2~ concentration, and their interactions, significantly affected pigment content (ANOVA, *p* < 0.05 for all; Table S5).  
 
 <br>
 
 ![<span id="fig:Pigment"></span>**Fig. **2: Pigment content (pg cell ^−1^) vs. growth waveband (nm; *a*) and Chlorophyll-specific exponential growth rates (µ; d^−1^) vs. Phycobiliproteins:Chlorophyll *a* ratio (µg:µg) (*b*) for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~. Blue lines (solid for 2.5 µM O~2~ or dashed for 250 µM O~2~) shows linear model fit for data from each strain across spectral bandwidths. Different blue lowercase letters indicate statistically significant differences between the fit models for different strains or given O~2~ concentrations (*t*-test; *p* < 0.05).](../Output/Figures/Fig_GrowthPig.png)
 
 ## Effective absorption cross section of PSII, turnover time of PSII photochemistry, and photochemical quenching coefficient {.unnumbered}
+
+Three-way factorial ANOVA showed that strain, and Actinic PAR, but not O~2~ concentration, significantly affected Sig at 445 nm (ANOVA, *p* < 0.05 for all; Table S6). Because lack of data, it was not possible to measured their interactions.
+Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, and their interactions, significantly affected Sig at 470 and 535 nm(ANOVA, *p* < 0.05 for all; Table S6). 
+Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, but not their interactions, significantly affected Sig at 590 nm (ANOVA, *p* < 0.05 for all; Table S6). 
+
+
+Three-way factorial ANOVA showed that Actinic PAR and O~2~ concentration, but not strain, significantly affected Tau at 445 nm (ANOVA, *p* < 0.05 for all; Table S7). Because lack of data, it was not possible to measured their interactions.
+Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, but not their interactions, significantly affected Tau at 470 and 535 nm (ANOVA, *p* < 0.05 for all; Table S7). 
+Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, and their interactions, significantly affected Tau at 590 nm (ANOVA, *p* < 0.05 for all; Table S7). 
+
+
+Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, and their interactions, significantly affected qP (ANOVA, *p* < 0.05 for all; Table S8). Because lack of data, it was not possible to measured their interactions.
+
+
+Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, and their interactions, significantly affected qP (ANOVA, *p* < 0.05 for all; Table S8). 
+Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, and their interactions, significantly affected qP (ANOVA, *p* < 0.05 for all; Table S8). 
+
 
 σPSII′ - Effective absorption cross section of PSII photochemistry under actinic light -> A2 (quanta)-1 or m2
 

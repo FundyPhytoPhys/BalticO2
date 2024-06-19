@@ -263,12 +263,15 @@ Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, b
 
 
 Three-way factorial ANOVA showed that Actinic PAR and O~2~ concentration, but not strain, significantly affected Tau at 445 nm (ANOVA, *p* < 0.05 for all; Table S7). Because lack of data, it was not possible to measured their interactions.
-Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, and their interactions, significantly affected Tau (ANOVA, *p* < 0.05 for all; Table S7). 
+Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, but not their interactions, significantly affected Tau at 470 and 535 nm (ANOVA, *p* < 0.05 for all; Table S7). 
+Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, and their interactions, significantly affected Tau at 590 nm (ANOVA, *p* < 0.05 for all; Table S7). 
 
+
+Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, and their interactions, significantly affected qP (ANOVA, *p* < 0.05 for all; Table S8). Because lack of data, it was not possible to measured their interactions.
 
 
 Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, and their interactions, significantly affected qP (ANOVA, *p* < 0.05 for all; Table S8). 
-
+Three-way factorial ANOVA showed that strain, Actinic PAR, O~2~ concentration, and their interactions, significantly affected qP (ANOVA, *p* < 0.05 for all; Table S8). 
 
 
 σPSII′ - Effective absorption cross section of PSII photochemistry under actinic light -> A2 (quanta)-1 or m2
