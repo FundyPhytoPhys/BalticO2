@@ -592,7 +592,7 @@ SolFitsMetaLRCTrim %>%
   # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
   # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
   # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
-    labs(y=expression(paste(tau,""["PSII"]*" (µs"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  labs(y=expression(paste(tau,""["PSII"]*" (µs)")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
   theme_bw() +
@@ -696,7 +696,7 @@ SolFitsMetaLRCTrim %>%
   # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
   # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
   # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
-    labs(y="qP", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  labs(y=expression(paste(q,""["P"]*"")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
   theme_bw() +
@@ -747,91 +747,7 @@ rm(SolFitsMetaLRCTrimChoosen450, SolFitsMetaLRCTrimChoosen470, SolFitsMetaLRCTri
 
 ```
 
-
-# Create preliminary plots sig vs ActPAR
-
-```{r preliminary plot}
-lab1=c(expression("PC-rich"), expression("PE-rich"))
-lab2=c(expression("2.5 µM"), expression("250 µM"))
-
-SolFitsMetaLRCTrimChoosen %>%
-  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  ggplot() +
-  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, shape = as.factor(O2)), size = 3, show.legend = T) +
-
-  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
-  
-  geom_line(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
-
-  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
-  
-  scale_fill_identity() +
-  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
-  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
-  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
-  scale_y_continuous(breaks=seq(0, 10, by = 2)) +
-  scale_x_continuous(breaks=seq(0, 800, by = 200)) +
-  coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
-  
-  labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
-  theme_bw() 
-
-```
-
-```{r}
-lab1=c(expression("PC-rich"), expression("PE-rich"))
-lab2=c(expression("2.5 µM"), expression("250 µM"))
-
-SolFitsMetaLRCTrimChoosen %>%
-  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  ggplot() +
-  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv, shape = as.factor(O2)), size = 3, show.legend = T) +
-
-  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanTauAv - AllsdTauAv, ymax = AllmeanTauAv + AllsdTauAv, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
-  
-  geom_line(aes(x = ActPARCorr, y = AllmeanTauAv, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
-
-  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
-
-  scale_fill_identity() +
-  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
-  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
-  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
-  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
-  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
-  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
-  
-  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
-  theme_bw() 
-```
-
-```{r}
-lab1=c(expression("PC-rich"), expression("PE-rich"))
-lab2=c(expression("2.5 µM"), expression("250 µM"))
-
-SolFitsMetaLRCTrimChoosen %>%
-  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
-  ggplot() +
-  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo, shape = as.factor(O2)), size = 3, show.legend = T) +
-
-  geom_line(aes(x = ActPARCorr, y = AllmeanqpOxbo, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
-  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanqpOxbo - AllsdqpOxbo, ymax = AllmeanqpOxbo + AllsdqpOxbo, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
-  
-  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
-  scale_fill_identity() +
-  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
-  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
-  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
-  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
-  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
-  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
-  
-  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
-  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
-  theme_bw() 
-```
+# Preliminary plot
 
 ```{r preliminary plot}
 lab1=c(expression("PC-rich"), expression("PE-rich"))
@@ -1074,6 +990,92 @@ ggp
 ```
 ```{r save plot}
 ggsave(file = file.path(FigPath, paste("Fig_SigTauqp",".png",sep = "")), height=8, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+----------------------------------------------- ANOVA ------------------------------------
+
+
+# Calculated Anova and Tukey test
+
+```{r calculated statistics}
+Stat<-SolFitsMetaLRCTrimChoosen %>% 
+  filter(Ex_WL == 445) %>% 
+  filter(WL == "450")
+Stat$O2 <- factor(Stat$O2)
+Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(qpOxbo~O2*ActPARCorr*Strain, data=Stat)
+AnovaTest_qp445<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_qp445$Ex_WL<-445
+
+Stat<-SolFitsMetaLRCTrimChoosen %>% 
+  filter(Ex_WL == 470) %>% 
+  filter(WL == "470")
+Stat$O2 <- factor(Stat$O2)
+Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(qpOxbo~O2*ActPARCorr*Strain, data=Stat)
+AnovaTest_qp470<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_qp470$Ex_WL<-470
+
+Stat<-SolFitsMetaLRCTrimChoosen %>% 
+  filter(Ex_WL == 535) %>% 
+  filter(WL == "530")
+Stat$O2 <- factor(Stat$O2)
+Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(qpOxbo~O2*ActPARCorr*Strain, data=Stat)
+AnovaTest_qp535<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_qp535$Ex_WL<-535
+
+Stat<-SolFitsMetaLRCTrimChoosen %>% 
+  filter(Ex_WL == 590) %>% 
+  filter(WL == "620")
+Stat$O2 <- factor(Stat$O2)
+Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(qpOxbo~O2*ActPARCorr*Strain, data=Stat)
+AnovaTest_qp590<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_qp590$Ex_WL<-590
+
+AnovaqP<-rbind(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
+```
+
+
+
+
+
+# Calculated Anova and Tukey test
+
+```{r calculated statistics}
+SolFitsMetaLRCTrimChoosenStat<-SolFitsMetaLRCTrimChoosen 
+
+#MCGrowthRateStats<-rbind(MultiCultiGrowth2, MultiCultiGrowth2) #I created double data here
+
+SolFitsMetaLRCTrimChoosenStat$O2 <- factor(SolFitsMetaLRCTrimChoosenStat$O2)
+SolFitsMetaLRCTrimChoosenStat$WL <- factor(SolFitsMetaLRCTrimChoosenStat$WL)
+SolFitsMetaLRCTrimChoosenStat$Strain <- factor(SolFitsMetaLRCTrimChoosenStat$Strain)
+
+# Two way Anova with interactions
+model<-aov(deltaOD_Lmu_corr~O2*WL*Strain, data=MCGrowthRateStats)
+AnovaTest_GrowthRate<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+TukeyHSDTest_GrowthRate<-TukeyHSD(model, which = c("O2", "WL", "Strain"))
+
+
+```
+
+
+
+# Save RDS that create stats and tables
+
+```{r}
+saveRDS(AnovaTest_GrowthRate, file.path(TableRdsPath, paste(Project, "Anova_GrowthRate.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
+saveRDS(TukeyHSDTest_GrowthRate, file.path(TableRdsPath, paste(Project, "HSD_GrowthRate.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 ```
 
 
