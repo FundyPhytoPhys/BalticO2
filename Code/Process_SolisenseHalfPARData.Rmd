@@ -175,7 +175,7 @@ SolFitsMetaLRC <- SolFitsMetaLRC %>%
   # filter(E_days <=10) %>% 
   group_by(Strain, Ex_WL, Par_ue, Photoperiod, WLNum, WL, O2, E_days, Oxygen, ObsDate, ActPARCorr) %>%
   
-  summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, WLNum, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, ActPARCorr, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days,
+  summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, WLNum, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, ActPARCorr, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days, TauAv, qpOxbo,
             meanSig_nm2psii = mean(Sig_nm2psii),
             sdSig_nm2psii = sd(Sig_nm2psii),
             
@@ -198,7 +198,7 @@ SolFitsMetaLRC <- SolFitsMetaLRC %>%
   # filter(E_days <=10) %>% 
   group_by(Strain, Ex_WL, Par_ue, Photoperiod, WLNum, WL, O2, Oxygen, ActPARCorr) %>%
   
-  summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, WLNum, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, meanSig_nm2psii, sdSig_nm2psii, meanSigdark_nm2psii, sdSigdark_nm2psii, ActPARCorr, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days, meanTauAv, sdTauAv, meanqpOxbo, sdqpOxbo, 
+  summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, WLNum, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, meanSig_nm2psii, sdSig_nm2psii, meanSigdark_nm2psii, sdSigdark_nm2psii, ActPARCorr, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days, TauAv, qpOxbo, meanTauAv, sdTauAv, meanqpOxbo, sdqpOxbo, 
             AllmeanSig_nm2psii = mean(meanSig_nm2psii),
             AllsdSig_nm2psii = sd(sdSig_nm2psii),
             
@@ -997,6 +997,118 @@ ggsave(file = file.path(FigPath, paste("Fig_SigTauqp",".png",sep = "")), height=
 
 # Calculated Anova and Tukey test
 
+Sig
+```{r calculated statistics}
+Stat<-SolFitsMetaLRCTrimChoosen %>% 
+  filter(E_days>=4) %>% 
+  filter(Ex_WL == 445) %>% 
+  filter(WL == "450")
+Stat$O2 <- factor(Stat$O2)
+Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(Sig_nm2psii~O2*ActPARCorr*Strain, data=Stat)
+AnovaTest_qp445<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_qp445$Ex_WL<-445
+
+Stat<-SolFitsMetaLRCTrimChoosen %>%
+  filter(E_days>=4) %>% 
+  filter(Ex_WL == 470) %>% 
+  filter(WL == "470")
+Stat$O2 <- factor(Stat$O2)
+Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(Sig_nm2psii~O2*ActPARCorr*Strain, data=Stat)
+AnovaTest_qp470<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_qp470$Ex_WL<-470
+
+Stat<-SolFitsMetaLRCTrimChoosen %>% 
+  filter(E_days>=4) %>% 
+  filter(Ex_WL == 535) %>% 
+  filter(WL == "530")
+Stat$O2 <- factor(Stat$O2)
+Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(Sig_nm2psii~O2*ActPARCorr*Strain, data=Stat)
+AnovaTest_qp535<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_qp535$Ex_WL<-535
+
+Stat<-SolFitsMetaLRCTrimChoosen %>% 
+  filter(E_days>=4) %>% 
+  filter(Ex_WL == 590) %>% 
+  filter(WL == "620")
+Stat$O2 <- factor(Stat$O2)
+Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(Sig_nm2psii~O2*ActPARCorr*Strain, data=Stat)
+AnovaTest_qp590<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_qp590$Ex_WL<-590
+
+AnovaSig<-rbind(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
+rm(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
+```
+
+
+Tau
+```{r calculated statistics}
+Stat<-SolFitsMetaLRCTrimChoosen %>%
+  filter(E_days>=4) %>% 
+  filter(Ex_WL == 445) %>% 
+  filter(WL == "450")
+Stat$O2 <- factor(Stat$O2)
+Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(TauAv~O2*ActPARCorr*Strain, data=Stat)
+AnovaTest_qp445<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_qp445$Ex_WL<-445
+
+Stat<-SolFitsMetaLRCTrimChoosen %>% 
+  filter(E_days>=4) %>% 
+  filter(Ex_WL == 470) %>% 
+  filter(WL == "470")
+Stat$O2 <- factor(Stat$O2)
+Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(TauAv~O2*ActPARCorr*Strain, data=Stat)
+AnovaTest_qp470<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_qp470$Ex_WL<-470
+
+Stat<-SolFitsMetaLRCTrimChoosen %>% 
+  filter(E_days>=4) %>% 
+  filter(Ex_WL == 535) %>% 
+  filter(WL == "530")
+Stat$O2 <- factor(Stat$O2)
+Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(TauAv~O2*ActPARCorr*Strain, data=Stat)
+AnovaTest_qp535<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_qp535$Ex_WL<-535
+
+Stat<-SolFitsMetaLRCTrimChoosen %>% 
+  filter(E_days>=4) %>% 
+  filter(Ex_WL == 590) %>% 
+  filter(WL == "620")
+Stat$O2 <- factor(Stat$O2)
+Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+Stat$Strain <- factor(Stat$Strain)
+# Three way Anova with interactions
+model<-aov(TauAv~O2*ActPARCorr*Strain, data=Stat)
+AnovaTest_qp590<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+AnovaTest_qp590$Ex_WL<-590
+
+AnovaTau<-rbind(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
+rm(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
+```
+
+
+
+qP
 ```{r calculated statistics}
 Stat<-SolFitsMetaLRCTrimChoosen %>% 
   filter(Ex_WL == 445) %>% 
@@ -1043,29 +1155,7 @@ AnovaTest_qp590<-data.frame(unclass(summary(model)), check.names = FALSE, string
 AnovaTest_qp590$Ex_WL<-590
 
 AnovaqP<-rbind(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
-```
-
-
-
-
-
-# Calculated Anova and Tukey test
-
-```{r calculated statistics}
-SolFitsMetaLRCTrimChoosenStat<-SolFitsMetaLRCTrimChoosen 
-
-#MCGrowthRateStats<-rbind(MultiCultiGrowth2, MultiCultiGrowth2) #I created double data here
-
-SolFitsMetaLRCTrimChoosenStat$O2 <- factor(SolFitsMetaLRCTrimChoosenStat$O2)
-SolFitsMetaLRCTrimChoosenStat$WL <- factor(SolFitsMetaLRCTrimChoosenStat$WL)
-SolFitsMetaLRCTrimChoosenStat$Strain <- factor(SolFitsMetaLRCTrimChoosenStat$Strain)
-
-# Two way Anova with interactions
-model<-aov(deltaOD_Lmu_corr~O2*WL*Strain, data=MCGrowthRateStats)
-AnovaTest_GrowthRate<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
-TukeyHSDTest_GrowthRate<-TukeyHSD(model, which = c("O2", "WL", "Strain"))
-
-
+rm(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
 ```
 
 
@@ -1073,9 +1163,12 @@ TukeyHSDTest_GrowthRate<-TukeyHSD(model, which = c("O2", "WL", "Strain"))
 # Save RDS that create stats and tables
 
 ```{r}
-saveRDS(AnovaTest_GrowthRate, file.path(TableRdsPath, paste(Project, "Anova_GrowthRate.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(AnovaSig, file.path(TableRdsPath, paste(Project, "Anova_SigLRC.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 
-saveRDS(TukeyHSDTest_GrowthRate, file.path(TableRdsPath, paste(Project, "HSD_GrowthRate.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+saveRDS(AnovaTau, file.path(TableRdsPath, paste(Project, "Anova_TauLRC.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
+saveRDS(AnovaqP, file.path(TableRdsPath, paste(Project, "Anova_qpLRC.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
 ```
 
 
