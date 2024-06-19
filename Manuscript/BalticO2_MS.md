@@ -91,7 +91,6 @@ xxx Add info about Colour Light and pico XXX
 
 The aim of this work was to demonstrate the ecophysiological response of PC-rich and PE-rich *Synechococcus* sp. to different oxygen concentrations and colors of light.
 
-
 <br>
 
 # Materials and Methods {.unnumbered}
@@ -108,35 +107,39 @@ Cultures grew at 22℃, with peak PAR of 180 µmol photons m^−2^s^−1^. To ap
 
 ## Chlorophyll-specific exponential growth rates {.unnumbered}
 
-Picocyanobacterial growth was monitored every 5 minutes by automatically recording OD~680~, OD~720~, and ΔOD (ΔOD = OD~680~ – OD~720~) for at least 5 days, independently for each culture tube. The chlorophyll-specific exponential growth rates (µ) were determined by fitting logistic growth curves using a modified Levenberg-Marquardt fitting algorithm [@elzhovMinpackLmInterface2023] to plots of the chlorophyll *a* proxy of ΔOD vs. elapsed time (d) for each combination of strain, spectral bandwidth, and O~2~ concentration. Growth curves, tracked as OD~680~, OD~720~, ΔOD and logistic fits of ΔOD vs. elapsed time were shown in Fig. S1 in Supplementary materials. 
-
-<br>
-
-## Pigment content and pigment ratio {.unnumbered}
-
-Whole-cell absorbance spectra of picocyanobacteria cells were collected using an integrating cavity upgrade spectrophotometer (CLARiTY 17 UV/Vis/NIR, On-Line Instrument Systems, Inc., Bogart, GA, USA) according to the method proposed by @blakeSituSpectroscopyIntact2012. Each sample and reference observation cavity of the spectrophotometer was filled with 8 mL of f/2 medium. After establishing a baseline absorbance ranging from 375 to 710 nm (f/2 media of salinity 8 PSU), 4 mL of PC-rich_077 or PE-rich_127 culture cell suspension was introduced into the sample cavity, replacing an equal volume of culture medium. Pathlength corrected absorbance per cm was calculated using Jávorfi coefficients [@javorfiQuantitativeSpectrophotometryUsing2006]. Using an integrating cavity upgrade CLARiTY 17 UV/Vis/NIR spectrophotometer, we conducted estimations of pigment content (µg mL^-1^) including Chlorophyll *a* (Chl *a*), Carotenoids (Car), Phycoerythrin (PE), Phycocyanin (PC), and Allophycocyanin (APC) in PC-rich_077 and PE-rich_127 *Synechococcus* sp. cultures. These estimations were based on established linear correlations between pigment content, determined through extraction methods [@stricklandPracticalHandBook1972; @bennettComplementaryChromaticAdaptation1973], and absorbance values of individual pigment peaks (Car; 480 nm, PE; 565 nm, PC; 620 nm, APC; 650 nm, and Chl *a*; 665 nm) obtained from whole-cell absorbance spectra (Table S1). We also summed PE, PC, and APC protein to receive Phycobiliproteins content. Additionally, we calculated the Car to Chl *a* ratio and the ratio of the sum of Phycobiliproteins to Chl *a* (µg:µg) for each strain.
-
-Additionally, we measured Chl *a* (µg mL^−1^) using Trilogy Laboratory Fluorometer (Turner Designs, Inc., CA, USA) equipped with Chlorophyll In-Vivo Module. Quantitative analysis of Chl *a* was obtained after adding 50 µL of picocyanobacteria culture and 2 mL of a 90% acetone:DMSO solution in a 3:2 ratio.
+Picocyanobacterial growth was monitored every 5 minutes by automatically recording OD~680~, OD~720~, and ΔOD (ΔOD = OD~680~ – OD~720~) for at least 5 days, independently for each culture tube. The chlorophyll-specific exponential growth rates (µ) were determined by fitting logistic growth curves using a modified Levenberg-Marquardt fitting algorithm [@elzhovMinpackLmInterface2023] to plots of the chlorophyll *a* proxy of ΔOD vs. elapsed time (d) for each combination of strain, spectral bandwidth, and O~2~ concentration. Growth curves, tracked as OD~680~, OD~720~, ΔOD and logistic fits of ΔOD vs. elapsed time were shown in Fig. S1 in Supplementary materials. The cell-specific exponential growth rates (µ) were also determined (Fig. S2). 
 
 <br>
 
 ## Picocyanobacteria cell counts {.unnumbered}
 
-Picocyanobacterial cells (cell mL^−1^) were counted using an ImageXpress Pico Digital microscope equipped with CMOS camera and LED+ image autofocus (ImageXpress Pico Automated Cell Imaging System, Molecular Devices, LLC., CA, USA). Culture samples were preserved with 4% glutaraldehyde and kept at -80°C until the measurements. Samples (V = 10 µL) were transferred to Tissue Culture (TC)-treated surface, flat bottom black 96-well plates (Corning® Falcon® Microplate, MilliporeSigma, Merck, Darmstadt, Germany) containing 200 µL of f/2 media and centrifuged using a Beckman J-20 centrifuge with a swing bucket JS-4.3 rotor at 4500 rpm (Beckman Coulter, Brea, California, United States). Cells were imaged with the Cy5 channels (Excitation: 630/40 nm; Emission: 695/45 nm; Dichroic: 655 nm) using selectable confocal geometries, which allowed us to distinguish cyanobacterial cells from any co-occurring heterotrophic bacteria, and counted using a 63x objective in fluorescence imaging modes. Quantitative analysis on images acquired from automated microscopy obtained from 96-well microplates was performed using CellReporterXpress Image Acquisition and Analysis Software. The actual cell number was calculated based on the dilution factor and selected area count in each well [@wlodkowicRecentProgressCytometric2022].
+The number of picocyanobacterial cells was estimated using linear regression models based on cell concentration (cell mL^−1^) and OD at 680 nm or 720 nm (Table S1). The OD of cultures was measured using MCMIX-OD PSI Multicultivators (Photon Systems Instruments, Drásov, Czech Republic) and calculation of the cell number was conducted using an ImageXpress Pico Digital microscope equipped with CMOS camera and LED+ image autofocus (ImageXpress Pico Automated Cell Imaging System, Molecular Devices, LLC., CA, USA). Culture samples were preserved with 4% glutaraldehyde and kept at -80°C until the measurements. Samples (V = 10 µL) were transferred to Tissue Culture (TC)-treated surface, flat bottom black 96-well plates (Corning® Falcon® Microplate, MilliporeSigma, Merck, Darmstadt, Germany) containing 200 µL of f/2 media and centrifuged using a Beckman J-20 centrifuge with a swing bucket JS-4.3 rotor at 4500 rpm (Beckman Coulter, Brea, California, United States). Cells were imaged with the Cy5 channels (Excitation: 630/40 nm; Emission: 695/45 nm; Dichroic: 655 nm) using selectable confocal geometries, which allowed us to distinguish cyanobacterial cells from any co-occurring heterotrophic bacteria, and counted using a 63x objective in fluorescence imaging modes. Quantitative analysis on images acquired from automated microscopy obtained from 96-well microplates was performed using CellReporterXpress Image Acquisition and Analysis Software. The actual cell number was calculated based on the dilution factor and selected area count in each well [@wlodkowicRecentProgressCytometric2022].
 
 <br>
 
-## PSII effective absorption cross section of PSII and electron flux {.unnumbered}
+## Pigment content and pigment ratio {.unnumbered}
 
-We harvested 4 mL of picocyanobacteria cultures for photophysiological characterizations repeatedly across the growth trajectories. It is worth emphasizing here that we We used Fast Repetition Rate fluorometry (FRRf) even in conditions when there was no recorded growth rate of tested strains.
+Whole-cell absorbance spectra of picocyanobacteria cells were collected using an integrating cavity upgrade spectrophotometer (CLARiTY 17 UV/Vis/NIR, On-Line Instrument Systems, Inc., Bogart, GA, USA) according to the method proposed by @blakeSituSpectroscopyIntact2012. Each sample and reference observation cavity of the spectrophotometer was filled with 8 mL of f/2 medium. After establishing a baseline absorbance ranging from 375 to 710 nm (f/2 media of salinity 8 PSU), 4 mL of PC-rich_077 or PE-rich_127 culture cell suspension was introduced into the sample cavity, replacing an equal volume of culture medium. Pathlength corrected absorbance per cm was calculated using Jávorfi coefficients [@javorfiQuantitativeSpectrophotometryUsing2006]. Using an integrating cavity upgrade CLARiTY 17 UV/Vis/NIR spectrophotometer, we conducted estimations of pigment content (µg mL^-1^) including Chlorophyll *a* (Chl *a*), Carotenoids (Car), Phycoerythrin (PE), Phycocyanin (PC), and Allophycocyanin (APC) in PC-rich_077 and PE-rich_127 *Synechococcus* sp. cultures. These estimations were based on established linear correlations between pigment content, determined through extraction methods [@stricklandPracticalHandBook1972; @bennettComplementaryChromaticAdaptation1973], and absorbance values of individual pigment peaks (Car; 480 nm, PE; 565 nm, PC; 620 nm, APC; 650 nm, and Chl *a*; 665 nm) obtained from whole-cell absorbance spectra (Table S2). We also summed PE, PC, and APC protein to receive Phycobiliproteins content. Additionally, we calculated and presented the Car to Chl *a* ratio and the ratio of the sum of Phycobiliproteins to Chl *a* (µg:µg) for each strain (Fig. S3).
 
-We used FRRf [@kolberMeasurementsVariableChlorophyll1998] (Solisense, USA), with a lab built temperature control jacket (22℃), to apply series of flashlets to drive saturation induction/relaxation trajectories, fit using the onboard Solisense LIFT software [@falkowskiEstimationPhytoplanktonPhotosynthesis1993; @kolberMeasurementsVariableChlorophyll1998]. From the model fits we took the initial fluorescence before induction (*F*~O~, *F*~O~′, or *F*~S~, depending upon the level of actinic light and step in the light response curve); the maximum fluorescence (*F*~M~ or *F*~M~′) once Photosystem II (PSII) was driven to closure; and the effective absorption cross section for PSII photochemistry (σ~PSII~ or σ~PSII~′; nm^2^ quanta^−1^) [@tortellUserGuideApplication2021]. 
+<br>
 
-We used a double tap protocol [@xuConnectivityPhotosystemII2017], where FRRf induction/relaxation trajectories were collected during a rapid light curve sequence increasing in steps of 10 s at 0, 20, 40, 80, 160, and 320 µmol photons m^−2^s^−1^ PAR, delivered from LED emitters centred at 445, preferentially exciting chlorophyll, 530, preferentially exciting phycoerythrin, or 590 nm, preferentially exciting phycocyanin. 
+## PSII effective absorption cross section of PSII, turnover time of PSII photochemistry, and photochemical quenching coefficient {.unnumbered}
 
-Flash Power for 445 excitation was 60000 µmol photons m^−2^s^−1^ PAR, for 530 nm excitation power was 25000 µmol photons m^−2^s^−1^ PAR, while for 590 nm excitation power was 14000 µmol photons m^−2^s^−1^, calibrated using a quantum sensor (LI-250, LI-COR, Inc.). We applied 1 s darkness between sequential light steps, to allow re-opening of PSII. FRRf excitation flashlets were applied at the same wavebands, 445, 530, or 590 nm, as the actinic light steps.
+We harvested 4 mL of picocyanobacteria cultures for photophysiological characterizations repeatedly across the growth trajectories. To ensure measurements in low O~2~ concentration of ~ 2.5 µM, we added N~2~ from a gas cylinder during measurements. O~2~ concentration was verified using oxygen optodes (PyroScience, Germany) inserted into culture samples for real-time measurements. 
 
-We calculated (Eq. (1)) an uncalibrated fluorescence based estimator for volumetric electron transport, *JV*~PSII~, (k × e^−^ L^−1^ s^−1^) under 445 nm (blue), 530 nm (green), and 590 nm (orange) excitation bands [@oxboroughDirectEstimationFunctional2012; @boatmanImprovingAccuracySingle2019; @tortellUserGuideApplication2021].
+We used FRRf [@kolberMeasurementsVariableChlorophyll1998] (Solisense, USA), with a lab built temperature control jacket (22℃), to apply series of flashlets to drive saturation induction/relaxation trajectories, fit using the onboard Solisense LIFT software [@falkowskiEstimationPhytoplanktonPhotosynthesis1993; @kolberMeasurementsVariableChlorophyll1998]. 
+
+We used a double tap protocol [@xuConnectivityPhotosystemII2017], where FRRf induction/relaxation trajectories were collected during a rapid light curve sequence increasing in steps of 10 s at 0, 20, 40, 80, 160, and 320 µmol photons m^−2^s^−1^ PAR, delivered from LED emitters centred at 445; preferentially exciting chlorophyll, 445; preferentially exciting phycourobilin (PUB), 530; preferentially exciting phycoerythrin (PE), or 590 nm; preferentially exciting phycocyanin (PC). 
+
+Flash Power for Ex~445nm~ was 60000 µmol photons m^−2^s^−1^ PAR, for Ex~470nm~ and Ex~535nm~ excitation power was 25000 µmol photons m^−2^s^−1^ PAR, while for Ex~590nm~ excitation power was 14000 µmol photons m^−2^s^−1^, calibrated using a quantum sensor (LI-250, LI-COR, Inc.). We applied 1 s darkness between sequential light steps, to allow re-opening of PSII. FRRf excitation flashlets were applied at the same wavebands, 445, 470, 535, or 590 nm, as the actinic light steps.
+
+We estimated effective absorption cross section of PSII (σ~PSII~; nm^2^ quanta^−1^); turnover time of PSII photochemistry (τ~PSII~; µs); or photochemical quenching coefficient (q~P~) using FRRf induction curves with excitation at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich or PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM or 2.5 µM.
+
+<br>
+
+## PSII electron flux {.unnumbered}
+
+We calculated (Eq. (1)) an uncalibrated fluorescence based estimator for volumetric electron transport, *JV*~PSII~, (k × e^−^ L^−1^ s^−1^) under Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange excitation bands [@oxboroughDirectEstimationFunctional2012; @boatmanImprovingAccuracySingle2019; @tortellUserGuideApplication2021].
 
 
 $$\begin{equation}
@@ -147,22 +150,24 @@ $$\begin{equation}
 
 where σ~PSII~′ is effective absorption cross section for PSII photochemistry under the relevant actinic PAR step (nm^2^ quanta^−1^); qP is an estimate of the fraction of PSII open for photochemistry estimated according to @oxboroughResolvingChlorophyllFluorescence1997; I is the applied PAR (µmol photons m^−2^s^−1^); *F*~O~ is the minimum fluorescence from a given sample and excitation bandwidth (relative fluorescence) and σ~PSII~ is the maximum effective absorption cross section for PSII photochemistry from a given sample and excitation bandwidth (nm^2^ quanta^−1^). 
 
-We calibrated the *JV*~PSII~ estimator to absolute rates of electron transport (Eq. (2)) using parallel measures of oxygen evolution (µmol O~2~ L^−1^ s^−1^), captured simultaneously with the FRRf measures, below light saturation of electron transport, using a FireSting robust oxygen probe (PyroScience, Germany) inserted in the cuvette for select Rapid Light Curve (RLC) runs. For the blue LED (Ex~445nm~) excitation we used a calibration slope of 108832, for the green LED (Ex~530nm~) excitation we used a calibration slope of 110082, while for orange LED (Ex~590nm~) excitation we used a calibration slope of 254327 (Tab. S2).
+We calibrated the *JV*~PSII~ estimator to absolute rates of electron transport (Eq. (2)) using parallel measures of oxygen evolution (µmol O~2~ L^−1^ s^−1^), captured simultaneously with the FRRf measures, below light saturation of electron transport, using a FireSting robust oxygen probe (PyroScience, Germany) inserted in the cuvette for select Rapid Light Curve (RLC) runs. 
+
+For the blue LED (Ex~445nm~) excitation we used a calibration slope of 108832, for the blue-green LED (Ex~470nm~) excitation we used a calibration slope of 98039, for the green LED (Ex~530nm~) excitation we used a calibration slope of 110082, while for orange LED (Ex~590nm~) excitation we used a calibration slope of 254327 (Table S3).
 
 $$\begin{equation}
   {JV_{PSII}(e^{−}~L^{−1}~s^{−1})} = \frac{Uncalibrated~JV_{PSII}(e^{−}~L^{−1}~s^{−1})}{Calibration~slope}
   \qquad(2)
 \end{equation}$$
 
-At the same time as the FRRf measurements were performed, Chl *a* (µg mL^−1^) and cell count (N mL^−1^) measurements were also investigated.
+At the same time as the FRRf measurements were performed, Chl *a* (µg mL^−1^) were also investigated using Trilogy Laboratory Fluorometer (Turner Designs, Inc., CA, USA) equipped with Chlorophyll In-Vivo Module. Quantitative analysis of Chl *a* was obtained after adding 50 µL of picocyanobacteria culture and 2 mL of a 90% acetone:DMSO solution in a 3:2 ratio.
 
 <br>
 
 ## Statistical analysis {.unnumbered}
 
-We used R version 4.3.0 [@rcore] running under RStudio [@posit]. We performed three-way factorial ANOVA (*aov()* function; R Base package) to determine whether strain, spectral bandwidth, oxygen concentration, and their interactions, significantly influence the chlorophyll-specific exponential growth rate (µ; d^−1^; Tab. S3). 
+We used R version 4.3.0 [@rcore] running under RStudio [@posit]. We performed three-way factorial ANOVA (*aov()* function; R Base package) to determine whether strain, growth waveband, O~2~ concentration, and their interactions, significantly influence the chlorophyll-specific exponential growth rate (µ; d^−1^; Tab. S4) and pigment content (Tab. S5). We also performed three-way factorial ANOVA (*aov()* function) to determine whether strain, Actinic PAR, O~2~ concentration, and their interactions, significantly influence the σ~PSII~; τ~PSII~; or q~P~ (Tab. S6).
 
-Furthermore, to examine statistical differences between fits plotted for chlorophyll-specific exponential growth rate (Tab. S4), pigments content (Tab. S5), pigment ratio (Tab. S6), σ~PSII~′ (Tab. S7), and *JV*~PSII~ (Tab. S8) measured under different oxygen concentrations for each strain, we performed one-way ANOVA (*aov()* function; R Base package). Statistical differences for all analyses were determined at significance level of α = 0.05. 
+We used *t*-tests of linear fits to compare data across different strains and O~2~ concentration for a given growth waveband, for chlorophyll-specific exponential growth rate vs. Phycobiliproteins to Chl *a* ratio (Tab. S7). We also performed *t*-tests of linear fits to compare data across different strains and O~2~ concentration in situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm, for chlorophyll-specific exponential growth rate vs. *JV*~PSII~ (Tab. S8). Statistical differences for all analyses were determined at significance level α = 0.05. 
 
 The manuscript was prepared as a Rmarkdown document [@handelAndreasHandelCustom2020] with figures plotted using ggplot2 [@wickhamDataAnalysis2016] and patchwork [@pedersenPatchworkComposerPlots2024] packages. All metadata, data, and code is available on GitHub (https://github.com/FundyPhytoPhys/BalticO2).
 
@@ -172,9 +177,9 @@ The manuscript was prepared as a Rmarkdown document [@handelAndreasHandelCustom2
 
 ## Chlorophyll-specific exponential growth rate {.unnumbered}
 
-We used logistic curve fits (Fig. S1) to determine chlorophyll-specific exponential growth rates (μ; d^−1^), for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidth of 405, 450, 470, 530, 620, 660, and 730 nm and O~2~ concentration of 250 µM and 2.5 µM (Fig. <a href="#fig:GrowthRate">1</a>. 
+We used logistic curve fits (Fig. S1) to determine chlorophyll-specific exponential growth rates (μ; d^−1^), for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM or 2.5 µM (Fig. <a href="#fig:GrowthRate">1</a>. 
 
-Three-way factorial ANOVA showed that peak PAR, photoperiod, strain, and their interactions, significantly affected μ (ANOVA, *p* < 0.05 for all; Table S3). [xxxx if we do this - I have some idea though xxx-> Significant differences between model fits of chlorophyll-specific exponential growth rates (d^−1^) across growth waveband (nm) estimated for 250 µM and 2.5 µM O~2~ concentration for each *Synechococcus* sp. cultures was also recorded (ANOVA, *p* < 0.05; Table S2). 
+Three-way factorial ANOVA showed that peak PAR, photoperiod, strain, and their interactions, significantly affected μ (ANOVA, *p* < 0.05 for all; Table S3). 
 
 In general, PE-rich strains achieved faster growth rates under O~2~ concentration of 2.5 µM than 250 µM whereas, PC-rich strain showed similar growth rates under 250 µM and 2.5 µM of O~2~ concentration across tested spectral bandwidth (nm). In the presence of high O~2~ concentrations (250 µM), PC-rich strain did not show growth at 405 nm and PE-rich strain did not growth at 405, 450, and 730 nm. On the other hand, in low O~2~ concentrations (2.5 µM), both PC-rich and PE-rich strain showed growth rates over the entire range of tested growth wavelength (405 – 730 nm). 
 
