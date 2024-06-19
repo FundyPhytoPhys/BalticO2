@@ -12,10 +12,6 @@ author:
     institute: MTA
     email: msavoie@mta.ca
     ORCID: 0009-0009-9499-6657
-- Naaman M. Omar:
-    institute: MTA
-    email: nomar@mta.ca
-    ORCID: 0000-0001-9583-2886
 - Douglas A. Campbell:
     institute: MTA
     email: dubhglascambeuil@gmail.com
@@ -314,7 +310,7 @@ Code to perform data processing and analyses is available at https://github.com/
 
 ## Acknowledgements {.unnumbered}
 
-We thank Miranda Corkum who maintained cultures and trained personnel in culture handling; Laurel Genge, and Carlie Barnhill (Mount Allison students) who assisted with R code. This work was supported by Canada Research Chair in Phytoplankton Ecophysiology (D.A.C) and Latitude & Light; NSERC of Canada Discovery Grant (D.A.C).
+We thank Naaman Omar for assistance with coding, data analyses and culture maintenance;  Miranda Corkum who maintained cultures and trained personnel in culture handling; Laurel Genge, and Carlie Barnhill (Mount Allison students) who assisted with R code. This work was supported by Canada Research Chair in Phytoplankton Ecophysiology (D.A.C) and Latitude & Light; NSERC of Canada Discovery Grant (D.A.C).
 
 <br>
 
