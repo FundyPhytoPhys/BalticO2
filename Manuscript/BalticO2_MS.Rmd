@@ -163,13 +163,13 @@ Picocyanobacterial growth was monitored every 5 minutes by automatically recordi
 
 ## Picocyanobacteria cell counts {.unnumbered}
 
-Picocyanobacterial cells mL^-1^ were estimated using linear regression models of OD at 680 nm or 720 nm vs. calibration counts of cell suspension densities (cell mL^−1^) (Table S1). The OD of cultures was measured using MCMIX-OD PSI Multicultivators (Photon Systems Instruments, Drásov, Czech Republic) and cell suspension density measures were conducted using an ImageXpress Pico Digital microscope equipped with CMOS camera and LED+ image autofocus (ImageXpress Pico Automated Cell Imaging System, Molecular Devices, LLC., CA, USA). Culture samples were preserved with 4% glutaraldehyde and kept at -80°C until the microscopy measures. Fixed samples of culture  (V = 10 µL) were transferred to Tissue Culture (TC)-treated surface, flat bottom black 96-well plates (Corning® Falcon® Microplate, MilliporeSigma, Merck, Darmstadt, Germany) containing 200 µL of f/2 media and centrifuged using a Beckman J-20 centrifuge with a swinging bucket JS-4.3 rotor at 4500 rpm (Beckman Coulter, Brea, California, United States). Cells were imaged with the Cy5 channels (Excitation: 630/40 nm; Emission: 695/45 nm; Dichroic: 655 nm) using selectable confocal geometries, which allowed us to distinguish cyanobacterial cells from co-occurring heterotrophic bacteria, and counted using a 63x objective in fluorescence imaging modes. Quantitative analysis on images acquired from automated microscopy obtained from 96-well microplates was performed using CellReporterXpress Image Acquisition and Analysis Software. The actual cell number mL^-1^ was calculated based on the dilution factor and selected count area from each well [@wlodkowicRecentProgressCytometric2022].
+Picocyanobacterial cells mL^−1^ were estimated using linear regression models of OD at 680 nm or 720 nm vs. calibration counts of cell suspension densities (cell mL^−1^) (Table S1). The OD of cultures was measured using MCMIX-OD PSI Multicultivators (Photon Systems Instruments, Drásov, Czech Republic) and cell suspension density measures were conducted using an ImageXpress Pico Digital microscope equipped with CMOS camera and LED+ image autofocus (ImageXpress Pico Automated Cell Imaging System, Molecular Devices, LLC., CA, USA). Culture samples were preserved with 4% glutaraldehyde and kept at -80°C until the microscopy measures. Fixed samples of culture  (V = 10 µL) were transferred to Tissue Culture (TC)-treated surface, flat bottom black 96-well plates (Corning® Falcon® Microplate, MilliporeSigma, Merck, Darmstadt, Germany) containing 200 µL of f/2 media and centrifuged using a Beckman J-20 centrifuge with a swinging bucket JS-4.3 rotor at 4500 rpm (Beckman Coulter, Brea, California, United States). Cells were imaged with the Cy5 channels (Excitation: 630/40 nm; Emission: 695/45 nm; Dichroic: 655 nm) using selectable confocal geometries, which allowed us to distinguish cyanobacterial cells from co-occurring heterotrophic bacteria, and counted using a 63x objective in fluorescence imaging modes. Quantitative analysis on images acquired from automated microscopy obtained from 96-well microplates was performed using CellReporterXpress Image Acquisition and Analysis Software. The actual cell number mL^−1^ was calculated based on the dilution factor and selected count area from each well [@wlodkowicRecentProgressCytometric2022].
 
 <br>
 
 ## Pigment content and pigment ratio {.unnumbered}
 
-Whole-cell absorbance spectra of picocyanobacteria cells were collected using an integrating cavity spectrophotometer (CLARiTY 17 UV/Vis/NIR, On-Line Instrument Systems, Inc., Bogart, GA, USA) according to the method proposed by @blakeSituSpectroscopyIntact2012. The sample and reference observation cavities of the spectrophotometer were filled with 8 mL of f/2 medium at salinity 8 PSU. After establishing a baseline absorbance spectra from 375 to 710 nm, 4 mL culture medium was replaced with 4 mL of culture in the sample cavity. Pathlength corrected absorbance per cm was calculated using Jávorfi coefficients [@javorfiQuantitativeSpectrophotometryUsing2006]. We then conducted estimations of pigment content (µg mL^-1^) including Chlorophyll *a* (Chl *a*), Carotenoids (Car), Phycoerythrin (PE), Phycocyanin (PC), and Allophycocyanin (APC) from the PC-rich_077 and PE-rich_127 *Synechococcus* sp. cultures. These estimations were based on established linear correlations between pigment content, determined through extraction methods [@stricklandPracticalHandBook1972; @bennettComplementaryChromaticAdaptation1973], and absorbance values of individual pigment peaks (Car; 480 nm, PE; 565 nm, PC; 620 nm, APC; 650 nm, and Chl *a*; 665 nm) obtained from whole-cell absorbance spectra (Table S2). We also summed PE, PC, and APC protein to total Phycobiliproteins content. We then calculated the Car to Chl *a* ratio, and the ratio of the sum of Phycobiliproteins to Chl *a* (µg:µg) for each strain (Fig. S3).
+Whole-cell absorbance spectra of picocyanobacteria cells were collected using an integrating cavity spectrophotometer (CLARiTY 17 UV/Vis/NIR, On-Line Instrument Systems, Inc., Bogart, GA, USA) according to the method proposed by @blakeSituSpectroscopyIntact2012. The sample and reference observation cavities of the spectrophotometer were filled with 8 mL of f/2 medium at salinity 8 PSU. After establishing a baseline absorbance spectra from 375 to 710 nm, 4 mL culture medium was replaced with 4 mL of culture in the sample cavity. Pathlength corrected absorbance per cm was calculated using Jávorfi coefficients [@javorfiQuantitativeSpectrophotometryUsing2006]. We then conducted estimations of pigment content (µg mL^−1^) including Chlorophyll *a* (Chl *a*), Carotenoids (Car), Phycoerythrin (PE), Phycocyanin (PC), and Allophycocyanin (APC) from the PC-rich and PE-rich *Synechococcus* sp. cultures. These estimations were based on established linear correlations between pigment content, determined through extraction methods [@stricklandPracticalHandBook1972; @bennettComplementaryChromaticAdaptation1973], and absorbance values of individual pigment peaks (Car; 480 nm, PE; 565 nm, PC; 620 nm, APC; 650 nm, and Chl *a*; 665 nm) obtained from whole-cell absorbance spectra (Table S2). We also summed PE, PC, and APC protein to total Phycobiliproteins content. We then calculated the Car to Chl *a* ratio, and the ratio of the sum of Phycobiliproteins to Chl *a* (µg:µg) for each strain (Fig. S3).
 
 <br>
 
@@ -227,7 +227,7 @@ The manuscript was prepared as a Rmarkdown document [@handelAndreasHandelCustom2
 
 We used logistic curve fits (Fig. S1) to determine chlorophyll-specific growth rates (μ; d^−1^) for PC-rich and PE-rich cultures of *Synechococcus* sp. grown under spectral wavebands centred at 405, 450, 470, 530, 620, 660, or 730 nm, and [O~2~]  of 250 µM or 2.5 µM (Fig. \@ref(fig:GrowthRate). Cell-specific growth rates (µ) were also determined using OD~720~ (Fig. S2). Strain, growth waveband, [O~2~], and their interactions, significantly affected μ (Table S4). 
 
-PC-rich and PE-rich *Synechococcus* sp. grow under 2.5 µM [O~2~], across the range of tested spectral wavebands from 405 – 730 nm. In contrast under 250 µM [O~2~], the PC-rich strain failed to grow under 405 nm, while the PE-rich strain failed to grow under 405, 450, and 730 nm. Failure of growth under 405 & 450 nm is consistent with accelerated photoinactivation of PSII under blue wavebands, which increases the cost of growth XXXXMURPHY 2017XXXX.  The PC-rich strain showed generally similar growth rates under 2.5 and 250 µM [O~2~], across tested spectral wavebands (nm). In contrast the PE-rich strain achieved faster growth rates under 2.5 µM [O~2~] than under 250 µM [O~2~].  PE-rich *Synechococcus* are typically found at greater depths, and lower light, than are PC-rich strains XXXXREFERENCESXXXX, but we suggest that the PE-rich strains are actually limited to lower light by an interaction between light and full air-saturated [O~2~].  In lower oxygen waters PE-rich strains are likely able to exploit higher light niches.
+PC-rich and PE-rich *Synechococcus* sp. grow under 2.5 µM [O~2~], across the range of tested spectral wavebands from 405 – 730 nm. In contrast under 250 µM [O~2~], the PC-rich strain failed to grow under 405 nm, while the PE-rich strain failed to grow under 405, 450, and 730 nm. Failure of growth under 405 & 450 nm is consistent with accelerated photoinactivation of PSII under blue wavebands, which increases the cost of growth [@murphyPhotoinactivationPhotosystemII2017]. The PC-rich strain showed generally similar growth rates under 2.5 and 250 µM [O~2~], across tested spectral wavebands (nm). In contrast the PE-rich strain achieved faster growth rates under 2.5 µM [O~2~] than under 250 µM [O~2~]. PE-rich *Synechococcus* are typically found at greater depths, and lower light, than are PC-rich strains [@haverkampColorfulMicrodiversitySynechococcus2009a;  @sliwinska-wilczewskaEcophysiologicalCharacteristicsRed2018], but we suggest that the PE-rich strains are actually limited to lower light by an interaction between light and full air-saturated [O~2~]. In lower oxygen waters PE-rich strains are likely able to exploit higher light niches.
 
 PC-rich *Synechococcus* sp. showed a peak in growth rate under red light of 620 or 660 nm, absorbed by phycocyanin and chlorophyll. Under 2.5 µM [O~2~] the PE-rich strain showed highest growth rates under 530 nm-660 nm absorbed by phycoerythin, phycocyanin and chlorophyll; while under 250 µM O~2~], the PE-rich strain showed the highest growth rate under green light of 530 nm absorbed by phycoerythrin. 
 
@@ -244,9 +244,9 @@ knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRateDelta.png"))
 
 Fig. \@ref(fig:Pigment)*a* presents Chlorophyll *a* (Chl *a*), Phycobiliproteins (Phyco), or Carotenoids (Car) content (pg cell ^−1^) vs. growth waveband (nm) for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral wavebands centred at 405, 450, 470, 530, 620, 660, or 730 nm and 250 or 2.5 µM [O~2~]. Here, we omit data from those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; and from those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~. 
 
-Strain, growth waveband, [O~2~], and their interactions, significantly affected cell-specific Chl *a*, Phycobiliproteins, and Car content (Table S5). For the PC-rich strain, the highest Chl *a*, Phycobiliproteins, and Car contents were recorded after growth under 730 nm. Moreover, the Phycobiliproteins content was higher under 250 µM [O~2~] than under 2.5 µM [O~2~] for the PC-rich strain. In contrast for PE-rich *Synechococcus* sp. phycobiliproteins content was significantly lower under 250 µM [O~2~] than under 2.5 µM [O~2~], with the highest phycobiliproteins content under  620 nm and 2.5 µM[O~2~].
+Strain, growth waveband, [O~2~], and their interactions, significantly affected cell-specific Chl *a*, Phycobiliproteins, and Car content (Table S5). For the PC-rich strain, the highest Chl *a*, Phycobiliproteins, and Car contents were recorded after growth under 730 nm. Moreover, the Phycobiliproteins content was higher under 250 µM [O~2~] than under 2.5 µM [O~2~] for the PC-rich strain. In contrast for PE-rich *Synechococcus* sp. phycobiliproteins content was significantly lower under 250 µM [O~2~] than under 2.5 µM [O~2~], with the highest phycobiliproteins content under  620 nm and 2.5 µM [O~2~].
 
-Chlorophyll-specific growth rates (µ; d^−1^) show positive linear responses to Phycobiliproteins:Chlorophyll *a* ratio (µg:µg), for both PC-rich and PE-rich *Synechococcus* sp. (Fig. \@ref(fig:Pigment)*b*, Tab S.9), although the relations vary across strain and [O~2~] XXXXNOT PROPER TABLE CITATION. 
+Chlorophyll-specific growth rates (µ; d^−1^) show positive linear responses to Phycobiliproteins:Chlorophyll *a* ratio (µg:µg), for both PC-rich and PE-rich *Synechococcus* sp. (Fig. \@ref(fig:Pigment)*b*, Tab. S9), although the relations vary across strain and [O~2~] XXXXNOT PROPER TABLE CITATION - make Sylwia anova for pig ratio!! XXX. 
 
 <br>
 
@@ -261,9 +261,8 @@ knitr::include_graphics(file.path( FiguresFP,"Fig_GrowthPig.png"))
 
 Light response curves of effective absorption cross section of PSII (σ~PSII~; nm^2^ quanta^−1^); turnover time of PSII photochemistry (τ~PSII~; µs); and photochemical quenching coefficient (q~P~) vs. Actinic PAR (µmol photons m^−2^s^−1^) (Fig. \@ref(fig:SigLRC)*a-c*) are shown for PC-rich and PE-rich cultures grown in, and excited by, corresponding wavebands of 450, 470, 530, or 620 nm, at 250 µM or 2.5 µM [O~2~]. We omit functional data for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; and for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~. In the Supplementary materials (Fig S4-S6), we also show the light response curves for all available excitation (Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange) and growth waveband (450, 470, 530, or 620 nm) cross-combinations.
 
-σ~PSII~ (Fig. \@ref(fig:SigLRC)*a*), as expected, was low and shows little change with increasing actinic light during excitation through chlorophyll at Ex~445nm~. In cyanobacteria the number of chlorophyll per PSII is low, and nearly fixed, so the effective absorbtion cross section for chlorophyll is also low  CITATIONS XuXXXX.  For the PC-rich strain, under orange excitation at Ex~590nm~, σ~PSII~ showed an initial small increase from darkness to the growth light level, followed by a mild decrease with increasing Actinic PAR,  and was higher at 250 µM [O~2~] compared to 2.5 µM O~2~. For the PE-rich strain, we again see a small increase from darkness to the growth light level, followed by a decrease in σ~PSII~ with increasing Actinic PAR. Moreover, for the PE-rich strain σ~PSII~ was higher in low [O~2~] conditions than in high [O~2~] conditions. Strain, Actinic PAR, and [O~2~] significantly influenced σ~PSII~ under excitation at Ex~590nm~ (Table S6).
+σ~PSII~ (Fig. \@ref(fig:SigLRC)*a*), as expected, was low and shows little change with increasing actinic light during excitation through chlorophyll at Ex~445nm~. In cyanobacteria the number of chlorophyll per PSII is low, and nearly fixed, so the effective absorbtion cross section for chlorophyll is also low  [@xuPhytoplanktonSPSIIExcitation2018].  For the PC-rich strain, under orange excitation at Ex~590nm~, σ~PSII~ showed an initial small increase from darkness to the growth light level, followed by a mild decrease with increasing Actinic PAR,  and was higher at 250 µM [O~2~] compared to 2.5 µM O~2~. For the PE-rich strain, we again see a small increase from darkness to the growth light level, followed by a decrease in σ~PSII~ with increasing Actinic PAR. Moreover, for the PE-rich strain σ~PSII~ was higher in low [O~2~] conditions than in high [O~2~] conditions. Strain, Actinic PAR, and [O~2~] significantly influenced σ~PSII~ under excitation at Ex~590nm~ (Table S6).
 
-XXXXSET Y AXIS ON tau plot to start at 0 XXXX
 For the PC-rich strain, across the excitation wavebands tested, τ~PSII~ showed an acceleration (decrease) from darkness to growth light Actinic PAR (Fig. \@ref(fig:SigLRC)*b*), to a plateau of ~ 800 µs. PE-rich strains, on the other hand, showed a progressive acceleration (decrease) with increasing Actinic PAR under excitation at Ex~470nm~, Ex~535nm~, or Ex~590nm~, declining towards ~ 400 µs under Ex~590nm~.  Thus the PE-rich strain showed more capacity to remove electrons from PSII>  τ~PSII~, was generally faster (smaller) for both PC-rich and PE-rich strains under 250 µM [O~2~], consistent with the cyanobacterial capacity for electron transport away from PSII to [O~2~] [@campbellOxygendependentElectronFlow1999; @hughesRoadmapsDetoursActive2018], particularly under excess actinic light. Strain, Actinic PAR, and [O~2~] significantly affected τ~PSII~ at Ex~470nm~, Ex~535nm~ and Ex~590nm~ (Table S7).
 
 q~P~, across the excitation wavebands tested, showed a strong decrease with increasing Actinic PAR (Fig. \@ref(fig:SigLRC)*c*). As expected @campbellOxygendependentElectronFlow1999; @hughesRoadmapsDetoursActive2018] q~P~ was generally higher for both PC-rich and PE-rich strains under 250 µM [O~2~], since cyanobacteria show strong capacity for electron flow away from PSII to O~2~, particularly under excess excitation. Strain, Actinic PAR, and [O~2~] significantly affected q~P~ at Ex~470nm~, Ex~535nm~, and Ex~590nm~ (Table S8). 
@@ -299,15 +298,14 @@ knitr::include_graphics(file.path(FiguresFP,"Fig_GrowthRateJVPSII.png"))
 
 <br>
 
-**Additional Supporting Information may be found in the online version of this article.**
+# Acknowledgements {.unnumbered}
+
+We thank Naaman Omar for assistance with coding, data analyses and culture maintenance; Miranda Corkum who maintained cultures and trained personnel in culture handling; Laurel Genge, and Carlie Barnhill (Mount Allison students) who assisted with R code. 
 
 <br>
 
-**Authors Contribution Statement:** S.S-W. designed the study with input from D.A.C. M.S. ensured the proper operation of the photobioreactors. N.M.O. solved technical problems related to computer operation and software. S.S-W., M.S., N.M.O., D.A.C. contributed to R coding and data analysis. S.S-W. conducted the experiments, created plots and wrote the manuscript, with support from D.A.C. All authors contributed to the discussion of the results, supported manuscript preparation, and approved the final submitted manuscript.
-
-<br>
-
-# Data availability statement {.unnumbered}
+# Article information {.unnumbered}
+## Data availability statement {.unnumbered}
 
 Data supporting this study is available on:
 https://github.com/FundyPhytoPhys/BalticO2 (public GitHub Repository) and
@@ -317,18 +315,48 @@ Code to perform data processing and analyses is available at https://github.com/
 
 <br>
 
-## Acknowledgements {.unnumbered}
+# Author information {.unnumbered}
+## Author ORCIDs {.unnumbered}
 
-We thank Naaman Omar for assistance with coding, data analyses and culture maintenance;  Miranda Corkum who maintained cultures and trained personnel in culture handling; Laurel Genge, and Carlie Barnhill (Mount Allison students) who assisted with R code. This work was supported by Canada Research Chair in Phytoplankton Ecophysiology (D.A.C) and Latitude & Light; NSERC of Canada Discovery Grant (D.A.C).
-
-<br>
-
-## Conflict of Interest {.unnumbered}
-
-None declared.
+Sylwia Śliwińska-Wilczewska https://orcid.org/0000-0002-3147-6605
+Mireille Savoie https://orcid.org/0009-0009-9499-6657
+Douglas A. Campbell https://orcid.org/0000-0001-8996-5463
 
 <br>
 
-Competing interests: The authors declare there are no competing interests.
+## Author contributions {.unnumbered}
+
+Conceptualization: SSW, DAC
+Data curation: SSW
+Formal analysis: SSW, MS, DAC
+Funding acquisition: DAC
+Investigation: SSW
+Methodology: SSW, MS, DAC
+Project administration: DAC
+Resources: DAC
+Supervision: DAC
+Validation: SSW, MS, DAC
+Visualization: SSW
+Writing – original draft: SSW, MS, DAC
+
+<br>
+
+## Competing interests {.unnumbered}
+
+The authors declare there are no competing interests.
+
+<br>
+
+## Funding information {.unnumbered}
+
+This work was supported by Canada Research Chair in Phytoplankton Ecophysiology (DAC) and Latitude & Light; NSERC of Canada Discovery Grant (DAC).
+
+<br>
+
+# Supplementary material {.unnumbered}
+
+Supplementary data are available with the article at https: //github.com/FundyPhytoPhys/BalticO2.
+
+<br>
 
 # References {.unnumbered}

@@ -1,0 +1,1089 @@
+---
+title: "Process_SolisenseLRCData"
+author:
+- Sylwia Sliwinska-Wilczewska
+- Douglas A. Campbell
+date: "`r format(Sys.Date())`"
+output:
+bookdown::html_document2:
+    code_folding: show
+    keep_md: yes
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 6
+    fig_caption: yes
+bibliography: BalticPhotoperiod.bib
+csl: plos-one.csl
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Set Chunk Options
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(fig.path='Figs/')
+```
+
+# Introduction
+
+Process_SolisenseDataLRC.Rmd process BalticPhotoperiod_Imported_SolisenseLight_LRC.Rds from BalticPhotoperiod/Data/ImportedData/ImportedSolisenseData folder and stored in Data/ProcessedData/ProcessedSolisenseData folder as: BalticPhotoperiod_Processed_SolisenseJVPSII.Rds.
+
+# Load Libraries
+
+```{r load libraries, warning = FALSE, echo=FALSE} 
+library(ggspectra)
+library(photobiologyWavebands)
+library(ggtext)
+library(tidyverse)
+library(broom)
+library(OneR)
+library(zoo)
+library(ggpubr)
+library(googledrive)
+library(googlesheets4)
+library(readxl)
+library(Cairo) #for greek symbols
+library(data.table)
+library(minpack.lm) #Standard 'nls' framework that uses 'nls.lm' for fitting
+library("patchwork") # merging plots
+```
+
+# Set Project Variables 
+
+```{r set project variables, read zipped files, list available files, warning = FALSE, echo=FALSE}
+Project <- "BalticO2"
+DataOut <- file.path("..", "Data", "ImportedData", "ImportedSolisenseData")
+DataOut <- file.path("..", "Data", "ProcessedData", "ProcessedSolisenseData")
+
+FigPath <- file.path("..", "Output", "Figures")
+FigRdsPath <- file.path("..", "Output", "FiguresRds")
+TableRdsPath <- file.path("..", "Output", "TablesRDS")
+# FileID <- "fit"
+# FileEncode <- "UTF-8"
+# Delimiter <- ","
+# HeaderRows <- 0
+```
+
+# Read MetaData
+
+```{r read locally stored metadata from rds}
+CultureCatalog <- readRDS(file = file.path("..", "Data", "ImportedData", "ImportedMetaData", "CultureCatalog.Rds"))
+
+CultureCatalog<-CultureCatalog %>% 
+  select(-c(PrimaryOperator, Temp_c, ExpCul, ExpStartTime, O2_Category, Optode, OptodeCh, OptodeMeasure))
+```
+
+
+# Read Imported Solisense
+
+```{r read locally stored metadata from rds}
+SolFitsMeta <- readRDS(file = file.path("..", "Data", "ImportedData", "ImportedSolisenseData", "BalticO2_Imported_SolisenseLight_LRC.Rds"))
+
+SolFitsMeta <- SolFitsMeta |>
+  select(-c(nm445,nm470,nm505,nm535,nm590,IR, nm445Corr,nm470Corr, nm505Corr,nm535Corr,nm590Corr,IRCorr,JVPSII_aLHIIOxbomax, JVPSII_ETRtauav_FoSig, JVPSII_ETRtauav_aLHII_Sig, JVPSII_ETRqpOxbo_aLHII_Sig)) |>
+  rename(JVPSII_ETRqpOxbo_FoSigmax_m2psii = JVPSII_ETRqpOxbo_FoSig) |>
+  rename(FilenameSolisense=Filename) %>% 
+  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
+         Strain=="BA77G"~"PC-rich_077")) 
+```
+
+# Create preliminary plots 
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+SolFitsMeta %>%
+  filter(Run!=118 & Run!= 119) %>% 
+  filter(Par_ue!=30) %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(ActPAR== 80) %>% 
+  filter(E_days>=4) %>% 
+  filter(E_days<=10) %>% 
+  ggplot() +
+  geom_point(aes(x = WLNum, y = JVPSII_ETRqpOxbo_FoSigmax_m2psii, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  # stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  # scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+```
+
+
+
+To get the Platt fits to work I plotted:
+JVPSII_umole_eLs vs. ActPAR
+
+so I had to convert JVPSII_eLs by dividing by 6.022E-17.
+If you want to go back to JVPSII_eLs just multiple back up.
+
+# Calibrate JVPSII to e L-1 s-1
+
+```{r JVPSII calib}
+JVPSII_eLs_ModelTerms <- read_rds(file.path("..","Data", "CleanedData", "JVPSIIO2Calib", "JVPSII_eLs_ModelTerms.Rds"))
+
+#smarter way to code this with 'which' in [] and map through Ex_WL
+SolFitsMeta <- left_join(SolFitsMeta, JVPSII_eLs_ModelTerms, by = join_by(Ex_WL)) |>
+  select(-c(Slope_P)) |>
+  mutate(JVPSII_eLs = JVPSII_ETRqpOxbo_FoSigmax_m2psii/Slope) |>
+  mutate(JVPSII_umol_eLs = JVPSII_eLs/6.022e17)
+
+```
+
+# Filter unrevelant data
+
+```{r}
+SolFitsMeta<-SolFitsMeta %>%
+  filter(Par_ue!= 30) %>% 
+    filter(E_days>=4) %>% 
+    #filter(E_days<=10) %>% 
+    filter(WL != "WW") %>%
+    filter(Run!=118 & Run!= 119) 
+```
+
+
+# Create preliminary plots 
+
+```{r preliminary plot}
+# lab1=c(expression("PC-rich_056"), expression("PC-rich_077"), expression("PE-rich_048"), expression("PE-rich_127"))
+# lab2=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
+# lab3=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("900 µE"))
+
+SolFitsMeta %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = JVPSII_umol_eLs, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #facet_grid(cols = vars(Ex_WL), rows = vars(O2)) +
+  theme_bw()
+
+```
+# Save plot 
+
+```{r save plot}
+#ggsave(file = file.path(FigPath, paste("Fig_JVPSII_ActPAR",".png",sep = "")), height=4, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+# Fit LRC for JVPSII to allow selection of specific JVPSII for different growth light levels.
+
+```{r}
+lrcplatt <- function(I, a, b, Pmax){Pmax * (1-exp(-a*I/Pmax)) * exp(-b*I/Pmax)}
+
+
+SolFitsMetaLRC <- SolFitsMeta %>%
+  nest(data = -c("SampleID", "Run", "Strain" ,"ExpDate","Par_ue", "Photoperiod", "O2", "WL", "MC", "Tube","Ex_WL","LightShape", "ExpEndDate", "PARPhotonDose_day", "ObsDate", "E_days")) %>% #head(50) %>% 
+  mutate(lrcplatt_Model = map(data, possibly(~nlsLM(JVPSII_umol_eLs ~ lrcplatt(I = ActPARCorr, a, b, Pmax),
+         data = .x,
+         control = list(maxiter = 100),
+         start = list(a = 0.1, b = 0.01, Pmax = 3), lower = c(0, 0, 0))))) %>%
+  mutate(lrcplatt_Param = map(lrcplatt_Model, tidy),
+         lrcplatt_Predict = map(lrcplatt_Model, possibly(augment)),
+         lrcplatt_Glance = map(lrcplatt_Model, possibly(glance)))
+
+```
+
+# Create preliminary plot - Example
+
+```{r prelim plot}
+SolFitsMetaLRC %>%  
+  unnest(lrcplatt_Predict) %>% 
+  #filter(Strain == "BA127R") %>% 
+ggplot() +
+  geom_point(aes(ActPARCorr, JVPSII_umol_eLs, colour = as.factor(Strain)), alpha = 0.8, size = 3.5, show.legend = T, SolFitsMeta) +
+  geom_line(aes(ActPARCorr, .fitted), colour = "black", linetype = "dotted") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(O2, Strain, E_days), labeller = label_parsed) +
+  theme_bw()
+
+```
+
+Use Peak Par_ue and 1/2 Peak Par_ue to estimate growth JVPSII for each combination
+-use 'Pluck' to reach into lrcplatt_Predict to get a, b, Pmax; or
+-unnest, pivot wider to get a, b, Pmax
+
+```{r growth light JVPSII}
+
+SolFitsMetaLRCGrowth <- SolFitsMetaLRC |>
+  unnest(lrcplatt_Param) |>
+  select(-c(statistic, p.value, lrcplatt_Predict, lrcplatt_Glance)) |> #remove (temporarily) to make pivot_wider easier
+  pivot_wider(names_from = term, values_from = c(estimate, std.error)) |>
+  mutate(JVPSII_umol_eLs_Par_ue = lrcplatt(I = Par_ue, a = estimate_a, estimate_b, estimate_Pmax),
+         JVPSII_umol_eLs_HalfPar_ue = lrcplatt(I = (0.5*Par_ue), a = estimate_a, estimate_b, estimate_Pmax))
+
+ 
+head(SolFitsMetaLRCGrowth) 
+```
+
+# Test plots of Growth Par_ue and 1/2 Growth Par_ue estimates for JVPSII
+```{r growth JVPSII}
+SolFitsMetaLRCGrowth |>
+  ggplot() +
+  geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = Ex_WL)) +
+  facet_grid(cols = vars(Ex_WL, Photoperiod, Strain), rows = vars(Par_ue)) +
+  theme_bw()
+
+SolFitsMetaLRCGrowth |>
+  filter(Strain == "PE-rich_127") |>
+  ggplot() +
+  geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = Ex_WL)) +
+  facet_grid(cols = vars(Ex_WL, Photoperiod, Strain), rows = vars(Par_ue)) +
+  theme_bw()
+
+SolFitsMetaLRCGrowth |>
+  filter(Strain == "PC-rich_077") |>
+  ggplot() +
+  geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = Ex_WL)) +
+  facet_grid(cols = vars(Ex_WL, Photoperiod, Strain), rows = vars(Par_ue)) +
+  theme_bw()
+```
+# Variable names used in Data Dictionary
+
+```{r}
+# colnames(SolFitsMeta)
+```
+
+
+# Save Rds for further analysis
+
+```{r save rds}
+saveRDS(SolFitsMetaLRCGrowth, file.path(DataOut, paste(Project, "SolFitsMetaLRCGrowth.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
+# saveRDS(SolFitsMetaLRC, file.path("..", "..", "PicoDiel", "Data", "CleanedData",  "SolFitsMetaLRC.Rds", fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+```
+
+
+XXXXDoug Stopped JVPSII_umol_eLs calibratedXXX
+
+c
+
+
+# Choosen corresponding Ex_WL
+
+```{r}
+SolFitsMetaLightCorr1<-SolFitsMetaLRCGrowth %>% 
+  filter(WL== 405 | WL == 450) %>% 
+  filter(Ex_WL == 445)
+
+SolFitsMetaLightCorr2<-SolFitsMetaLRCGrowth %>% 
+  filter(WL== 470) %>% 
+  filter(Ex_WL == 470)
+  
+SolFitsMetaLightCorr3<-SolFitsMetaLRCGrowth %>% 
+  filter(WL== 530) %>% 
+  filter(Ex_WL == 535)
+
+SolFitsMetaLightCorr4<-SolFitsMetaLRCGrowth %>% 
+  filter(WL== 620 | WL== 660 | WL == 730) %>% 
+  filter(Ex_WL == 590)
+
+SolFitsMetaLRCGrowthCorr<-rbind(SolFitsMetaLightCorr1, SolFitsMetaLightCorr2, SolFitsMetaLightCorr3, SolFitsMetaLightCorr4)
+  rm(SolFitsMetaLightCorr1, SolFitsMetaLightCorr2, SolFitsMetaLightCorr3, SolFitsMetaLightCorr4)
+```
+
+```{r}
+#SolFitsMetaLRCGrowthCorr<-SolFitsMetaLRCGrowth
+```
+
+
+------------------------------------------------------# Add Turner Catalog--------------------------------------------------
+
+# Load Turner catalog
+
+```{r load turner catalog, message = FALSE, warning = FALSE, echo=FALSE}
+gs4_deauth()
+Turnercatalog<- read_sheet("https://docs.google.com/spreadsheets/d/13mQm0B3siS65UuGjNdzvpHFomfuwn6aAg7dBoq1IqrM/edit#gid=0")
+
+as.data.frame(Turnercatalog)
+ChlData <- Turnercatalog 
+
+ChlData <- ChlData %>%  
+  mutate(TurChl_ugL = as.numeric(Reading_rfu) * as.numeric(Chl_slope) + as.numeric(Chl_intercept)) %>% 
+  mutate(DATE = ymd(`DATE`)) %>% 
+  rename(SampleID=CultureID) %>% 
+  rename(ObsDate=DATE) %>% 
+  select(c(SampleID, ObsDate, TurChl_ugL)) %>% 
+  filter(TurChl_ugL<212354.754)  #outliers
+
+```
+
+# Merge Turner with CultureCatalog
+
+```{r}
+ChlDataMeta <- CultureCatalog %>% 
+  left_join(., ChlData, by = c("SampleID"="SampleID")) %>% 
+    mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
+         Strain=="BA77G"~"PC-rich_077")) 
+```
+
+
+# Calculate Chl mean from 3 technical replica - wierd issue with ObsDate - probably I need to use Turner correlation
+
+```{r}
+colnames(ChlDataMeta)
+
+ChlDataMeta <- ChlDataMeta %>%
+  group_by(Strain, WL, O2) %>%
+  summarize(SampleID, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, PARPhotonDose_day, ObsDate, TurChl_ugL,
+            meanTurChl_ugL = mean(TurChl_ugL),
+            sdTurChl_ugL = sd(TurChl_ugL)) %>%
+  ungroup() %>% 
+  select(-c(ObsDate))
+```
+# Create Preliminary plot
+
+```{r preliminary plot}
+ChlDataMeta %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+
+# Merge JVPSII with chlorophyll Turner data 
+It is "bigger" df b/c I have 3 replica for Turner
+
+#SolFitsMetaLRCGrowthCorr or SolFitsMetaLRCGrowth
+
+```{r}
+SolFitsExpStTurner <- ChlDataMeta %>%
+  full_join(., SolFitsMetaLRCGrowthCorr, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) 
+
+#"ObsDate"="ObsDate"
+```
+
+# Removed TurChl_ugL b/c I have already mean from 3 technical replica - smaller df
+
+```{r}
+SolFitsExpStTurner<-SolFitsExpStTurner %>% 
+  select(-c(TurChl_ugL)) %>% 
+  unique()
+```
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+#colnames(SolFitsExpStTurner)
+
+SolFitsExpStTurner %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+SolFitsExpStTurner %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_umol_eLs_Par_ue, x = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+
+
+```
+
+
+```{r}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+SolFitsExpStTurner %>% 
+  ggplot() +
+  geom_point(aes(x = WL, y = meanTurChl_ugL, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+SolFitsExpStTurner %>% 
+  ggplot() +
+  geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+
+SolFitsExpStTurner %>% 
+  ggplot() +
+  geom_point(aes(x = meanTurChl_ugL, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+SolFitsExpStTurner %>% 
+  ggplot() +
+  geom_point(aes(x = meanTurChl_ugL, y = JVPSII_umol_eLs_HalfPar_ue, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw()
+```
+
+
+--------------------------------------------------- MD Pico --------------------------------------
+
+# IMPORT MD PICO CORRELATION DATA
+
+```{r set project variables, warning = FALSE, echo = FALSE}
+Project <- "BalticO2"
+zip_file <- file.path("..", "Data", "RawData", "MDPico.zip")
+
+# List files in the extracted folder with a ".txt" extension
+CountFiles <- unzip(zip_file, list = TRUE)
+CountFiles <- CountFiles[grepl(".csv$", CountFiles$Name), "Name"]
+print(CountFiles)
+
+FileID <- "ExperimentSummaryData"
+FileEncode <- "UTF-8" 
+HeaderRows <- 0
+DelimCS <- ","
+```
+
+# Read fread_plus function
+
+```{r data read adds filename and cdate, warning=FALSE, message=FALSE, echo=FALSE}
+# Define function to read and process each file
+fread_plus <- function(Flnm, FileEncode, Delim) {
+  con <- unz(zip_file, Flnm)
+  
+  # Read the file using read.table
+  data <- read.table(con, skip = HeaderRows, encoding = FileEncode, sep = Delim, header = TRUE)
+  
+  # Use tryCatch to handle errors during the closing of the connection
+  tryCatch(
+    close(con),
+    error = function(e) {
+      warning("Error closing connection: ", e$message)
+    })
+  
+  data <- data %>%
+    mutate(Filename = Flnm, CDateTime = ymd_hms(file.info(zip_file)$ctime)) 
+  return(data)
+}
+
+# Use map_df to read and process all files in CountFiles
+MDPicoTidy <- CountFiles %>%
+  map_df(~fread_plus(Flnm = ., FileEncode = FileEncode, Delim = DelimCS))
+```
+
+```{r tidy CountTidy}
+
+MDPicoTidy <- MDPicoTidy %>% 
+  select(-c("Concentration", "Group", "Compound", "CDateTime")) %>% # remove superfluous columns
+  mutate(Filename = str_remove(string = Filename, pattern = ".csv")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../MDPico/")) %>%
+  separate(Filename, into = c("ObsDate", "Project", "Initials",  "PlateNr", "IndStud", "Organism", "Count"), sep = "([\\/\\/\\_\\_\\_\\_\\_])", remove = FALSE) %>%
+  select(-c("IndStud", "Organism", "Count")) %>% 
+  mutate(ObsDate = ymd_hm(ObsDate)) 
+
+```
+
+Load MDPicoMetaData catalog
+```{r load local metadatacatalog, message = FALSE, warning = FALSE, echo=FALSE}
+gs4_deauth()
+
+# this is the URL or ID of a Sheet readable by anyone (with a link)
+
+MDPicoMetaData <- read_sheet("https://docs.google.com/spreadsheets/d/1Lerp5u25kzBtaBbnOYElYqUP59cn68gJpxxayhnGdkw/edit#gid=0") %>%
+  #mutate(Date = as.numeric(Date)) %>%
+  mutate(Date = ymd_hm(`Date`)) %>%
+  separate(Date, into = c("Date_count", "Time_count"), sep = " ", remove = FALSE) %>%
+  mutate(Date_count = ymd(`Date_count`)) 
+```
+
+
+# Merge MD Pico and Culture catalog
+
+```{r}
+MDPicoMeta <- MDPicoMetaData %>%
+  left_join(., CultureCatalog, by = c("SampleID" = "SampleID")) %>% 
+      mutate(Strain=case_when(Strain=="BA127R"~"PE-rich_127",
+         Strain=="BA77G"~"PC-rich_077")) 
+```
+
+
+# Merge
+
+```{r}
+MDPicoAll <- MDPicoTidy %>%
+  mutate(PlateNr = as.double(PlateNr)) %>%
+  left_join(., MDPicoMeta, by = c("Well.Name" = "WellNumber", "PlateNr" = "PlateNumber")) %>% 
+  drop_na(Strain)
+```
+
+```{r, warning = FALSE}
+MDPicoAll <- MDPicoAll %>%
+  mutate(culture_inocul_L = as.double(culture_inocul_L)) %>%
+  mutate(CapAreaPercentage = as.double(CapAreaPercentage)) %>%
+
+  mutate(CellmL_MDPico = (`Cell.Count` * (0.001/culture_inocul_L)) /(CapAreaPercentage/100)) %>%
+  # mutate(cellsml = `cellsmlwithoutpercentage`/(CapAreaPercentage/100))
+group_by(SampleID) %>%
+  arrange(Date_count) %>%
+  mutate(E_days = as.numeric((Date_count - ExpDate[1]))) %>%
+ungroup() 
+  
+```
+
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+MDPicoAll %>%
+  ggplot() +
+  geom_point(aes(x = E_days, y = CellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+# Calculate "Big" cell count mean from 3 technical replica - wierd issue with ObsDate_Count - probably I need to use MDPico correlation
+
+```{r}
+#Date_count
+
+MDPicoAll <- MDPicoAll %>%
+  filter(E_days>4) %>% 
+group_by(Strain, WL, O2) %>%
+
+summarize(Well.Name, Cell.Count, Filename, ObsDate, PlateNr, PlateID, SampleID, Date, Date_count, Time_count, media_inocul_L, culture_inocul_L, CapAreaPercentage, Run, Strain, ExpDate, Par_ue, Photoperiod, PARPhotonDose_day, Tube, O2, WL, LightShape, ExpEndDate, E_days, CellmL_MDPico, 
+          meanCellmL_MDPico = mean(CellmL_MDPico), 
+          sdCellmL_MDPico = sd(CellmL_MDPico)) %>%
+ungroup() %>%
+  
+  rename(Cell_Count=Cell.Count) %>% 
+  rename(Well_Name=Well.Name) %>% 
+  rename(MeasDate = ObsDate) %>% 
+  rename(ObsDateTime = Date) %>% 
+  rename(ObsDate_count = Date_count) %>% 
+  rename(ObsTime_count = Time_count) %>% 
+  rename(FilenameMDPico=Filename) 
+```
+
+```{r}
+#colnames(MDPicoAll)
+
+MDPicoAll <- MDPicoAll %>%
+  select(c(Strain, WL, SampleID, Run, ExpDate, Par_ue, Photoperiod, PARPhotonDose_day, O2, meanCellmL_MDPico, sdCellmL_MDPico))
+```
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+MDPicoAll %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+
+# Merge Sigma-Turner with MDPicoData data 
+
+```{r}
+SolFitsExpStTurnerMD <- MDPicoAll %>%
+  full_join(., SolFitsExpStTurner, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) %>% 
+  drop_na(Ex_WL) %>% 
+  unique()
+
+```
+
+```{r preliminary plot}
+#colnames(SolFitsExpStTurner)
+
+SolFitsExpStTurnerMD %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+
+SolFitsExpStTurnerMD %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_umol_eLs_Par_ue, x = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+# Calculate cell per L - for JVPSII
+
+```{r}
+SolFitsExpStTurnerMD<-SolFitsExpStTurnerMD %>% 
+  mutate(meanCellL_MDPico=meanCellmL_MDPico*1000) %>% 
+  mutate(sdCellL_MDPico=sdCellmL_MDPico*1000)
+```
+
+
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+SolFitsExpStTurnerMD %>% 
+  ggplot() +
+  geom_point(aes(x = E_days, y = meanCellmL_MDPico, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+SolFitsExpStTurnerMD %>% 
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_umol_eLs_Par_ue, x = meanCellmL_MDPico, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+SolFitsExpStTurnerMD %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+
+SolFitsExpStTurnerMD %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(x = meanTurChl_ugL, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+
+SolFitsExpStTurnerMD %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(x = meanCellmL_MDPico, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+```
+
+
+-------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------ Chl and Phyco 445 and 590 ------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
+
+```{r}
+SolFitsMetaLRCGrowthCorr1<-SolFitsMetaLRCGrowth %>% 
+  filter(Ex_WL == 445)
+
+SolFitsMetaLRCGrowthCorr2<-SolFitsMetaLRCGrowth %>% 
+  filter(Ex_WL == 590)
+
+SolFitsMetaLRCGrowthCorr3<-SolFitsMetaLRCGrowth %>% 
+  filter(Ex_WL == 535)
+
+SolFitsMetaLRCGrowth445590<-rbind(SolFitsMetaLRCGrowthCorr1, SolFitsMetaLRCGrowthCorr2, SolFitsMetaLRCGrowthCorr3)
+  rm(SolFitsMetaLRCGrowthCorr1, SolFitsMetaLRCGrowthCorr2, SolFitsMetaLRCGrowthCorr3)
+  
+```
+
+
+```{r}
+SolFitsMetaLRCGrowth445590<-SolFitsMetaLRCGrowth445590 %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>% 
+  mutate(Oxygen=case_when(O2==21~"250~µM",
+         O2==0~"2.5~µM"))
+
+SolFitsMetaLRCGrowth445590<-SolFitsMetaLRCGrowth445590 %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>% 
+  mutate(Oxygen=case_when(O2==21~"250~µM",
+         O2==0~"2.5~µM"))
+```
+
+```{r}
+SolFitsMetaLRCGrowth445590<-SolFitsMetaLRCGrowth445590 %>% 
+  mutate(Strain=case_when(Strain=="PE-rich_127"~"PE-rich",
+         Strain=="PC-rich_077"~"PC-rich"))
+```
+
+
+-------------------------------------------- Turner ---------------------------------------------------
+
+# Merge JVPSII with chlorophyll Turner data 
+It is "bigger" df b/c I have 3 replica for Turner
+
+#SolFitsMetaLRCGrowthCorr or SolFitsMetaLRCGrowth
+
+```{r}
+ChlDataMeta<-ChlDataMeta %>% 
+  mutate(Strain=case_when(Strain=="PE-rich_127"~"PE-rich",
+         Strain=="PC-rich_077"~"PC-rich"))
+
+SolFitsExpStTurner445590 <- ChlDataMeta %>%
+  full_join(., SolFitsMetaLRCGrowth445590, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) 
+
+#"ObsDate"="ObsDate"
+```
+
+# Removed TurChl_ugL b/c I have already mean from 3 technical replica - smaller df
+
+```{r}
+SolFitsExpStTurner445590<-SolFitsExpStTurner445590 %>% 
+  select(-c(TurChl_ugL)) %>% 
+  unique()
+```
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+#colnames(SolFitsExpStTurner)
+
+SolFitsExpStTurner445590 %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+SolFitsExpStTurner445590 %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_umol_eLs_Par_ue, x = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+-------------------------------------- MD Pico -------------------------------------
+
+
+# Merge Sigma-Turner with MDPicoData data 
+
+```{r}
+MDPicoAll<-MDPicoAll %>% 
+  mutate(Strain=case_when(Strain=="PE-rich_127"~"PE-rich",
+         Strain=="PC-rich_077"~"PC-rich"))
+
+SolFitsExpStTurnerMD445590 <- MDPicoAll %>%
+  full_join(., SolFitsExpStTurner445590, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) %>% 
+  drop_na(Ex_WL) %>% 
+  unique()
+
+```
+
+```{r preliminary plot}
+#colnames(SolFitsExpStTurner)
+
+SolFitsExpStTurnerMD445590 %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+
+SolFitsExpStTurnerMD445590 %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_umol_eLs_Par_ue, x = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+# Calculate cell per L - for JVPSII
+
+```{r}
+SolFitsExpStTurnerMD445590<-SolFitsExpStTurnerMD445590 %>% 
+  mutate(meanCellL_MDPico=meanCellmL_MDPico*1000) %>% 
+  mutate(sdCellL_MDPico=sdCellmL_MDPico*1000)
+```
+
+
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+SolFitsExpStTurnerMD445590 %>% 
+  ggplot() +
+  geom_point(aes(x = E_days, y = meanCellmL_MDPico, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+SolFitsExpStTurnerMD445590 %>% 
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_umol_eLs_Par_ue, x = meanCellmL_MDPico, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+    ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  #ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw()
+
+SolFitsExpStTurnerMD445590 %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+
+SolFitsExpStTurnerMD445590 %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(x = meanTurChl_ugL, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+
+SolFitsExpStTurnerMD445590 %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(x = meanCellmL_MDPico, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  ggh4x::facet_nested(cols = vars(WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+```
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------
+
+# Save rds for further analysis
+
+```{r save rds}
+saveRDS(SolFitsExpStTurnerMD, file.path(DataOut, paste(Project, "Processed_SolisenseJVPSIICorr.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
+
+saveRDS(SolFitsExpStTurnerMD445590, file.path(DataOut, paste(Project, "Processed_SolisenseJVPSII445590.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------- Adding cell_L from calibration ---------------------------------
+
+```{r set project variables}
+# Project <- "BalticPhotoperiod"
+# DataIn <- file.path("..", "Data", "ProcessedData", "ProcessedPigmentsData", fsep = .Platform$file.sep)
+```
+
+```{r Exported Rmd}
+# list.files(path = DataIn, pattern = Project, full.names = TRUE)
+```
+
+```{r read pigments File}
+#df ontained mean OD per day from Multiculti and Abs from Olis spectra for selected nm. Based on this I calculated pigments per mL and per cell (pg/cell)
+
+# MCPigmentAllFile <- "../Data/ProcessedData/ProcessedPigmentsData/BalticPhotoperiod_Processed_PigmentsAll.Rds"
+# MCPigmentAllFileName <- str_split(string = MCPigmentAllFile, "/")[[1]][3] %>%
+#   str_remove(pattern = ".Rds")
+# MCPigmentAll <- readRDS(MCPigmentAllFile)  %>%
+#   ungroup()
+```
+
+```{r}
+# colnames(MCPigmentAll)
+# 
+# MCPigmentAll<-MCPigmentAll %>% 
+#   select(-c(Phase, ChlaugmL, CarugmL, PEugmL, PCugmL, APCugmL, PhycougmL, CarChlaRatio, PhycoChlaRatio, PEPCRatio, Chlapgcell, Carpgcell, PEpgcell, PCpgcell, APCpgcell, Phycopgcell, meanOD720_h, meanDeltaOD_h, AchivePreStationary, dayRound_tmaxAG, MaxAG, MaxDG, MC))
+
+```
+
+```{r}
+# MCPigmentAll <- MCPigmentAll %>%
+#   filter(ToD==12) # When I choose 12 (peak) then I loose a few data point from 12h and 900UE
+```
+
+```{r}
+# SolFitsAll <- MCPigmentAll %>%
+#   full_join(., SolFitsExpStTurner, by = c("SampleID"="SampleID", "Strain"="Strain", "Run"="Run", "Tube"="Tube", "Par_ue" = "Par_ue", "Photoperiod"="Photoperiod", "O2"="O2", "WL"="WL", "LightShape"="LightShape", "ExpDate"="ExpDate", "ExpEndDate"="ExpEndDate", "PARPhotonDose_day"="PARPhotonDose_day","E_days"="E_days"))
+```
+
+```{r}
+# SolFitsAll<-SolFitsAll %>% 
+#   drop_na(JVPSII_umol_eLs_Par_ue)
+```
+
+# Create preliminary plot
+
+```{r preliminary plot}
+# lab1=c(expression("PC-rich_056"), expression("PC-rich_077"), expression("PE-rich_048"), expression("PE-rich_127"))
+# lab2=c(expression("8 h"), expression("12 h"), expression("16 h"), expression("24 h"))
+# lab3=c(expression("30 µE"), expression("90 µE"), expression("180 µE"), expression("300 µE"), expression("900 µE"))
+# 
+# SolFitsAll %>%
+#   filter(Ex_WL == 445) %>% 
+#   ggplot() +
+#   geom_point(aes(x = E_days, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
+#   ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
+#   theme_bw() 
+# 
+# SolFitsAll %>%
+#   filter(Ex_WL == 445) %>% 
+#   ggplot() +
+#   geom_point(aes(x = TurChl_ugL, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
+#   ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
+#   theme_bw() 
+# 
+# SolFitsAll %>%
+#   filter(Ex_WL == 445) %>% 
+#   ggplot() +
+#   geom_point(aes(x = cellL_OD680, y = JVPSII_umol_eLs_Par_ue, colour = as.factor(Strain)),  alpha = 0.8, size = 3, show.legend = T) +
+#   scale_colour_discrete(type=c("seagreen4", "palegreen3", "brown1", "brown4"), name="", labels = lab1) +
+#   ggh4x::facet_nested(cols = vars(Photoperiod), rows = vars(Par_ue), labeller = label_parsed) +
+#   theme_bw() 
+```
+
+
+
+# Calculate Turner per umol chl
+
+```{r}
+# SolTurner<-SolTurner %>% 
+#   mutate(meanTurChl_umolL=meanTurChl_ugL*0.00112)
+```
+
+
+
+# Adding facet labels
+
+```{r}
+#SolTurnerMDPico$facetsExcitation = factor(SolTurnerMDPico$WL, labels = c("Excitation~(nm)"))
+```
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------
+
+Oxborough & Baker 1997 for Fo'
+
+Oxborough, K., & Baker, N. R. (1997). Resolving chlorophyll a fluorescence images of photosynthetic efficiency into photochemical and non-photochemical components–calculation of qP and Fv-/Fm-; without measuring Fo. Photosynthesis research, 54, 135-142.
+
+Oxborough, K., & Baker, N. R. (1997). An instrument capable of imaging chlorophyll a fluorescence from intact leaves at very low irradiance and at cellular and subcellular levels of organization. Plant, Cell & Environment, 20(12), 1473-1483.
+
+Oxborough, K., Moore, C. M., Suggett, D. J., Lawson, T., Chan, H. G., & Geider, R. J. (2012). Direct estimation of functional PSII reaction center concentration and PSII electron flux on a volume basis: a new approach to the analysis of Fast Repetition Rate fluorometry (FRRf) data. Limnology and Oceanography: Methods, 10(3), 142-154.
+
+Suggett, D. J., Moore, C. M., Oxborough, K., & Geider, R. J. (2006). Fast repetition rate (FRR) chlorophyll a fluorescence induction measurements. West Molesey: Chelsea Technologies Group, 1-53.
+
+
+
+
+Berge, J., Grant, S., Bjørgum, R., Cohen, J. H., McKee, D., Johnsen, G., Zolich, A., Kopec, T. P., Vogedes, D. L., UiT The Arctic University of Norway (2021).Time series (2017) of irradiance in the PAR (photosynthetically active radiation) region measured under the dome of a light observatory in the Arctic  (Ny-Ålesund, Svalbard, Norway) derived from an USSIMO spectroradiometer [Data set]. Norstore. https://doi.org/10.11582/2021.00040
+
+https://archive.norstore.no/pages/public/datasetDetail.jsf?id=10.11582/2021.00040
+
+PAR is approximated as an integral of micromolespersec=(uirr/(h*c/(lambda*1e-9)))/microavo for wavelengths(lambda) in range from 400 to 700nm, where: uirr = USSIMO irradiance for wavelength equal to lambda, h=6.63e-34 [Js], c=3.00e+08 [m/s], microavo=6.022e17.
+
+
+
+
+
+Fast Repetition Rate fluorometry (FRRf, Kolber et al. 1998) 
+
+σPSII - Effective absorption cross section of PSII photochemistry in darkness -> A2 (quanta)-1 or m2
+ρ - Connectivity between PSII reaction centres in darkness
+
+σPSII′ - Effective absorption cross section of PSII photochemistry under actinic light -> A2 (quanta)-1 or m2
+ρ′ - Connectivity between PSII reaction centres under actinic light
+
+TauPSII - Minimum turnover time of PSII photochemistry -> s-1
+
+F0 or F0’ (Minimum fluorescence in darkness or Minimum fluorescence under actinic light)
+Fm or Fm’ (Maximum fluorescence in darkness or Maximum fluorescence under actinic light)
+F’ (or Fs; Steady state fluorescence at any point)
+Fv = Fm-F0 (Variable fluorescence in darkness)
+Fv’ = Fm’-F0’ (Variable fluorescence under actinic light)
+Fq′ = (Fm′ - F′) (Difference between Fm′ and F′)
+
+Fv/Fm = (Fm-F0)/Fm (The maximum PSII quantum yield/Maximum photochemical efficiency)
+Fv’/Fm’ = (Fm’- F0’)/Fm’ (Maximum PSII efficiency under actinic light)
+
+ΦPSII = (Fm’- F’)/Fm’ = Fq′/Fm′ (Photochemical efficiency under actinic light)
+
+qP = (Fm’- F’)/(Fm’-F0’) = (Fm′ - F′)/Fv′ = Fq′/Fv′ (PSII efficiency factor under actinic light; photochemical quenching coefficient) 
+
+NPQ =(Fm-Fm’)/Fm’ (Non-photochemical quenching coefficien)
+
+
+ETR = PPFD * aPSII * PSII photochemical efficiency (ΦPSII)
+
+ETR^RCII = PPFD * σPSII * Fq′/Fm′ (or ΦPSII) * 21.683
+
+ETR^chl = PPFD * σPSII * n PSII * Fq′/Fm′ (or ΦPSII) * 21.683
+
+
+FRR fluorescence provides a direct measure of light absorption per unit PSII reaction centres (σPSII).
+
+ETR, called the relative electron transport rate, is the product of the effective photochemical yield of
+PSII (ΦPSII) and photosynthetic photon flux density
+
+ETR^RCII(chl) - RCII (Chlorophyll a)-normalised rate of electron transfer by PSII -> mol e- g chla-1 h-1
+
+ETR^chl is the chlorophylla-specific rate of electron transfer (mol e- mol chla-1 h-1 ).
+
+PPFD (=E) - Photosynthetically active photon flux density -> μmol m-2 s-1
+
+a^chlPSII - a^chl only used for PSII photochemistry -> m2 mg chla-1
+
+(factor 21.683 converts seconds to hours, μmol e- to mol e- and A2 quanta-1 to m2 mol RCII-1)
+
+nPSII - photosynthetic unit size of PSII
+
+JVPSII - PSII flux per unit volume -> electrons m–3 s–1
+
+[RCII] - concentration of functional PS II reaction centers -> m-3
+
+aLHII - LHII (light harvesting complex II) absorption coefficient -> m-1
+
+
+```{r example of different labels on plot}
+
+# data_textF0 <- data.frame(facetsActinicPAR  = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"), facetsExcitation  = c("Excitation~(nm)"), PAR  = c(0), Ex_WL  = c(445), Strain  = c("PE-rich_048"), label = c("italic(F)[0]^{-1}"))
+
+# data_textF0 <- data.frame(facetsActinicPAR = c("Actinic~PAR~(µmol~photons~m^{-2}~s^{-1})"),
+#                           facetsExcitation = c("Excitation~(nm)"),
+#                           PAR = c(0),
+#                           Ex_WL = c(445),
+#                           Strain = c("PE-rich_048"),
+#                           label = c("~\"''\""))
+# 
+# LIFTMeta %>%
+#   filter(Time_us < 1000) %>%
+#   ggplot() +
+#   geom_point(aes(x = Time_us, y = EM), colour = "brown1", alpha = 0.8, size = 2, show.legend = FALSE) +
+#   geom_text(data = data_textF0, aes(x = 50, y = 100, label = label), size = 3.5, parse = TRUE) +
+#   ggh4x::facet_nested(cols = vars(facetsActinicPAR, PAR), rows = vars(facetsExcitation, Ex_WL), labeller = label_parsed, scales = "free_y") +
+#   theme_bw()
+
+```
