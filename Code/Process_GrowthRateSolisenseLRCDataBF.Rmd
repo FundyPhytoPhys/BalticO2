@@ -695,28 +695,37 @@ ggplot() +
 # Added a Starting Point (SP) at 0
 
 ```{r added starting point}
-gs4_deauth()
-# this is the URL or ID of a Sheet readable by anyone (with a link)
-StartingPoints <- read_sheet("https://docs.google.com/spreadsheets/d/1AnP4JXwSJx50ARBiyuG9B3TyxuBNR1zH-CF0FSMtFc8/edit?gid=0#gid=0") 
-
-Dummy <- MCGrowthJVPSIISPmean %>%  
-  select(c(Strain, deltaOD_Lmu_corr, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, O2, WL))   
-
-
-MCGrowthJVPSIISPmeanDummy<-rbind(Dummy, StartingPoints)
-
-rm(Dummy, StartingPoints)
+# gs4_deauth()
+# # this is the URL or ID of a Sheet readable by anyone (with a link)
+# StartingPoints <- read_sheet("https://docs.google.com/spreadsheets/d/1AnP4JXwSJx50ARBiyuG9B3TyxuBNR1zH-CF0FSMtFc8/edit?gid=0#gid=0") 
+# 
+# Dummy <- MCGrowthJVPSIISPmean %>%  
+#   select(c(Strain, deltaOD_Lmu_corr, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, O2, WL))   
+# 
+# 
+# MCGrowthJVPSIISPmeanDummy<-rbind(Dummy, StartingPoints)
+# 
+# rm(Dummy, StartingPoints)
 ```
 
 
-
+```{r}
+# SolFitsAllPigmentfitPhycoChlalinear <- MCGrowthJVPSIISPmeanDummy %>%   
+#   #drop_na(Par_ue, Ex_WL, Phase, meanSig_nm2psii, AllmeanPhycoChlaRatio) %>% 
+#   select(c(Strain, deltaOD_Lmu_corr, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, O2, WL)) %>%  
+#   nest(data = -c("O2", "Strain")) %>%   
+#   mutate(Linear_Model = map(data, ~lm(deltaOD_Lmu_corr ~ JVPSII_umol_eLs_HalfPar_ue_umolChl_day, data = .x))) %>%     
+#   mutate(Linear_Model_Param = map(Linear_Model, tidy),          
+#          Linear_Model_Predict = map(Linear_Model, possibly(augment)),          
+#          Linear_Model_Glance = map(Linear_Model, possibly(glance)))
+```
 
 ```{r}
-SolFitsAllPigmentfitPhycoChlalinear <- MCGrowthJVPSIISPmeanDummy %>%   
+SolFitsAllPigmentfitPhycoChlalinear <- MCGrowthJVPSIISPmean %>%   
   #drop_na(Par_ue, Ex_WL, Phase, meanSig_nm2psii, AllmeanPhycoChlaRatio) %>% 
-  select(c(Strain, deltaOD_Lmu_corr, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, O2, WL)) %>%  
+  select(c(Strain, deltaOD_Lmu_corr, meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, O2, WL)) %>%  
   nest(data = -c("O2", "Strain")) %>%   
-  mutate(Linear_Model = map(data, ~lm(deltaOD_Lmu_corr ~ JVPSII_umol_eLs_HalfPar_ue_umolChl_day, data = .x))) %>%     
+  mutate(Linear_Model = map(data, ~lm(deltaOD_Lmu_corr ~ 0 + meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, data = .x))) %>%     
   mutate(Linear_Model_Param = map(Linear_Model, tidy),          
          Linear_Model_Predict = map(Linear_Model, possibly(augment)),          
          Linear_Model_Glance = map(Linear_Model, possibly(glance)))
@@ -737,10 +746,10 @@ MCGrowthJVPSIISPmean %>%
 SolFitsAllPigmentfitPhycoChlalinear %>% 
   unnest(Linear_Model_Predict) %>% 
   ggplot() +
-  geom_point(aes(y = deltaOD_Lmu_corr, x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, colour=as.factor(Strain)), size = 3.5, show.legend = T, MCGrowthJVPSIISPmeanDummy) + 
-  geom_point(aes(y = deltaOD_Lmu_corr, x = JVPSII_umol_eLs_HalfPar_ue_umolChl_day, colour=as.factor(Strain)), size = 2, show.legend = T, alpha = 0.3, MCGrowthJVPSIISPmeanDummy) + 
+  geom_point(aes(y = deltaOD_Lmu_corr, x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, colour=as.factor(Strain)), size = 3.5, show.legend = T, MCGrowthJVPSIISPmean) + 
+  #geom_point(aes(y = deltaOD_Lmu_corr, x = JVPSII_umol_eLs_HalfPar_ue_umolChl_day, colour=as.factor(Strain)), size = 2, show.legend = T, alpha = 0.3, MCGrowthJVPSIISPmean) + 
   
-  geom_line(aes(x = JVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F) +  
+  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F) +  
   
   scale_x_continuous(breaks=seq(0, 8000, by = 2000), expand = c(0, 0)) +
   #scale_y_continuous(breaks=seq(0, 10, by = 2)) +
@@ -752,26 +761,103 @@ SolFitsAllPigmentfitPhycoChlalinear %>%
   theme_bw() 
 ```
 
+-------------------------
+
+# Checking if slope significantly different than 0
+```{r}
+GrowthJVPSIIPE21<-MCGrowthJVPSIISPmean %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 21)
+PE21lm<-lm(deltaOD_Lmu_corr~ 0 + meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, data=GrowthJVPSIIPE21)
+GrowthJVPSIIPE21lm<-summary(PE21lm)
+# Coefficients:
+#                                             Estimate Std. Error t value Pr(>|t|)    
+# meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day 2.177e-05  2.859e-06   7.616 1.57e-06 ***
+
+
+GrowthJVPSIIPE0<-MCGrowthJVPSIISPmean %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 0)
+PE0lm<-lm(deltaOD_Lmu_corr~ 0 + meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, data=GrowthJVPSIIPE0)
+GrowthJVPSIIPE0lm<-summary(PE0lm)
+# Coefficients:
+#                                             Estimate Std. Error t value Pr(>|t|)   
+# meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day 8.671e-05  1.781e-05   4.868   0.0046 **
+
+
+GrowthJVPSIIPC21<-MCGrowthJVPSIISPmean %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+PC21lm<-lm(deltaOD_Lmu_corr~ 0 + meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, data=GrowthJVPSIIPC21)
+GrowthJVPSIIPC21lm<-summary(PC21lm)
+# Coefficients:
+#                                             Estimate Std. Error t value Pr(>|t|)   
+# meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day 5.628e-05  8.793e-06   6.401  0.00138 **
+
+
+GrowthJVPSIIPC0<-MCGrowthJVPSIISPmean %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+PC0lm<-lm(deltaOD_Lmu_corr~ 0 + meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, data=GrowthJVPSIIPC0)
+GrowthJVPSIIPC0lm<-summary(PC0lm)
+# Coefficients:
+#                                             Estimate Std. Error t value Pr(>|t|)    
+# meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day 2.863e-05  5.486e-06   5.218 0.000287 ***
+
+```
+
+
+
+```{r}
+# MCGrowthJVPSIISPmeanStrainPE<-MCGrowthJVPSIISPmean %>% 
+#   filter(Strain == "PE-rich")
+# cmodO2PErich<-lm(deltaOD_Lmu_corr~ 0 + meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day*factor(O2), data=MCGrowthJVPSIISPmeanStrainPE)
+# AnovaO2PErich<-summary(cmodO2PErich)
+# 
+# 
+# MCGrowthJVPSIISPmeanStrainPC<-MCGrowthJVPSIISPmean %>% 
+#   filter(Strain == "PC-rich")
+# cmodO2PCrich<-lm(deltaOD_Lmu_corr~ 0 + meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day*factor(O2), data=MCGrowthJVPSIISPmeanStrainPC)
+# AnovaO2PCrich<-summary(cmodO2PCrich)
+# 
+# 
+# MCGrowthJVPSIISPmeanOxygen21<-MCGrowthJVPSIISPmean %>% 
+#   filter(O2 == 21)
+# cmodStrain21<-lm(deltaOD_Lmu_corr~ 0 + meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day*factor(Strain), data=MCGrowthJVPSIISPmeanOxygen21)
+# AnovaStrain21<-summary(cmodStrain21)
+# 
+# 
+# MCGrowthJVPSIISPmeanOxygen0<-MCGrowthJVPSIISPmean %>% 
+#   filter(O2 == 0)
+# cmodStrain0<-lm(deltaOD_Lmu_corr~ 0 + meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day*factor(Strain), data=MCGrowthJVPSIISPmeanOxygen0)
+# AnovaStrain0<-summary(cmodStrain0)
+
+
+```
+
+
+------------------
+
 
 t-test from the linear model Phase
 ```{r}
 # Strain across O2
-Stats77_ExpSt<-MCGrowthJVPSIISPmeanDummy %>%
+Stats77_ExpSt<-MCGrowthJVPSIISPmean %>%
   filter(Strain == "PC-rich") 
-  fit <- lm(deltaOD_Lmu_corr ~ JVPSII_umol_eLs_HalfPar_ue_umolChl_day + O2 + JVPSII_umol_eLs_HalfPar_ue_umolChl_day:O2,data=Stats77_ExpSt)
-x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[4, 4])), t(as.numeric(summary(fit)$coefficients[4, 3])), t(as.numeric(summary(fit)$coefficients[4, 2])))
+  fit <- lm(deltaOD_Lmu_corr ~ 0 + JVPSII_umol_eLs_HalfPar_ue_umolChl_day + O2 + JVPSII_umol_eLs_HalfPar_ue_umolChl_day:O2,data=Stats77_ExpSt)
+x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[3, 4])), t(as.numeric(summary(fit)$coefficients[3, 3])), t(as.numeric(summary(fit)$coefficients[3, 2])))
 model_77021<-data.frame(unclass(x), check.names = FALSE, stringsAsFactors = FALSE) %>% 
-  rename("Estimate" = "4", "Std.Error" = "7", "t_value" = "6", "p_value" = "5") %>% 
+  rename("Estimate" = "1", "Std.Error" = "3", "t_value" = "5", "p_value" = "6") %>% 
   select(c("Estimate", "Std.Error", "t_value", "p_value"))
   model_77021$FitComparison <- 'PC-rich_0:21'
 
 
-Stats127_ExpSt<-MCGrowthJVPSIISPmeanDummy %>%
+Stats127_ExpSt<-MCGrowthJVPSIISPmean %>%
   filter(Strain == "PE-rich") 
-  fit <- lm(deltaOD_Lmu_corr ~ JVPSII_umol_eLs_HalfPar_ue_umolChl_day + O2 + JVPSII_umol_eLs_HalfPar_ue_umolChl_day:O2,data=Stats127_ExpSt)
-x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[4, 4])), t(as.numeric(summary(fit)$coefficients[4, 3])), t(as.numeric(summary(fit)$coefficients[4, 2])))
+  fit <- lm(deltaOD_Lmu_corr ~ 0 + JVPSII_umol_eLs_HalfPar_ue_umolChl_day + O2 + JVPSII_umol_eLs_HalfPar_ue_umolChl_day:O2,data=Stats127_ExpSt)
+x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[3, 4])), t(as.numeric(summary(fit)$coefficients[3, 3])), t(as.numeric(summary(fit)$coefficients[3, 2])))
 model_127021<-data.frame(unclass(x), check.names = FALSE, stringsAsFactors = FALSE) %>% 
-  rename("Estimate" = "4", "Std.Error" = "7", "t_value" = "6", "p_value" = "5") %>% 
+  rename("Estimate" = "1", "Std.Error" = "3", "t_value" = "5", "p_value" = "6") %>% 
   select(c("Estimate", "Std.Error", "t_value", "p_value"))
   model_127021$FitComparison <- 'PE-rich_0:21'
 
@@ -781,28 +867,42 @@ modelO2<-rbind(model_77021, model_127021)
   
 
 # O2 across Strain
-Stats77_ExpSt<-MCGrowthJVPSIISPmeanDummy %>%
+Stats77_ExpSt<-MCGrowthJVPSIISPmean %>%
   filter(O2 == 0) 
-  fit <- lm(deltaOD_Lmu_corr ~ JVPSII_umol_eLs_HalfPar_ue_umolChl_day + Strain + JVPSII_umol_eLs_HalfPar_ue_umolChl_day:Strain,data=Stats77_ExpSt)
-x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[4, 4])), t(as.numeric(summary(fit)$coefficients[4, 3])), t(as.numeric(summary(fit)$coefficients[4, 2])))
+  fit <- lm(deltaOD_Lmu_corr ~ 0 + JVPSII_umol_eLs_HalfPar_ue_umolChl_day + Strain + JVPSII_umol_eLs_HalfPar_ue_umolChl_day:Strain,data=Stats77_ExpSt)
+x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[3, 4])), t(as.numeric(summary(fit)$coefficients[3, 3])), t(as.numeric(summary(fit)$coefficients[3, 2])))
 model_077127<-data.frame(unclass(x), check.names = FALSE, stringsAsFactors = FALSE) %>% 
-  rename("Estimate" = "4", "Std.Error" = "7", "t_value" = "6", "p_value" = "5") %>% 
+  rename("Estimate" = "1", "Std.Error" = "3", "t_value" = "5", "p_value" = "6") %>% 
   select(c("Estimate", "Std.Error", "t_value", "p_value"))
   model_077127$FitComparison <- '0_PC-rich:PE-rich'
 
 
-Stats127_ExpSt<-MCGrowthJVPSIISPmeanDummy %>%
+Stats127_ExpSt<-MCGrowthJVPSIISPmean %>%
   filter(O2 == 21) 
-  fit <- lm(deltaOD_Lmu_corr ~ JVPSII_umol_eLs_HalfPar_ue_umolChl_day + Strain + JVPSII_umol_eLs_HalfPar_ue_umolChl_day:Strain,data=Stats127_ExpSt)
-x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[4, 4])), t(as.numeric(summary(fit)$coefficients[4, 3])), t(as.numeric(summary(fit)$coefficients[4, 2])))
+  fit <- lm(deltaOD_Lmu_corr ~ 0 + JVPSII_umol_eLs_HalfPar_ue_umolChl_day + Strain + JVPSII_umol_eLs_HalfPar_ue_umolChl_day:Strain,data=Stats127_ExpSt)
+x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[3, 4])), t(as.numeric(summary(fit)$coefficients[3, 3])), t(as.numeric(summary(fit)$coefficients[3, 2])))
 model_2177127<-data.frame(unclass(x), check.names = FALSE, stringsAsFactors = FALSE) %>% 
-  rename("Estimate" = "4", "Std.Error" = "7", "t_value" = "6", "p_value" = "5") %>% 
+  rename("Estimate" = "1", "Std.Error" = "3", "t_value" = "5", "p_value" = "6") %>% 
   select(c("Estimate", "Std.Error", "t_value", "p_value"))
   model_2177127$FitComparison <- '21_PC-rich:PE-rich'
 
 modelStrain<-rbind(model_077127, model_2177127)
   rm(model_077127, model_2177127)
   
+```
+
+```{r}
+# Stats127_ExpSt<-MCGrowthJVPSIISPmean %>%
+#   filter(O2 == 21) 
+#   fit <- lm(deltaOD_Lmu_corr ~ 0 + JVPSII_umol_eLs_HalfPar_ue_umolChl_day + Strain + JVPSII_umol_eLs_HalfPar_ue_umolChl_day:Strain,data=Stats127_ExpSt)
+# x <- cbind(t(as.numeric(coefficients(fit))), t(as.numeric(summary(fit)$coefficients[4, 4])), t(as.numeric(summary(fit)$coefficients[4, 3])), t(as.numeric(summary(fit)$coefficients[4, 2])))
+# model_2177127<-data.frame(unclass(x), check.names = FALSE, stringsAsFactors = FALSE) %>% 
+#   rename("Estimate" = "4", "Std.Error" = "7", "t_value" = "6", "p_value" = "5") %>% 
+#   select(c("Estimate", "Std.Error", "t_value", "p_value"))
+#   model_2177127$FitComparison <- '21_PC-rich:PE-rich'
+# 
+# modelStrain<-rbind(model_077127, model_2177127)
+#   rm(model_077127, model_2177127)
 ```
 
 
@@ -818,6 +918,19 @@ rm(modelO2, modelStrain)
 ```{r}
 saveRDS(Anova_GrowthJVPSII, file.path(TableRdsPath, paste(Project, "Anova_GrowthJVPSII_Model2.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
 ```
+
+----------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------
+
+# Final plot (depend on stats)
 
 ```{r}
 SolFitsAllPigmentfitPhycoChlalinearUnnest<-SolFitsAllPigmentfitPhycoChlalinear %>% 
@@ -844,32 +957,32 @@ PE0<-SolFitsAllPigmentfitPhycoChlalinearUnnest %>%
 lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
-data_text_PC1<- data.frame(Strain  = c("PC-rich"), label = c('a'))
-data_text_PC2<- data.frame(Strain  = c("PC-rich"), label = c('b'))
-data_text_PE1<- data.frame(Strain  = c("PE-rich"), label = c('c'))
-data_text_PE2<- data.frame(Strain  = c("PE-rich"), label = c('d'))
+data_text_PC1<- data.frame(Strain  = c("PC-rich"), label = c('aA'))
+data_text_PC2<- data.frame(Strain  = c("PC-rich"), label = c('bA'))
+data_text_PE1<- data.frame(Strain  = c("PE-rich"), label = c('cA'))
+data_text_PE2<- data.frame(Strain  = c("PE-rich"), label = c('dA'))
 
 data_text_Anova<- data.frame(Strain  = c("PE-rich"),  label = c('  , \u03B1 = 0.05'))
 data_text_Anova2<- data.frame(Strain  = c("PE-rich"),  label = c('italic(t)~-test'))
 
 
-MultiCultiGrowth1PC21<-MCGrowthJVPSIISPmeanDummy %>% 
+MultiCultiGrowth1PC21<-MCGrowthJVPSIISPmean %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
   filter(Strain == "PC-rich") %>% 
   filter(O2 == 21)
-MultiCultiGrowth1PE21<-MCGrowthJVPSIISPmeanDummy %>% 
+MultiCultiGrowth1PE21<-MCGrowthJVPSIISPmean %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
   filter(Strain == "PE-rich") %>% 
     filter(O2 == 21)
   
-MultiCultiGrowth1PC0<-MCGrowthJVPSIISPmeanDummy %>% 
+MultiCultiGrowth1PC0<-MCGrowthJVPSIISPmean %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
   filter(Strain == "PC-rich") %>% 
   filter(O2 == 0)
-MultiCultiGrowth1PE0<-MCGrowthJVPSIISPmeanDummy %>% 
+MultiCultiGrowth1PE0<-MCGrowthJVPSIISPmean %>% 
     mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL != "WW") %>%
   filter(Strain == "PE-rich") %>% 
@@ -880,8 +993,8 @@ MultiCultiGrowth1PE0<-MCGrowthJVPSIISPmeanDummy %>%
 SolFitsAllPigmentfitPhycoChlalinear %>% 
   unnest(Linear_Model_Predict) %>% 
   ggplot() +
-  geom_point(aes(meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, deltaOD_Lmu_corr, shape = as.factor(O2), shape = as.factor(O2)), alpha = 0.8, size = 4, show.legend = T, MCGrowthJVPSIISPmeanDummy) +
-  geom_point(aes(y = deltaOD_Lmu_corr, x = JVPSII_umol_eLs_HalfPar_ue_umolChl_day, colour = as.factor(Strain), shape=as.factor(O2)), size = 2, show.legend = F, alpha = 0.3, MCGrowthJVPSIISPmeanDummy) + 
+  geom_point(aes(meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, deltaOD_Lmu_corr, shape = as.factor(O2), shape = as.factor(O2)), alpha = 0.8, size = 4, show.legend = T, MCGrowthJVPSIISPmean) +
+  # geom_point(aes(y = deltaOD_Lmu_corr, x = JVPSII_umol_eLs_HalfPar_ue_umolChl_day, colour = as.factor(Strain), shape=as.factor(O2)), size = 2, show.legend = F, alpha = 0.3, MCGrowthJVPSIISPmean) + 
   
   geom_point(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = deltaOD_Lmu_corr), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
   geom_point(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = deltaOD_Lmu_corr), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
@@ -890,10 +1003,10 @@ SolFitsAllPigmentfitPhycoChlalinear %>%
   
   
   
-  geom_line(aes(x = JVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PC21, linetype = "dotted") +  
-  geom_line(aes(x = JVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PC0, linetype = "solid") +  
-  geom_line(aes(x = JVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PE21, linetype = "dotted") +  
-  geom_line(aes(x = JVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PE0, linetype = "solid") +  
+  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PC21, linetype = "dotted") +  
+  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PC0, linetype = "solid") +  
+  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PE21, linetype = "dotted") +  
+  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PE0, linetype = "solid") +  
   
   geom_text(data=data_text_PC1, aes(x=2000, y=0.15, label=label), colour = "blue", size=5) +
   geom_text(data=data_text_PC2, aes(x=4100, y=0.14, label=label), colour = "blue", size=5) +
@@ -928,98 +1041,20 @@ SolFitsAllPigmentfitPhycoChlalinear %>%
         legend.background = element_rect(fill="transparent"),
         legend.key = element_blank(),
         legend.title = element_blank(),
-        legend.position = c(0.10,0.99),
+        legend.position = c(0.10,0.95),
         legend.text = element_text(size=10))
 ```
 
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_GrowthRateJVPSII_2",".png",sep = "")), height=5, width= 6,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("Fig_GrowthRateJVPSII",".png",sep = "")), height=5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
 
 
 ---------------------------------------------------
-
-```{r}
-lab1=c(expression("PC-rich"), expression("PE-rich"))
-lab2=c(expression("2.5 µM"), expression("250 µM"))
-lab3=c(expression("450"), expression("470"), expression("530"), expression("620"))
-
-scientific_10 <- function(x) {   parse(text=gsub("e\\+*", " %*% 10^", scales::scientific_format()(x))) }
-
-MCGrowthJVPSIISPmean %>% 
-  filter(WL != "WW") %>% 
-ggplot() +
-  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain)), alpha = 0.8, size = 3.5, show.legend = T) +
-  geom_line(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain), linetype = as.factor(Strain)), alpha = 0.8, show.legend = F) +
-  
-  geom_errorbar(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
-  
-  geom_errorbar(aes(y = deltaOD_Lmu_corr, xmin = meanJVPSII_umol_eLs_Par_ue_umolChl_day - sdJVPSII_umol_eLs_Par_ue_umolChl_day, xmax = meanJVPSII_umol_eLs_Par_ue_umolChl_day + sdJVPSII_umol_eLs_Par_ue_umolChl_day, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
-  
-  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
-  scale_shape_manual(values = c(16, 18), name="", labels = lab1) +
-  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab1) +
-  scale_x_continuous(label=scientific_10) +
-  ggh4x::facet_nested(rows = vars(factor(Oxygen, levels=c("250~µM","2.5~µM"))), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.10,0.90),
-        legend.text = element_text(size=10))
-
-
-
-
-MCGrowthJVPSIISPmean %>% 
-  filter(WL != "WW") %>% 
-ggplot() +
-  geom_point(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(WL)), alpha = 0.8, size = 3.5, show.legend = T) +
-  geom_line(aes(meanJVPSII_umol_eLs_Par_ue_umolChl_day, deltaOD_Lmu_corr, linetype = as.factor(O2)), alpha = 0.8, show.legend = T) +
-  
-  geom_errorbar(aes(x = meanJVPSII_umol_eLs_Par_ue_umolChl_day, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
-  
-  geom_errorbar(aes(y = deltaOD_Lmu_corr, xmin = meanJVPSII_umol_eLs_Par_ue_umolChl_day - sdJVPSII_umol_eLs_Par_ue_umolChl_day, xmax = meanJVPSII_umol_eLs_Par_ue_umolChl_day + sdJVPSII_umol_eLs_Par_ue_umolChl_day, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
-  
-  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
-  # scale_shape_manual(values = c(16, 18), name="", labels = lab2) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name="", labels = lab3) +
-  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
-  scale_x_continuous(label=scientific_10) +
-  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.90,0.78),
-        legend.text = element_text(size=10))
-
-
-```
 
 
 

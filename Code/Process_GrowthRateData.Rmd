@@ -1112,10 +1112,10 @@ lab2=c(expression("2.5 µM"), expression("250 µM"))
 
 data_textb <- data.frame(Strain  = c("PC-rich"), label = c('italic(b)'))
 
-data_text_PC1<- data.frame(Strain  = c("PC-rich"), label = c('a'))
-data_text_PC2<- data.frame(Strain  = c("PC-rich"), label = c('a'))
-data_text_PE1<- data.frame(Strain  = c("PE-rich"), label = c('b'))
-data_text_PE2<- data.frame(Strain  = c("PE-rich"), label = c('c'))
+data_text_PC1<- data.frame(Strain  = c("PC-rich"), label = c('aA'))
+data_text_PC2<- data.frame(Strain  = c("PC-rich"), label = c('aA'))
+data_text_PE1<- data.frame(Strain  = c("PE-rich"), label = c('bB'))
+data_text_PE2<- data.frame(Strain  = c("PE-rich"), label = c('cB'))
 
 data_text_Anova<- data.frame(Strain  = c("PE-rich"),  label = c(' , \u03B1 = 0.05'))
 data_text_Anova2<- data.frame(Strain  = c("PE-rich"),  label = c('italic(t)~-test'))
@@ -1140,7 +1140,7 @@ FigGrowthPig<-MCGrowthPig %>%
   coord_cartesian(ylim = c(-0.05, 0.2)) +
   
   geom_text(data=data_text_PC1, aes(x=3.4, y=0.15, label=label), colour = "blue", size=5) +
-  geom_text(data=data_text_PC2, aes(x=3.9, y=0.16, label=label), colour = "blue", size=5) +
+  geom_text(data=data_text_PC2, aes(x=3.9, y=0.18, label=label), colour = "blue", size=5) +
   geom_text(data=data_text_PE1, aes(x=3.5, y=0.14, label=label), colour = "blue", size=5) +
   geom_text(data=data_text_PE2, aes(x=5.5, y=0.16, label=label), colour = "blue", size=5) +
   

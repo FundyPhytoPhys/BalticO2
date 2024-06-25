@@ -1,5 +1,5 @@
 ---
-title: "Coastal picocyanobacteria exploit low oxygen habitats"
+title: "Coastal picocyanobacteria can exploit low oxygen habitats"
 
 author:
 - Sylwia Śliwińska-Wilczewska:
@@ -12,10 +12,6 @@ author:
     institute: MTA
     email: msavoie@mta.ca
     ORCID: 0009-0009-9499-6657
-- Naaman M. Omar:
-    institute: MTA
-    email: nomar@mta.ca
-    ORCID: 0000-0001-9583-2886
 - Douglas A. Campbell:
     institute: MTA
     email: dubhglascambeuil@gmail.com
@@ -25,8 +21,6 @@ institute:
 - MTA: Department of Biology, Mount Allison University, 53 York St., Sackville, NB, E4L 1C9, Canada
 - UG: "Institute of Oceanography, University of Gdansk, 46 Pilsudskiego St, P81-378,
     Gdynia, Poland"
-- VU: Department of Geography, University of Victoria, Victoria, BC, V8P 5C2, Canada
-- IOPAN: "Institute of Oceanology, Polish Academy of Sciences, 81-712 Sopot, Poland"
 output:
   bookdown::word_document2:
     reference_docx: Template.docx
@@ -50,7 +44,7 @@ output:
     - "--lua-filter=author-info-blocks.lua"
     - "--lua-filter=custom_filter.lua"
 bibliography:
-- BalticPhotoperiod.bib
+- BalticO2.bib
 - packages.bib
 - faultycitations.bib
 csl: "botany.csl"
@@ -107,6 +101,9 @@ knitr::include_graphics(file.path(FiguresFP,"SFig_GrowthRateOD720.png"))
 GrowthPUR_cap<- glue("Pigment ratio (µg:µg) vs. growth waveband (nm) for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
 knitr::include_graphics(file.path(FiguresFP,"SFig_PigmentRatio.png"))
 ```
+
+
+
 
 ```{r SigAll, fig.cap = SigAll_cap, fig.height = 6, fig.width = 8, echo = FALSE}
 SigAll_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~; nm^2^ quanta^−1^) vs. Actinic PAR (µmol photons m^−2^s^−1^). \u03C3~PSII~ were estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths (rows) of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Shaded area show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm. The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
