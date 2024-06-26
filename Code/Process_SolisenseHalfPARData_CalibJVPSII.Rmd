@@ -1,0 +1,2012 @@
+---
+title: "Process_SolisensePigmentsData"
+author:
+- Sylwia Sliwinska-Wilczewska
+- Douglas A. Campbell
+date: "`r format(Sys.Date())`"
+output:
+bookdown::html_document2:
+    code_folding: show
+    keep_md: yes
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 6
+    fig_caption: yes
+bibliography: BalticPhotoperiod.bib
+csl: plos-one.csl
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Set Chunk Options
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(fig.path='Figs/')
+```
+
+# Introduction
+
+Process_SolisensePigmentsData.Rmd processes and combines BalticPhotoperiod_Imported_SolisenseDarkafterLight.Rds and BalticPhotoperiod_Imported_SolisenseLight.Rds from Data/ImportedData/ImportedSolisenseData folder. This .Rmd generates BalticPhotoperiod_Processed_SolisenseData.Rds (stored in Data/ProcessedData/ProcessedSolisenseData folder), plots stored in Output/Figures folder, and tables stored in Output/TablesRds folder.
+
+# Load Libraries and set Project Variables
+
+```{r load libraries, warning = FALSE, echo=FALSE} 
+library(tidyverse)
+library(lubridate)
+library(stringr)
+library(broom)
+library(knitr)
+library(OneR)
+library(zoo)
+library(ggpubr)
+library(caret)
+library(reshape2)
+library(gcookbook)
+library(ggspectra)
+library(photobiologyWavebands)
+library(photobiology)
+library(scales)
+library(Cairo) #for greek symbols
+library(googledrive)
+library(googlesheets4)
+library(readxl)
+library(multcompView)
+library("patchwork") # merging plots
+```
+
+```{r set project variables}
+Project <- "BalticO2"
+DataOut <- file.path("..", "Data", "ProcessedData", "ProcessedSolisenseData")
+DataIn <- file.path("..", "Data", "ImportedData", "ImportedSolisenseData", fsep = .Platform$file.sep)
+
+FigPath <- file.path("..", "Output", "Figures")
+FigRdsPath <- file.path("..", "Output", "FiguresRds")
+TableRdsPath <- file.path("..", "Output", "TablesRDS")
+```
+
+# List and read Imported_Solisense RDS
+
+```{r Exported Rmd}
+list.files(path = DataIn, pattern = Project, full.names = TRUE)
+```
+
+# This RDS contained only data from corresponding growth light 
+# Also, conteined mean sig - mean for replica measured on the same day
+
+```{r read ProcessFile Sol}
+SolisenseFile <- "../Data/ImportedData/ImportedSolisenseData/BalticO2_Imported_SolisenseLight_LRC.Rds"  
+
+SolisenseFileName <- str_split(string = SolisenseFile, "/")[[1]][3] %>%
+  str_remove(pattern = ".Rds")
+
+SolFits <- readRDS(SolisenseFile)  %>%
+  ungroup()
+
+SolFitsMeta <- SolFits %>% 
+  select(-c(nm445,nm470,nm505,nm535,nm590,IR, nm445Corr,nm470Corr, nm505Corr,nm535Corr,nm590Corr,IRCorr,JVPSII_aLHIIOxbomax, JVPSII_ETRtauav_FoSig, JVPSII_ETRtauav_aLHII_Sig, JVPSII_ETRqpOxbo_aLHII_Sig)) |>
+  rename(JVPSII_ETRqpOxbo_FoSigmax_m2psii = JVPSII_ETRqpOxbo_FoSig) |>
+  rename(FilenameSolisense=Filename) %>% 
+  mutate(Strain=case_when(Strain=="BA127R"~"PE-rich",
+         Strain=="BA77G"~"PC-rich")) 
+
+```
+
+
+```{r}
+SolFitsMetaLRC<-SolFitsMeta %>%
+  filter(Par_ue == 180) %>% 
+  filter(Run!= 118) %>%
+  filter(Run!= 119) %>%
+  filter(Run!= 122) %>%
+  
+  # filter(Sig!= 989.08) %>%
+  #   filter(Sig!= 940.64) %>%
+  #   filter(Sig!= 873.12) %>%
+  #   filter(Sig!= 500.42) %>%
+  #   filter(Sig!= 478.93) %>% 
+    
+  filter(Sig>0)
+```
+
+# Convert Sig_m2psii to Sig_nm2psii and Sigdark_m2psii to Sigdark_nm2psii and calculated number of days when measurements were made
+
+```{r convert Sigma}
+SolFitsMetaLRC <- SolFitsMetaLRC %>%
+mutate(Sig_nm2psii=Sig_m2psii*1000000000000000000) %>%
+mutate(Sigdark_nm2psii=Sigdark_m2psii*1000000000000000000)
+```
+
+```{r}
+SolFitsMetaLRC<-SolFitsMetaLRC %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>% 
+  mutate(Oxygen=case_when(O2==21~"250~µM",
+         O2==0~"2.5~µM"))
+```
+
+# Create preliminary plots 
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(E_days>=4) %>% 
+  ggplot() +
+  geom_point(aes(x = WLNum, y = Sig, colour = as.factor(Strain)), size = 3.5, show.legend = T) +
+  scale_colour_discrete(type=c("palegreen3", "brown4"), name="", labels = lab1) +
+  stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() 
+
+```
+
+# Create preliminary plots sig vs ActPAR
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = Sig), size = 2, show.legend = T) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL, O2), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw()
+
+```
+
+
+# Calculate Sigma mean from 3 replica measured on the same day 
+# 6 replica b/c 3 replica * 2 values ("up" and "down")
+
+```{r calculate Sigma mean from 3 replica measured on the same day}
+SolFitsMetaLRC <- SolFitsMetaLRC %>%
+  filter(E_days>=4) %>% 
+  # filter(E_days <=10) %>% 
+  group_by(Strain, Ex_WL, Par_ue, Photoperiod, WLNum, WL, O2, E_days, Oxygen, ObsDate, ActPARCorr) %>%
+  
+  summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, WLNum, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, ActPARCorr, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days, TauAv, qpOxbo,
+            meanSig_nm2psii = mean(Sig_nm2psii),
+            sdSig_nm2psii = sd(Sig_nm2psii),
+            
+            meanTauAv = mean(TauAv),
+            sdTauAv = sd(TauAv),
+            
+            meanqpOxbo = mean(qpOxbo),
+            sdqpOxbo = sd(qpOxbo),
+            
+            meanJVPSII_ETRqpOxbo_FoSigmax_m2psii = mean(JVPSII_ETRqpOxbo_FoSigmax_m2psii),
+            sdJVPSII_ETRqpOxbo_FoSigmax_m2psii = sd(JVPSII_ETRqpOxbo_FoSigmax_m2psii),
+            
+            meanSigdark_nm2psii = mean(Sigdark_nm2psii),
+            sdSigdark_nm2psii = sd(Sigdark_nm2psii)) %>%
+  ungroup() 
+```
+# Calculate Sigma Allmean measured on all days from exp phase of growth (day4-13)
+
+
+```{r calculate Sigma mean from 3 replica measured on the same day}
+SolFitsMetaLRC <- SolFitsMetaLRC %>%
+  filter(E_days>=4) %>% 
+  # filter(E_days <=10) %>% 
+  group_by(Strain, Ex_WL, Par_ue, Photoperiod, WLNum, WL, O2, Oxygen, ActPARCorr) %>%
+  
+  summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, WLNum, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, meanSig_nm2psii, sdSig_nm2psii, meanSigdark_nm2psii, sdSigdark_nm2psii, ActPARCorr, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days, TauAv, qpOxbo, meanTauAv, sdTauAv, meanqpOxbo, sdqpOxbo, meanJVPSII_ETRqpOxbo_FoSigmax_m2psii, sdJVPSII_ETRqpOxbo_FoSigmax_m2psii,
+            AllmeanSig_nm2psii = mean(meanSig_nm2psii),
+            AllsdSig_nm2psii = sd(sdSig_nm2psii),
+            
+            AllmeanTauAv = mean(meanTauAv),
+            AllsdTauAv = sd(sdTauAv),
+            
+            AllmeanqpOxbo = mean(meanqpOxbo),
+            AllsdqpOxbo = sd(sdqpOxbo),
+            
+            AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii = mean(meanJVPSII_ETRqpOxbo_FoSigmax_m2psii),
+            AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii = sd(sdJVPSII_ETRqpOxbo_FoSigmax_m2psii),
+            
+            AllmeanSigdark_nm2psii = mean(meanSigdark_nm2psii),
+            AllsdSigdark_nm2psii = sd(sdSigdark_nm2psii)) %>%
+  ungroup() 
+```
+
+
+# Create preliminary plots sig vs ActPAR
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = Sig_nm2psii), colour = "gray", size = 2, show.legend = T) +
+  geom_point(aes(x = ActPARCorr, y = meanSig_nm2psii), colour = "darkgreen",size = 2, show.legend = T) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "red",size = 2, show.legend = T) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL, O2), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw()
+
+```
+
+```{r}
+lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
+
+
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, shape = as.factor(O2)), size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = meanSig_nm2psii), colour = "darkgreen",size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "red",size = 2, show.legend = T) +
+    scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw()
+
+
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv, shape = as.factor(O2)), size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = meanSig_nm2psii), colour = "darkgreen",size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "red",size = 2, show.legend = T) +
+    scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw()
+
+
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo, shape = as.factor(O2)), size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = meanSig_nm2psii), colour = "darkgreen",size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "red",size = 2, show.legend = T) +
+    scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw()
+
+
+SolFitsMetaLRC %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii, shape = as.factor(O2)), size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = meanSig_nm2psii), colour = "darkgreen",size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "red",size = 2, show.legend = T) +
+    scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw()
+#colnames(SolFitsMetaLRC)
+```
+
+
+
+
+# Save plot 
+
+```{r save plot}
+#ggsave(file = file.path(FigPath, paste("Fig_SigLRC",".png",sep = "")), height=5.5, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+
+------------------------------ Trim no growth ----------------------------
+
+# Filter condition where no growt
+
+```{r}
+SolFitsMetaLightCorr445590Trim1<-SolFitsMetaLRC %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21) %>% 
+  filter(WL != 405) 
+
+SolFitsMetaLightCorr445590Trim3<-SolFitsMetaLRC %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0) 
+
+SolFitsMetaLightCorr445590Trim4<-SolFitsMetaLRC %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 21) %>% 
+  filter(WL != 405) %>% 
+  filter(WL != 450) %>% 
+  filter(WL != 730) 
+  
+SolFitsMetaLightCorr445590Trim5<-SolFitsMetaLRC %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 0) 
+
+
+SolFitsMetaLRCTrim<-rbind(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMetaLightCorr445590Trim4, SolFitsMetaLightCorr445590Trim5)
+
+rm(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMetaLightCorr445590Trim4, SolFitsMetaLightCorr445590Trim5)
+```
+
+
+```{r}
+SolFitsMetaLRCTrim$facetsExcitation<-c("Excitation~(nm)")
+```
+
+# Create preliminary plots sig vs ActPAR
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+
+drectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+drectsemiblue <- data.frame(Ex_WL = c("470", "470"), Strain = c("PC-rich", "PE-rich"), WL = c("470", "470"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+drectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+drectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+
+
+MultiCultiGrowth1PC21<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+
+SolFitsMetaLRCTrim %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, shape = as.factor(O2)), size = 3, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = Sig_nm2psii, colour = as.factor(Strain)), size = 1, alpha = 0.2, show.legend = F) +
+  
+    geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "palegreen3", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PC21) +
+    geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "brown4", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PE21) +
+    geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "palegreen3", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PC0) +
+    geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "brown4", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  geom_line(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  #geom_line(aes(x = ActPARCorr, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  
+  
+  
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  
+  geom_rect(data=drectblue, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="steelblue3", alpha = 0.2, size=1) +
+  geom_rect(data=drectsemiblue, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), color="lightseagreen", fill="lightseagreen", alpha = 0.2, size=1) +
+  
+  geom_rect(data=drectgreen, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="limegreen", alpha = 0.2, size=1) +
+  geom_rect(data=drectred, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="coral", alpha = 0.2, size=1) +
+  
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  
+  labs(y=expression(paste(sigma,""["PSII"]*" (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.94),
+        legend.text = element_text(size=10))
+
+
+```
+# Save plot 
+
+```{r save plot}
+# ggsave(file = file.path(FigPath, paste("SFig_Sig",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+
+```{r}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+
+drectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+drectsemiblue <- data.frame(Ex_WL = c("470", "470"), Strain = c("PC-rich", "PE-rich"), WL = c("470", "470"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+drectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+drectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+
+
+MultiCultiGrowth1PC21<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+
+SolFitsMetaLRCTrim %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv, shape = as.factor(O2)), size = 3, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = Sig_nm2psii, colour = as.factor(Strain)), size = 1, alpha = 0.2, show.legend = F) +
+  
+    geom_point(aes(x = ActPARCorr, y = AllmeanTauAv), colour = "palegreen3", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PC21) +
+    geom_point(aes(x = ActPARCorr, y = AllmeanTauAv), colour = "brown4", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PE21) +
+    geom_point(aes(x = ActPARCorr, y = AllmeanTauAv), colour = "palegreen3", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PC0) +
+    geom_point(aes(x = ActPARCorr, y = AllmeanTauAv), colour = "brown4", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanTauAv - AllsdTauAv, ymax = AllmeanTauAv + AllsdTauAv, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  geom_line(aes(x = ActPARCorr, y = AllmeanTauAv, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  #geom_line(aes(x = ActPARCorr, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  
+  
+  
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  
+  geom_rect(data=drectblue, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="steelblue3", alpha = 0.2, size=1) +
+  geom_rect(data=drectsemiblue, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="lightseagreen", alpha = 0.2, size=1) +
+  
+  geom_rect(data=drectgreen, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="limegreen", alpha = 0.2, size=1) +
+  geom_rect(data=drectred, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="coral", alpha = 0.2, size=1) +
+  
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  labs(y=expression(paste(tau,""["PSII"]*" (µs)")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.94),
+        legend.text = element_text(size=10))
+```
+# Save plot 
+
+```{r save plot}
+# ggsave(file = file.path(FigPath, paste("SFig_Tau",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+```{r}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+
+drectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+drectsemiblue <- data.frame(Ex_WL = c("470", "470"), Strain = c("PC-rich", "PE-rich"), WL = c("470", "470"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+drectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+drectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+
+MultiCultiGrowth1PC21<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+
+SolFitsMetaLRCTrim %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo, shape = as.factor(O2)), size = 3, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = Sig_nm2psii, colour = as.factor(Strain)), size = 1, alpha = 0.2, show.legend = F) +
+  
+    geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo), colour = "palegreen3", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PC21) +
+    geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo), colour = "brown4", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PE21) +
+    geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo), colour = "palegreen3", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PC0) +
+    geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo), colour = "brown4", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanqpOxbo - AllsdqpOxbo, ymax = AllmeanqpOxbo + AllsdqpOxbo, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  geom_line(aes(x = ActPARCorr, y = AllmeanqpOxbo, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  #geom_line(aes(x = ActPARCorr, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  
+  
+  
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  
+  geom_rect(data=drectblue, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="steelblue3", alpha = 0.2, size=1) +
+  geom_rect(data=drectsemiblue, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2),  fill="lightseagreen", alpha = 0.2, size=1) +
+  
+  geom_rect(data=drectgreen, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="limegreen", alpha = 0.2, size=1) +
+  geom_rect(data=drectred, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="coral", alpha = 0.2, size=1) +
+  
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  labs(y=expression(paste(q,""["P"]*"")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.94),
+        legend.text = element_text(size=10))
+```
+
+# Save plot 
+
+```{r save plot}
+# ggsave(file = file.path(FigPath, paste("SFig_qpOxbo",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+
+```{r}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+
+drectblue <- data.frame(Ex_WL = c("445", "445"), Strain = c("PC-rich", "PE-rich"), WL = c("450", "450"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+drectsemiblue <- data.frame(Ex_WL = c("470", "470"), Strain = c("PC-rich", "PE-rich"), WL = c("470", "470"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+drectgreen <- data.frame(Ex_WL = c("535", "535"), Strain = c("PC-rich", "PE-rich"), WL = c("530", "530"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+drectred <- data.frame(Ex_WL = c("590", "590"), Strain = c("PC-rich", "PE-rich"), WL = c("620", "620"), x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+
+MultiCultiGrowth1PC21<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-SolFitsMetaLRCTrim %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+
+SolFitsMetaLRCTrim %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii, shape = as.factor(O2)), size = 3, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = Sig_nm2psii, colour = as.factor(Strain)), size = 1, alpha = 0.2, show.legend = F) +
+  
+    geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii), colour = "palegreen3", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PC21) +
+    geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii), colour = "brown4", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PE21) +
+    geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii), colour = "palegreen3", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PC0) +
+    geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii), colour = "brown4", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii - AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii, ymax = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii + AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  
+  geom_line(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  #geom_line(aes(x = ActPARCorr, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = T, MCDataHourSVR) +
+  
+  
+  
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  
+  geom_rect(data=drectblue, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="steelblue3", alpha = 0.2, size=1) +
+  geom_rect(data=drectsemiblue, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2),  fill="lightseagreen", alpha = 0.2, size=1) +
+  
+  geom_rect(data=drectgreen, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="limegreen", alpha = 0.2, size=1) +
+  geom_rect(data=drectred, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill="coral", alpha = 0.2, size=1) +
+  
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  labs(y=expression(paste(Uncalib_JV,""["PSII"]*"")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.94),
+        legend.text = element_text(size=10))
+```
+
+# Save plot 
+
+```{r save plot}
+# ggsave(file = file.path(FigPath, paste("SFig_UcalibJVPSII",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+
+# Choosen only corresponding data
+
+```{r}
+SolFitsMetaLRCTrimChoosen450<-SolFitsMetaLRCTrim %>% 
+  filter(WL == 450) %>%
+  filter(Ex_WL == 445) 
+SolFitsMetaLRCTrimChoosen470<-SolFitsMetaLRCTrim %>% 
+  filter(WL == 470) %>%
+  filter(Ex_WL == 470) 
+SolFitsMetaLRCTrimChoosen530<-SolFitsMetaLRCTrim %>% 
+  filter(WL == 530) %>%
+  filter(Ex_WL == 535)  
+SolFitsMetaLRCTrimChoosen620<-SolFitsMetaLRCTrim %>% 
+  filter(WL == 620) %>%
+  filter(Ex_WL == 590) 
+  
+SolFitsMetaLRCTrimChoosen<-rbind(SolFitsMetaLRCTrimChoosen450, SolFitsMetaLRCTrimChoosen470, SolFitsMetaLRCTrimChoosen530, SolFitsMetaLRCTrimChoosen620)
+
+rm(SolFitsMetaLRCTrimChoosen450, SolFitsMetaLRCTrimChoosen470, SolFitsMetaLRCTrimChoosen530, SolFitsMetaLRCTrimChoosen620)
+
+
+```
+
+# Preliminary plot
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+
+
+SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanTauAv - AllsdTauAv, ymax = AllmeanTauAv + AllsdTauAv, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanTauAv, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+
+
+SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanqpOxbo, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanqpOxbo - AllsdqpOxbo, ymax = AllmeanqpOxbo + AllsdqpOxbo, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+
+
+SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii - AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii, ymax = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii + AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+```
+
+```{r}
+SolFitsMetaLRCTrimChoosen$facetsExcitation<-c("Excitation~(nm)")
+```
+
+
+```{r preliminary plot}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+MultiCultiGrowth1PC21<-SolFitsMetaLRCTrimChoosen %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-SolFitsMetaLRCTrimChoosen %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-SolFitsMetaLRCTrimChoosen %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-SolFitsMetaLRCTrimChoosen %>% 
+    mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+
+
+
+
+data_textA <- data.frame(facetsExcitation  = c("Excitation~(nm)"), Ex_WL  = c("590"), Strain  = c("PC-rich"), label = c('italic(a)'))
+data_textB <- data.frame(Ex_WL  = c("590"), Strain  = c("PC-rich"), label = c('italic(b)'))
+data_textC <- data.frame(Ex_WL  = c("590"), Strain  = c("PC-rich"), label = c('italic(c)'))
+
+Sig<-SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, shape = as.factor(O2)), size = 3, show.legend = T) +
+  
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "palegreen3", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PC21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "brown4", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PE21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "palegreen3", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PC0) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "brown4", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanSig_nm2psii - AllsdSig_nm2psii, ymax = AllmeanSig_nm2psii + AllsdSig_nm2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanSig_nm2psii, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.4) +
+  geom_text(data=data_textA, aes(x=750, y=9, label=label), size=6, parse = TRUE) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  scale_x_continuous(breaks=seq(0, 900, by = 300)) +
+  coord_cartesian(ylim = c(0, 10), xlim = c(0, 900)) +
+  labs(y=expression(paste(sigma,""["PSII"]*" (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  # labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(facetsExcitation, Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_blank(),
+        axis.title = element_text(size=16),
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        #axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+Sig
+
+Tau<-SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv, shape = as.factor(O2)), size = 3, show.legend = F) +
+  
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv), colour = "palegreen3", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PC21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv), colour = "brown4", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PE21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv), colour = "palegreen3", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PC0) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanTauAv), colour = "brown4", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanTauAv - AllsdTauAv, ymax = AllmeanTauAv + AllsdTauAv, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanTauAv, linetype = as.factor(O2)), size = 0.3, show.legend = F) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.4) +
+  geom_text(data=data_textB, aes(x=750, y=1400, label=label), size=6, parse = TRUE) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_y_continuous(breaks=seq(0, 1600, by = 400)) +
+  scale_x_continuous(breaks=seq(0, 900, by = 300)) +
+  coord_cartesian(ylim = c(0, 1600), xlim = c(0, 900)) +
+  
+  labs(y=expression(paste(tau,""["PSII"]*" (µs)")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  #labs(y=expression(paste(tau," (ms"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_blank(),
+        axis.title = element_text(size=16),
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        #axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+Tau
+
+qp<-SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo, shape = as.factor(O2)), size = 3, show.legend = F) +
+  
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo), colour = "palegreen3", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PC21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo), colour = "brown4", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PE21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo), colour = "palegreen3", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PC0) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanqpOxbo), colour = "brown4", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  geom_line(aes(x = ActPARCorr, y = AllmeanqpOxbo, linetype = as.factor(O2)), size = 0.3, show.legend = F) +
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanqpOxbo - AllsdqpOxbo, ymax = AllmeanqpOxbo + AllsdqpOxbo, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.4) +
+  geom_text(data=data_textC, aes(x=750, y=0.85, label=label), size=6, parse = TRUE) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  scale_y_continuous(breaks=seq(0, 1.2, by = 0.3)) +
+  scale_x_continuous(breaks=seq(0, 900, by = 300)) +
+  coord_cartesian(ylim = c(0, 1.2), xlim = c(0, 900)) +
+  labs(y=expression(paste(q,""["P"]*"")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  
+  #labs(y="qP", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+qp
+
+
+UncalibJVPSII<-SolFitsMetaLRCTrimChoosen %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii, shape = as.factor(O2)), size = 3, show.legend = F) +
+  
+  geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii), colour = "palegreen3", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PC21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii), colour = "brown4", shape = 1, size = 3, show.legend = F, MultiCultiGrowth1PE21) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii), colour = "palegreen3", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PC0) +
+  geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii), colour = "brown4", shape = 16, size = 3, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  geom_line(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii, linetype = as.factor(O2)), size = 0.3, show.legend = F) +
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii - AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii, ymax = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii + AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.4) +
+  geom_text(data=data_textC, aes(x=750, y=0.85, label=label), size=6, parse = TRUE) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 1.2, by = 0.3)) +
+  # scale_x_continuous(breaks=seq(0, 900, by = 300)) +
+  # coord_cartesian(ylim = c(0, 1.2), xlim = c(0, 900)) +
+  labs(y=expression(paste(Uncalib_JV,""["PSII"]*"")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  
+  #labs(y="qP", x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.90),
+        legend.text = element_text(size=10))
+UncalibJVPSII
+
+```
+
+
+
+```{r fig.height = 8, fig.width = 6, warning = FALSE}
+ggp<-Sig/Tau/qp
+ggp
+```
+
+```{r save plot}
+# ggsave(file = file.path(FigPath, paste("Fig_SigTauqp",".png",sep = "")), height=8, width= 6,  dpi = 300, limitsize = TRUE)
+```
+
+----------------------------------------------- ANOVA ------------------------------------
+
+
+# Calculated Anova and Tukey test
+
+Sig
+```{r calculated statistics}
+# Stat<-SolFitsMetaLRCTrimChoosen %>% 
+#   filter(E_days>=4) %>% 
+#   filter(Ex_WL == 445) %>% 
+#   filter(WL == "450")
+# Stat$O2 <- factor(Stat$O2)
+# Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+# Stat$Strain <- factor(Stat$Strain)
+# # Three way Anova with interactions
+# model<-aov(Sig_nm2psii~O2*ActPARCorr*Strain, data=Stat)
+# AnovaTest_qp445<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# AnovaTest_qp445$Ex_WL<-445
+# 
+# Stat<-SolFitsMetaLRCTrimChoosen %>%
+#   filter(E_days>=4) %>% 
+#   filter(Ex_WL == 470) %>% 
+#   filter(WL == "470")
+# Stat$O2 <- factor(Stat$O2)
+# Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+# Stat$Strain <- factor(Stat$Strain)
+# # Three way Anova with interactions
+# model<-aov(Sig_nm2psii~O2*ActPARCorr*Strain, data=Stat)
+# AnovaTest_qp470<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# AnovaTest_qp470$Ex_WL<-470
+# 
+# Stat<-SolFitsMetaLRCTrimChoosen %>% 
+#   filter(E_days>=4) %>% 
+#   filter(Ex_WL == 535) %>% 
+#   filter(WL == "530")
+# Stat$O2 <- factor(Stat$O2)
+# Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+# Stat$Strain <- factor(Stat$Strain)
+# # Three way Anova with interactions
+# model<-aov(Sig_nm2psii~O2*ActPARCorr*Strain, data=Stat)
+# AnovaTest_qp535<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# AnovaTest_qp535$Ex_WL<-535
+# 
+# Stat<-SolFitsMetaLRCTrimChoosen %>% 
+#   filter(E_days>=4) %>% 
+#   filter(Ex_WL == 590) %>% 
+#   filter(WL == "620")
+# Stat$O2 <- factor(Stat$O2)
+# Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+# Stat$Strain <- factor(Stat$Strain)
+# # Three way Anova with interactions
+# model<-aov(Sig_nm2psii~O2*ActPARCorr*Strain, data=Stat)
+# AnovaTest_qp590<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# AnovaTest_qp590$Ex_WL<-590
+# 
+# AnovaSig<-rbind(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
+# rm(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
+```
+
+
+Tau
+```{r calculated statistics}
+# Stat<-SolFitsMetaLRCTrimChoosen %>%
+#   filter(E_days>=4) %>% 
+#   filter(Ex_WL == 445) %>% 
+#   filter(WL == "450")
+# Stat$O2 <- factor(Stat$O2)
+# Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+# Stat$Strain <- factor(Stat$Strain)
+# # Three way Anova with interactions
+# model<-aov(TauAv~O2*ActPARCorr*Strain, data=Stat)
+# AnovaTest_qp445<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# AnovaTest_qp445$Ex_WL<-445
+# 
+# Stat<-SolFitsMetaLRCTrimChoosen %>% 
+#   filter(E_days>=4) %>% 
+#   filter(Ex_WL == 470) %>% 
+#   filter(WL == "470")
+# Stat$O2 <- factor(Stat$O2)
+# Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+# Stat$Strain <- factor(Stat$Strain)
+# # Three way Anova with interactions
+# model<-aov(TauAv~O2*ActPARCorr*Strain, data=Stat)
+# AnovaTest_qp470<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# AnovaTest_qp470$Ex_WL<-470
+# 
+# Stat<-SolFitsMetaLRCTrimChoosen %>% 
+#   filter(E_days>=4) %>% 
+#   filter(Ex_WL == 535) %>% 
+#   filter(WL == "530")
+# Stat$O2 <- factor(Stat$O2)
+# Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+# Stat$Strain <- factor(Stat$Strain)
+# # Three way Anova with interactions
+# model<-aov(TauAv~O2*ActPARCorr*Strain, data=Stat)
+# AnovaTest_qp535<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# AnovaTest_qp535$Ex_WL<-535
+# 
+# Stat<-SolFitsMetaLRCTrimChoosen %>% 
+#   filter(E_days>=4) %>% 
+#   filter(Ex_WL == 590) %>% 
+#   filter(WL == "620")
+# Stat$O2 <- factor(Stat$O2)
+# Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+# Stat$Strain <- factor(Stat$Strain)
+# # Three way Anova with interactions
+# model<-aov(TauAv~O2*ActPARCorr*Strain, data=Stat)
+# AnovaTest_qp590<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# AnovaTest_qp590$Ex_WL<-590
+# 
+# AnovaTau<-rbind(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
+# rm(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
+```
+
+
+
+qP
+```{r calculated statistics}
+# Stat<-SolFitsMetaLRCTrimChoosen %>% 
+#   filter(Ex_WL == 445) %>% 
+#   filter(WL == "450")
+# Stat$O2 <- factor(Stat$O2)
+# Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+# Stat$Strain <- factor(Stat$Strain)
+# # Three way Anova with interactions
+# model<-aov(qpOxbo~O2*ActPARCorr*Strain, data=Stat)
+# AnovaTest_qp445<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# AnovaTest_qp445$Ex_WL<-445
+# 
+# Stat<-SolFitsMetaLRCTrimChoosen %>% 
+#   filter(Ex_WL == 470) %>% 
+#   filter(WL == "470")
+# Stat$O2 <- factor(Stat$O2)
+# Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+# Stat$Strain <- factor(Stat$Strain)
+# # Three way Anova with interactions
+# model<-aov(qpOxbo~O2*ActPARCorr*Strain, data=Stat)
+# AnovaTest_qp470<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# AnovaTest_qp470$Ex_WL<-470
+# 
+# Stat<-SolFitsMetaLRCTrimChoosen %>% 
+#   filter(Ex_WL == 535) %>% 
+#   filter(WL == "530")
+# Stat$O2 <- factor(Stat$O2)
+# Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+# Stat$Strain <- factor(Stat$Strain)
+# # Three way Anova with interactions
+# model<-aov(qpOxbo~O2*ActPARCorr*Strain, data=Stat)
+# AnovaTest_qp535<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# AnovaTest_qp535$Ex_WL<-535
+# 
+# Stat<-SolFitsMetaLRCTrimChoosen %>% 
+#   filter(Ex_WL == 590) %>% 
+#   filter(WL == "620")
+# Stat$O2 <- factor(Stat$O2)
+# Stat$ActPARCorr <- factor(Stat$ActPARCorr)
+# Stat$Strain <- factor(Stat$Strain)
+# # Three way Anova with interactions
+# model<-aov(qpOxbo~O2*ActPARCorr*Strain, data=Stat)
+# AnovaTest_qp590<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+# AnovaTest_qp590$Ex_WL<-590
+# 
+# AnovaqP<-rbind(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
+# rm(AnovaTest_qp445, AnovaTest_qp470, AnovaTest_qp535, AnovaTest_qp590)
+```
+
+
+
+# Save RDS that create stats and tables
+
+```{r}
+# saveRDS(AnovaSig, file.path(TableRdsPath, paste(Project, "Anova_SigLRC.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+# 
+# saveRDS(AnovaTau, file.path(TableRdsPath, paste(Project, "Anova_TauLRC.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+# 
+# saveRDS(AnovaqP, file.path(TableRdsPath, paste(Project, "Anova_qpLRC.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
+```
+
+
+
+
+```{r}
+
+#rm(MultiCultiGrowth1PC21, MultiCultiGrowth1PC0, MultiCultiGrowth1PE21, MultiCultiGrowth1PE0)
+```
+
+----------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------
+
+SolFitsMetaLRCTrimChoosen
+
+
+# Choosen Sigma from corresponding light
+
+```{r data taken from corresponding light calibration}
+
+# SolFitsMetaLight1 <- SolFitsMeta %>%
+#   filter(Dark1s == 0) %>%
+#   filter(Par_ue == 180) %>%
+#   filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>% 
+#   filter(ActPAR == 40) # 79 for 445; 61.5 for 535; and 97.5 for 590
+# 
+# 
+# SolFitsMetaLight2 <- SolFitsMeta %>%
+#   filter(Dark1s == 0) %>%
+#   filter(Par_ue == 180) %>%
+#   filter(Ex_WL == 505 | Ex_WL == 470) %>% 
+#   filter(ActPAR == 80) # 79.6 for 505; 114.2 for 470; 
+# 
+# SolFitsMetaLight<-rbind(SolFitsMetaLight1, SolFitsMetaLight2)
+#   rm(SolFitsMetaLight1, SolFitsMetaLight2)
+```
+
+# Convert Sig_m2psii to Sig_nm2psii and Sigdark_m2psii to Sigdark_nm2psii and calculated number of days when measurements were made
+
+```{r convert Sigma}
+# SolFitsMetaLight <- SolFitsMetaLight %>%
+# mutate(Sig_nm2psii=Sig_m2psii*1000000000000000000) %>%
+# mutate(Sigdark_nm2psii=Sigdark_m2psii*1000000000000000000)
+```
+
+# Choosen Sigma measured from 1s in dark after corresponding light
+
+```{r data taken from 1s of dark after corresponding light calibration}
+
+# SolFitsTrimMetaDarkafterLight1<- SolFitsMeta %>%
+#   filter(Dark1s == 1) %>%
+#   filter(ActPAR == 0) %>%
+#   filter(Par_ue == 180) %>%
+#   filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>% 
+#   filter(LR_s==40|LR_s==41|LR_s==42|LR_s==43|
+#          LR_s==92|LR_s==93|LR_s==94|LR_s==95)
+# 
+# SolFitsTrimMetaDarkafterLight2 <- SolFitsMeta %>%
+#   filter(Dark1s == 1) %>%
+#   filter(ActPAR == 0) %>%
+#   filter(Par_ue == 180) %>%
+#   filter(Ex_WL == 505 | Ex_WL == 470) %>% 
+#   filter(LR_s==53|LR_s==54|LR_s==55|LR_s==56|
+#          LR_s==79|LR_s==80|LR_s==81|LR_s==82)
+# 
+# SolFitsTrimMetaDarkafterLight<-rbind(SolFitsTrimMetaDarkafterLight1, SolFitsTrimMetaDarkafterLight2)
+#   rm(SolFitsTrimMetaDarkafterLight1, SolFitsTrimMetaDarkafterLight2)
+# 
+# 
+# SolFitsTrimMetaDarkafterLight <- SolFitsTrimMetaDarkafterLight %>%
+#   mutate(Sig1s=Sig*1) %>%
+#   mutate(Sig1s_m2psii=Sig_m2psii*1) %>%
+#   select(-c(Sig, Sig_m2psii))
+```
+
+# Convert Sig1s_m2psii to Sig1s_nm2psii and calculated number of days when measurements were made
+
+```{r convert Sigma}
+# SolFitsTrimMetaDarkafterLight <- SolFitsTrimMetaDarkafterLight %>%
+# # mutate(Sigdark_nm2psii=Sigdark_m2psii*1000000000000000000)  %>%
+# mutate(Sig1s_nm2psii=Sig1s_m2psii*1000000000000000000)
+```
+
+
+------------------------------------------------ MetaData Catalog ------------------------------------------------------
+
+# Read MetaData Catalog
+
+```{r read locally stored metadata from rds}
+CultureCatalog <- readRDS(file = file.path("..", "Data", "ImportedData", "ImportedMetaData", "CultureCatalog.Rds"))
+
+CultureCatalog<-CultureCatalog %>% 
+  select(-c(PrimaryOperator, Temp_c, ExpCul, ExpStartTime, O2_Category, Optode, OptodeCh, OptodeMeasure))
+```
+
+
+------------------------------------------------------# Add Turner Catalog--------------------------------------------------
+
+# Load Turner catalog
+
+```{r load turner catalog, message = FALSE, warning = FALSE, echo=FALSE}
+gs4_deauth()
+Turnercatalog<- read_sheet("https://docs.google.com/spreadsheets/d/13mQm0B3siS65UuGjNdzvpHFomfuwn6aAg7dBoq1IqrM/edit#gid=0")
+
+as.data.frame(Turnercatalog)
+ChlData <- Turnercatalog 
+
+ChlData <- ChlData %>%  
+  mutate(TurChl_ugL = as.numeric(Reading_rfu) * as.numeric(Chl_slope) + as.numeric(Chl_intercept)) %>% 
+  mutate(DATE = ymd(`DATE`)) %>% 
+  rename(SampleID=CultureID) %>% 
+  rename(ObsDate=DATE) %>% 
+  select(c(SampleID, ObsDate, TurChl_ugL)) %>% 
+  filter(TurChl_ugL<212354.754)  #outliers
+
+```
+
+# Merge Turner with CultureCatalog
+
+```{r}
+ChlDataMeta <- CultureCatalog %>% 
+  left_join(., ChlData, by = c("SampleID"="SampleID")) %>% 
+    mutate(Strain=case_when(Strain=="BA127R"~"PE-rich",
+         Strain=="BA77G"~"PC-rich")) 
+```
+
+
+# Calculate Chl mean from 3 technical replica - wierd issue with ObsDate - probably I need to use Turner correlation
+
+```{r}
+colnames(ChlDataMeta)
+
+ChlDataMeta <- ChlDataMeta %>%
+  group_by(Strain, WL, O2) %>%
+  summarize(SampleID, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, PARPhotonDose_day, ObsDate, TurChl_ugL,
+            meanTurChl_ugL = mean(TurChl_ugL),
+            sdTurChl_ugL = sd(TurChl_ugL)) %>%
+  ungroup() %>% 
+  select(-c(ObsDate))
+```
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+ChlDataMeta %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+
+# Merge Sigma with chlorophyll Turner data 
+It is "bigger" df than SolFitsPigmentExp, b/c I have 3 replica for Turner
+
+```{r}
+SolFitsExpStTurner <- ChlDataMeta %>%
+  full_join(., SolFitsMetaLRCTrimChoosen, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) 
+
+#"ObsDate"="ObsDate"
+```
+
+# Removed TurChl_ugL b/c I have already mean from 3 technical replica - smaller df
+
+```{r}
+SolFitsExpStTurner<-SolFitsExpStTurner %>% 
+  select(-c(TurChl_ugL)) %>% 
+  unique()
+```
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+#colnames(SolFitsExpStTurner)
+
+SolFitsExpStTurner %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+SolFitsExpStTurner %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = Sig_nm2psii, x = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+SolFitsExpStTurner %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_ETRqpOxbo_FoSigmax_m2psii, x = meanTurChl_ugL)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+
+
+
+--------------------------------------------------- MD Pico --------------------------------------
+
+# IMPORT MD PICO CORRELATION DATA
+
+```{r set project variables, warning = FALSE, echo = FALSE}
+Project <- "BalticO2"
+zip_file <- file.path("..", "Data", "RawData", "MDPico.zip")
+
+# List files in the extracted folder with a ".txt" extension
+CountFiles <- unzip(zip_file, list = TRUE)
+CountFiles <- CountFiles[grepl(".csv$", CountFiles$Name), "Name"]
+print(CountFiles)
+
+FileID <- "ExperimentSummaryData"
+FileEncode <- "UTF-8" 
+HeaderRows <- 0
+DelimCS <- ","
+```
+
+# Read fread_plus function
+
+```{r data read adds filename and cdate, warning=FALSE, message=FALSE, echo=FALSE}
+# Define function to read and process each file
+fread_plus <- function(Flnm, FileEncode, Delim) {
+  con <- unz(zip_file, Flnm)
+  
+  # Read the file using read.table
+  data <- read.table(con, skip = HeaderRows, encoding = FileEncode, sep = Delim, header = TRUE)
+  
+  # Use tryCatch to handle errors during the closing of the connection
+  tryCatch(
+    close(con),
+    error = function(e) {
+      warning("Error closing connection: ", e$message)
+    })
+  
+  data <- data %>%
+    mutate(Filename = Flnm, CDateTime = ymd_hms(file.info(zip_file)$ctime)) 
+  return(data)
+}
+
+# Use map_df to read and process all files in CountFiles
+MDPicoTidy <- CountFiles %>%
+  map_df(~fread_plus(Flnm = ., FileEncode = FileEncode, Delim = DelimCS))
+```
+
+```{r tidy CountTidy}
+
+MDPicoTidy <- MDPicoTidy %>% 
+  select(-c("Concentration", "Group", "Compound", "CDateTime")) %>% # remove superfluous columns
+  mutate(Filename = str_remove(string = Filename, pattern = ".csv")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../MDPico/")) %>%
+  separate(Filename, into = c("ObsDate", "Project", "Initials",  "PlateNr", "IndStud", "Organism", "Count"), sep = "([\\/\\/\\_\\_\\_\\_\\_])", remove = FALSE) %>%
+  select(-c("IndStud", "Organism", "Count")) %>% 
+  mutate(ObsDate = ymd_hm(ObsDate)) 
+
+```
+
+Load MDPicoMetaData catalog
+```{r load local metadatacatalog, message = FALSE, warning = FALSE, echo=FALSE}
+gs4_deauth()
+
+# this is the URL or ID of a Sheet readable by anyone (with a link)
+
+MDPicoMetaData <- read_sheet("https://docs.google.com/spreadsheets/d/1Lerp5u25kzBtaBbnOYElYqUP59cn68gJpxxayhnGdkw/edit#gid=0") %>%
+  #mutate(Date = as.numeric(Date)) %>%
+  mutate(Date = ymd_hm(`Date`)) %>%
+  separate(Date, into = c("Date_count", "Time_count"), sep = " ", remove = FALSE) %>%
+  mutate(Date_count = ymd(`Date_count`)) 
+```
+
+
+# Merge MD Pico and Culture catalog
+
+```{r}
+MDPicoMeta <- MDPicoMetaData %>%
+  left_join(., CultureCatalog, by = c("SampleID" = "SampleID")) %>% 
+      mutate(Strain=case_when(Strain=="BA127R"~"PE-rich",
+         Strain=="BA77G"~"PC-rich")) 
+```
+
+
+# Merge
+
+```{r}
+MDPicoAll <- MDPicoTidy %>%
+  mutate(PlateNr = as.double(PlateNr)) %>%
+  left_join(., MDPicoMeta, by = c("Well.Name" = "WellNumber", "PlateNr" = "PlateNumber")) %>% 
+  drop_na(Strain)
+```
+
+```{r, warning = FALSE}
+MDPicoAll <- MDPicoAll %>%
+  mutate(culture_inocul_L = as.double(culture_inocul_L)) %>%
+  mutate(CapAreaPercentage = as.double(CapAreaPercentage)) %>%
+
+  mutate(CellmL_MDPico = (`Cell.Count` * (0.001/culture_inocul_L)) /(CapAreaPercentage/100)) %>%
+  # mutate(cellsml = `cellsmlwithoutpercentage`/(CapAreaPercentage/100))
+group_by(SampleID) %>%
+  arrange(Date_count) %>%
+  mutate(E_days = as.numeric((Date_count - ExpDate[1]))) %>%
+ungroup() 
+  
+```
+
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+MDPicoAll %>%
+  ggplot() +
+  geom_point(aes(x = E_days, y = CellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+# Calculate "Big" cell count mean from 3 technical replica - wierd issue with ObsDate_Count - probably I need to use MDPico correlation
+
+```{r}
+#Date_count
+
+MDPicoAll <- MDPicoAll %>%
+  filter(E_days>4) %>% 
+group_by(Strain, WL, O2) %>%
+
+summarize(Well.Name, Cell.Count, Filename, ObsDate, PlateNr, PlateID, SampleID, Date, Date_count, Time_count, media_inocul_L, culture_inocul_L, CapAreaPercentage, Run, Strain, ExpDate, Par_ue, Photoperiod, PARPhotonDose_day, Tube, O2, WL, LightShape, ExpEndDate, E_days, CellmL_MDPico, 
+          meanCellmL_MDPico = mean(CellmL_MDPico), 
+          sdCellmL_MDPico = sd(CellmL_MDPico)) %>%
+ungroup() %>%
+  
+  rename(Cell_Count=Cell.Count) %>% 
+  rename(Well_Name=Well.Name) %>% 
+  rename(MeasDate = ObsDate) %>% 
+  rename(ObsDateTime = Date) %>% 
+  rename(ObsDate_count = Date_count) %>% 
+  rename(ObsTime_count = Time_count) %>% 
+  rename(FilenameMDPico=Filename) 
+```
+
+```{r}
+#colnames(MDPicoAll)
+
+MDPicoAll <- MDPicoAll %>%
+  select(c(Strain, WL, SampleID, Run, ExpDate, Par_ue, Photoperiod, PARPhotonDose_day, O2, meanCellmL_MDPico, sdCellmL_MDPico))
+```
+
+# Create Preliminary plot
+
+```{r preliminary plot}
+MDPicoAll %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+
+# Merge Sigma-Turner with MDPicoData data 
+
+```{r}
+SolFitsExpStTurnerMD <- MDPicoAll %>%
+  full_join(., SolFitsExpStTurner, by = c("SampleID"="SampleID", "Run"="Run", "Strain"="Strain", "ExpDate"="ExpDate", "Par_ue"="Par_ue", "Photoperiod"="Photoperiod", 'O2'="O2", "WL"="WL", "PARPhotonDose_day"="PARPhotonDose_day")) %>% 
+  drop_na(Ex_WL) %>% 
+  unique()
+
+#colnames(SolFitsExpStTurnerMD)
+```
+
+```{r preliminary plot}
+#colnames(SolFitsExpStTurner)
+
+SolFitsExpStTurnerMD %>%
+  ggplot() +
+  geom_point(aes(x = WL, y = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+SolFitsExpStTurnerMD %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = Sig_nm2psii, x = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+SolFitsExpStTurnerMD %>%
+  filter(WL!= "WW") %>% 
+  ggplot() +
+  geom_point(aes(y = JVPSII_ETRqpOxbo_FoSigmax_m2psii, x = meanCellmL_MDPico)) +
+  ggh4x::facet_nested(rows = vars(Par_ue, O2), cols = vars(Strain, WL), labeller = labeller(Ex_WL = label_both, strain = label_value, Par_ue = label_both, WL = label_both, Photoperiod = label_value)) +
+  theme_bw()
+
+```
+
+# Calculate cell per L - for JVPSII
+
+```{r}
+SolFitsExpStTurnerMD<-SolFitsExpStTurnerMD %>% 
+  mutate(meanCellL_MDPico=meanCellmL_MDPico*1000) %>% 
+  mutate(sdCellL_MDPico=sdCellmL_MDPico*1000)
+
+#colnames(SolFitsExpStTurnerMD)
+```
+
+
+# Save Rds for further analysis
+
+```{r save rds}
+# saveRDS(SolFitsExpStTurnerMD, file.path(DataOut, paste(Project, "Processed_SolisenseDataCorrHalfPAR.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+```
+
+# Variable names used in Data Dictionary
+
+```{r}
+colnames(SolFitsExpStTurnerMD)
+```
+
+# checking plot
+
+```{r}
+SolFitsExpStTurnerMD %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  #filter(Strain == "PC-rich") %>% 
+  #filter(O2 == 0) %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620) %>%
+  filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii, shape = as.factor(O2)), size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = meanSig_nm2psii), colour = "darkgreen",size = 2, show.legend = T) +
+  #geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "red",size = 2, show.legend = T) +
+    scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_fill_identity() +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw()
+#colnames(SolFitsMetaLRC)
+
+
+SolFitsExpStTurnerMD %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_line(aes(x = ActPARCorr, y = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii - AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii, ymax = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii + AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+```
+# Adding codes from apply cumulative diel uncalibrated JVPSII
+
+# Calculate umol chl a
+
+```{r}
+SolFitsExpStTurnerMD<-SolFitsExpStTurnerMD %>%
+  mutate(meanTurChl_umolL=meanTurChl_ugL*0.00112)
+```
+
+
+JVPSII per Turner Chl ug/L and per cell/L (meanCellmL_MDPico; meanTurChl_ugL)
+
+```{r}
+colnames(SolFitsExpStTurnerMD)
+
+# JVPSII_ETRqpOxbo_FoSig = JVPSII_Par_ue
+
+GrowthRateSol<-SolFitsExpStTurnerMD %>%
+  # filter(WL!="WW") %>% 
+  #   filter(WL != 405) %>%
+  #   filter(WL != 660) %>%
+  #   filter(WL != 730) %>%
+  #Turner
+  mutate(JVPSII_umol_eLs_Par_ue_ugChl = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii/meanTurChl_ugL) %>% #umol e/ug ch/s
+  #mutate(JVPSII_umol_eLs_HalfPar_ue_ugChl = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii/meanTurChl_ugL) %>% 
+  
+  mutate(JVPSII_umol_eLs_Par_ue_umolChl = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii/meanTurChl_umolL) %>% #umol e/umol ch/s
+  #mutate(JVPSII_umol_eLs_HalfPar_ue_umolChl = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii/meanTurChl_umolL) %>% 
+  
+  #cell per L based on MC OD680 and pamas corr
+  mutate(JVPSII_umol_eLs_Par_ue_cell = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii/meanCellL_MDPico) %>% 
+  #mutate(JVPSII_umol_eLs_HalfPar_ue_cell = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii/meanCellL_MDPico)  
+```
+
+calculate JVPSII per day
+```{r}
+
+# JVPSII_ETRqpOxbo_FoSig
+
+GrowthRateSoliExpDay<-GrowthRateSol %>% 
+  mutate(JVPSII_umol_eLs_Par_ue_ugChl_day = JVPSII_umol_eLs_Par_ue_ugChl*3600*Photoperiod/2) %>%
+  #mutate(JVPSII_umol_eLs_HalfPar_ue_ugChl_day = JVPSII_umol_eLs_HalfPar_ue_ugChl*3600*Photoperiod/2) %>%
+  mutate(JVPSII_umol_eLs_Par_ue_umolChl_day = JVPSII_umol_eLs_Par_ue_umolChl*3600*Photoperiod/2) %>% 
+  #mutate(JVPSII_umol_eLs_HalfPar_ue_umolChl_day = JVPSII_umol_eLs_HalfPar_ue_umolChl*3600*Photoperiod/2) %>% 
+  mutate(JVPSII_umol_eLs_Par_ue_cell_day = JVPSII_umol_eLs_Par_ue_cell*3600*Photoperiod/2) %>% 
+  #mutate(JVPSII_umol_eLs_HalfPar_ue_cell_day = JVPSII_umol_eLs_HalfPar_ue_cell*3600*Photoperiod/2) %>% 
+  unique()
+
+```
+
+# Think Sylwia about JVPSII mean!!! 
+
+```{r}
+
+# MCGrowthJVPSIISPmean<-GrowthRateSoliExpDay2 %>% 
+#  
+#   group_by(Strain, O2, Oxygen, WL, Ex_WL) %>%
+#   summarize(Strain, Par_ue, Photoperiod, O2, Oxygen, WL, Ex_WL, deltaOD_Lmu_se, deltaOD_Lmu_corr, JVPSII_umol_eLs_Par_ue_ugChl_day, JVPSII_umol_eLs_Par_ue_umolChl_day, JVPSII_umol_eLs_Par_ue_cell_day, 
+# JVPSII_umol_eLs_HalfPar_ue_ugChl_day, JVPSII_umol_eLs_HalfPar_ue_umolChl_day, JVPSII_umol_eLs_HalfPar_ue_cell_day, 
+#     
+#             meanJVPSII_umol_eLs_Par_ue_ugChl_day = mean(JVPSII_umol_eLs_Par_ue_ugChl_day),
+#             sdJVPSII_umol_eLs_Par_ue_ugChl_day = sd(JVPSII_umol_eLs_Par_ue_ugChl_day),
+#             
+#             meanJVPSII_umol_eLs_Par_ue_umolChl_day = mean(JVPSII_umol_eLs_Par_ue_umolChl_day),
+#             sdJVPSII_umol_eLs_Par_ue_umolChl_day = sd(JVPSII_umol_eLs_Par_ue_umolChl_day),
+#             
+#             meanJVPSII_umol_eLs_Par_ue_cell_day = mean(JVPSII_umol_eLs_Par_ue_cell_day),
+#             sdJVPSII_umol_eLs_Par_ue_cell_day = sd(JVPSII_umol_eLs_Par_ue_cell_day),
+#             
+#             
+#             meanJVPSII_umol_eLs_HalfPar_ue_ugChl_day = mean(JVPSII_umol_eLs_HalfPar_ue_ugChl_day),
+#             sdJVPSII_umol_eLs_HalfPar_ue_ugChl_day = sd(JVPSII_umol_eLs_HalfPar_ue_ugChl_day),
+#             
+#             meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day = mean(JVPSII_umol_eLs_HalfPar_ue_umolChl_day),
+#             sdJVPSII_umol_eLs_HalfPar_ue_umolChl_day = sd(JVPSII_umol_eLs_HalfPar_ue_umolChl_day),
+#             
+#             meanJVPSII_umol_eLs_HalfPar_ue_cell_day = mean(JVPSII_umol_eLs_HalfPar_ue_cell_day),
+#             sdJVPSII_umol_eLs_HalfPar_ue_cell_day = sd(JVPSII_umol_eLs_HalfPar_ue_cell_day)) %>%
+#   ungroup()
+#   
+# 
+# MCGrowthJVPSIISPmean$facetsStrain <- 'Strain'
+```
+
+# Cumulative uncalibrated JVPSII vs ActPAR
+
+```{r}
+
+GrowthRateSoliExpDay %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = JVPSII_umol_eLs_Par_ue_umolChl_day, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_line(aes(x = ActPARCorr, y = JVPSII_umol_eLs_Par_ue_umolChl_day, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  # geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii - AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii, ymax = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii + AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+```
+
+# Calibrated JVPSII
+
+To get the Platt fits to work I plotted:
+JVPSII_umole_eLs vs. ActPAR
+
+so I had to convert JVPSII_eLs by dividing by 6.022E-17.
+If you want to go back to JVPSII_eLs just multiple back up.
+
+# Calibrate JVPSII to e L-1 s-1
+
+```{r JVPSII calib}
+JVPSII_eLs_ModelTerms <- read_rds(file.path("..","Data", "CleanedData", "JVPSIIO2Calib", "JVPSII_eLs_ModelTerms.Rds"))
+
+#smarter way to code this with 'which' in [] and map through Ex_WL
+SolFitsMeta <- left_join(GrowthRateSoliExpDay, JVPSII_eLs_ModelTerms, by = join_by(Ex_WL)) |>
+  select(-c(Slope_P)) |>
+  mutate(JVPSII_eLs = JVPSII_umol_eLs_Par_ue_umolChl_day/Slope) |>
+  mutate(JVPSII_umol_eLs = JVPSII_eLs/6.022e17)
+
+```
+
+# calibrated JVPSII 
+
+```{r}
+
+SolFitsMeta %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = JVPSII_umol_eLs, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_line(aes(x = ActPARCorr, y = JVPSII_umol_eLs, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
+  # geom_errorbar(aes(x = ActPARCorr, ymin = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii - AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii, ymax = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii + AllsdJVPSII_ETRqpOxbo_FoSigmax_m2psii, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  # scale_y_continuous(breaks=seq(0, 10, by = 2)) +
+  # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
+  # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
+  #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+```
+
+
+
+
+
+
+
+# Fit LRC for JVPSII to allow selection of specific JVPSII for different growth light levels.
+
+```{r}
+# lrcplatt <- function(I, a, b, Pmax){Pmax * (1-exp(-a*I/Pmax)) * exp(-b*I/Pmax)}
+# 
+# 
+# SolFitsMetaLRC <- SolFitsMeta %>%
+#   nest(data = -c("SampleID", "Run", "Strain" ,"ExpDate","Par_ue", "Photoperiod", "O2", "WL", "MC", "Tube","Ex_WL","LightShape", "ExpEndDate", "PARPhotonDose_day", "ObsDate", "E_days")) %>% #head(50) %>% 
+#   mutate(lrcplatt_Model = map(data, possibly(~nlsLM(JVPSII_umol_eLs ~ lrcplatt(I = ActPARCorr, a, b, Pmax),
+#          data = .x,
+#          control = list(maxiter = 100),
+#          start = list(a = 0.1, b = 0.01, Pmax = 3), lower = c(0, 0, 0))))) %>%
+#   mutate(lrcplatt_Param = map(lrcplatt_Model, tidy),
+#          lrcplatt_Predict = map(lrcplatt_Model, possibly(augment)),
+#          lrcplatt_Glance = map(lrcplatt_Model, possibly(glance)))
+
+```
+
+Use Peak Par_ue and 1/2 Peak Par_ue to estimate growth JVPSII for each combination
+-use 'Pluck' to reach into lrcplatt_Predict to get a, b, Pmax; or
+-unnest, pivot wider to get a, b, Pmax
+
+```{r growth light JVPSII}
+
+# SolFitsMetaLRCGrowth <- SolFitsMetaLRC |>
+#   unnest(lrcplatt_Param) |>
+#   select(-c(statistic, p.value, lrcplatt_Predict, lrcplatt_Glance)) |> #remove (temporarily) to make pivot_wider easier
+#   pivot_wider(names_from = term, values_from = c(estimate, std.error)) |>
+#   mutate(JVPSII_umol_eLs_Par_ue = lrcplatt(I = Par_ue, a = estimate_a, estimate_b, estimate_Pmax),
+#          JVPSII_umol_eLs_HalfPar_ue = lrcplatt(I = (0.5*Par_ue), a = estimate_a, estimate_b, estimate_Pmax))
+# 
+#  
+# head(SolFitsMetaLRCGrowth) 
+```
+
+
+
+
+
+
+
+
+
+
+Set up R codes for Greek letters
+
+\u0391  Α   Greek Capital Letter Alpha
+\u0392  Β   Greek Capital Letter Beta
+\u0393  Γ   Greek Capital Letter Gamma
+\u0394  Δ   Greek Capital Letter Delta
+\u0395  Ε   Greek Capital Letter Epsilon
+\u0396  Ζ   Greek Capital Letter Zeta
+\u0397  Η   Greek Capital Letter Eta
+\u0398  Θ   Greek Capital Letter Theta
+\u0399  Ι   Greek Capital Letter Iota
+\u039A  Κ   Greek Capital Letter Kappa
+\u039B  Λ   Greek Capital Letter Lambda
+\u039C  Μ   Greek Capital Letter Mu
+\u039D  Ν   Greek Capital Letter Nu
+\u039E  Ξ   Greek Capital Letter Xi
+\u039F  Ο   Greek Capital Letter Omicron
+\u03A0  Π   Greek Capital Letter Pi
+\u03A1  Ρ   Greek Capital Letter Rho
+\u03A3  Σ   Greek Capital Letter Sigma
+\u03A4  Τ   Greek Capital Letter Tau
+\u03A5  Υ   Greek Capital Letter Upsilon
+\u03A6  Φ   Greek Capital Letter Phi
+\u03A7  Χ   Greek Capital Letter Chi
+\u03A8  Ψ   Greek Capital Letter Psi
+\u03A9  Ω   Greek Capital Letter Omega
+\u03B1  α   Greek Small Letter alpha
+\u03B2  β   Greek Small Letter beta
+\u03B3  γ   Greek Small Letter gamma
+\u03B4  δ   Greek Small Letter delta
+\u03B5  ε   Greek Small Letter epsilon
+\u03B6  ζ   Greek Small Letter zeta
+\u03B7  η   Greek Small Letter eta
+\u03B8  θ   Greek Small Letter theta
+\u03B9  ι   Greek Small Letter iota
+\u03BA  κ   Greek Small Letter kappa
+\u03BB  λ   Greek Small Letter lambda
+\u03BC  μ   Greek Small Letter mu
+\u03BD  ν   Greek Small Letter nu
+\u03BE  ξ   Greek Small Letter xi
+\u03BF  ο   Greek Small Letter omicron
+\u03C0  π   Greek Small Letter pi
+\u03C1  ρ   Greek Small Letter rho
+\u03C2  ς   Greek Small Letter final sigma
+\u03C3  σ   Greek Small Letter sigma
+\u03C4  τ   Greek Small Letter tau
+\u03C5  υ   Greek Small Letter upsilon
+\u03C6  φ   Greek Small Letter phi
+\u03C7  χ   Greek Small Letter chi
+\u03C8  ψ   Greek Small Letter psi
+\u03C9  ω   Greek Small Letter omega
+
+
+
+
+
