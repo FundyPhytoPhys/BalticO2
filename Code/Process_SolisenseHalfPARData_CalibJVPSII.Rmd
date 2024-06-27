@@ -192,13 +192,13 @@ SolFitsMetaLRC <- SolFitsMetaLRC %>%
             sdSigdark_nm2psii = sd(Sigdark_nm2psii)) %>%
   ungroup() 
 ```
-# Calculate Sigma Allmean measured on all days from exp phase of growth (day4-13)
+# Calculate Sigma Allmean measured on all days from exp phase of growth (day4-8)
 
 
-```{r calculate Sigma mean from 3 replica measured on the same day}
+```{r calculate Sigma mean across exp measurements}
 SolFitsMetaLRC <- SolFitsMetaLRC %>%
   filter(E_days>=4) %>% 
-  # filter(E_days <=10) %>% 
+  #filter(E_days <=8) %>% 
   group_by(Strain, Ex_WL, Par_ue, Photoperiod, WLNum, WL, O2, Oxygen, ActPARCorr) %>%
   
   summarize(SampleID, Ex_WL, FilenameSolisense, Run, Strain, ExpDate, Par_ue, Photoperiod, O2, WL, WLNum, Oxygen, PARPhotonDose_day, ObsDate, ObsTime, ObsDateTime, Sig, Sig_nm2psii, meanSig_nm2psii, sdSig_nm2psii, meanSigdark_nm2psii, sdSigdark_nm2psii, ActPARCorr, ActPARCorr_photonsm2s, Sigdark_nm2psii, FoOxbo, qpOxbo, JVPSII_ETRqpOxbo_FoSigmax_m2psii, E_days, TauAv, qpOxbo, meanTauAv, sdTauAv, meanqpOxbo, sdqpOxbo, meanJVPSII_ETRqpOxbo_FoSigmax_m2psii, sdJVPSII_ETRqpOxbo_FoSigmax_m2psii,
@@ -228,16 +228,17 @@ lab1=c(expression("PC-rich_077"), expression("PE-rich_127"))
 
 SolFitsMetaLRC %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(Strain == "PC-rich") %>% 
   #filter(Strain == "PC-rich") %>% 
   #filter(O2 == 0) %>% 
   filter(WL == 450 | WL == 530 |  WL == 620) %>%
   filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590) %>%
   ggplot() +
-  geom_point(aes(x = ActPARCorr, y = Sig_nm2psii), colour = "gray", size = 2, show.legend = T) +
-  geom_point(aes(x = ActPARCorr, y = meanSig_nm2psii), colour = "darkgreen",size = 2, show.legend = T) +
-  geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "red",size = 2, show.legend = T) +
+  geom_point(aes(x = ActPARCorr, y = Sig_nm2psii), colour = "black", size = 2, show.legend = T) +
+  # geom_point(aes(x = ActPARCorr, y = meanSig_nm2psii), colour = "darkgreen",size = 2, show.legend = T) +
+  # geom_point(aes(x = ActPARCorr, y = AllmeanSig_nm2psii), colour = "red",size = 2, show.legend = T) +
   scale_fill_identity() +
-  ggh4x::facet_nested(cols = vars(Ex_WL, O2), rows = vars(Strain, WL), labeller = label_parsed) +
+  ggh4x::facet_nested(cols = vars(Ex_WL, O2), rows = vars(Strain, WL, E_days), labeller = label_parsed) +
   theme_bw()
 
 ```
@@ -1766,7 +1767,7 @@ SolFitsExpStTurnerMD<-SolFitsExpStTurnerMD %>%
 JVPSII per Turner Chl ug/L and per cell/L (meanCellmL_MDPico; meanTurChl_ugL)
 
 ```{r}
-colnames(SolFitsExpStTurnerMD)
+#colnames(SolFitsExpStTurnerMD)
 
 # JVPSII_ETRqpOxbo_FoSig = JVPSII_Par_ue
 
@@ -1783,7 +1784,7 @@ GrowthRateSol<-SolFitsExpStTurnerMD %>%
   #mutate(JVPSII_umol_eLs_HalfPar_ue_umolChl = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii/meanTurChl_umolL) %>% 
   
   #cell per L based on MC OD680 and pamas corr
-  mutate(JVPSII_umol_eLs_Par_ue_cell = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii/meanCellL_MDPico) %>% 
+  mutate(JVPSII_umol_eLs_Par_ue_cell = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii/meanCellL_MDPico) 
   #mutate(JVPSII_umol_eLs_HalfPar_ue_cell = AllmeanJVPSII_ETRqpOxbo_FoSigmax_m2psii/meanCellL_MDPico)  
 ```
 
@@ -1900,6 +1901,7 @@ SolFitsMeta %>%
   # scale_x_continuous(breaks=seq(0, 800, by = 200)) +
   # coord_cartesian(ylim = c(0, 10), xlim = c(0, 800)) +
   #labs(y=expression(paste(sigma,""["PSII"]*"' (nm"^"2"*" quanta"^"-1"*")")), x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")") +
+  labs(x = "Actinic PAR ( µmol photons "~m^-2~""~s^-1~")", y = ""~italic(JV)~""["PSII"]*" (µmol"~e^-~""~µmol~Chl~italic(a)~""^-1~""~d^-1~")") +
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw() 
 ```

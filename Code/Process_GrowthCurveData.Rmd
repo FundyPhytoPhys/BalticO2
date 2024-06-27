@@ -116,8 +116,8 @@ MultiCultiDataAll <- MultiCultiDataAll %>%
     mutate(Strain=case_when(Strain=="BA127R"~"PE-rich",
          Strain=="BA77G"~"PC-rich")) %>% 
     mutate(Oxygen=case_when(O2==21~"250~µM",
-         O2==0~"2.5~µM")) %>% 
-    filter(Time_h <= 192) 
+         O2==0~"2.5~µM"))  
+    #filter(Time_h <= 192) 
 ```
 
 
