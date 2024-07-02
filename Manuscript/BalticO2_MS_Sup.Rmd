@@ -123,12 +123,10 @@ knitr::include_graphics(file.path( FiguresFP,"SFig_qpOxbo.png"))
 ```
 
 
-
-```{r GrowthRateJVPSIIcell, fig.cap = GrowthRateJVPSIIcell_cap, fig.height = 8, fig.width = 6, echo = FALSE}
-GrowthRateJVPSIIcell_cap<- glue("Cell-specific exponential growth rates (µ; d^−1^) vs. PSII electron flux (*JV*~PSII~; µmol e^−^ Cell^−1^ d^−1^) measured under half diel peak PAR growth light. Growth rates (± SE) were estimated from logistic fits of OD~720~ vs. elapsed time (Fig. S1). *JV*~PSII~ was estimated using FRRf induction curves with excitation at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. Data show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Blue lines (solid for 2.5 µM O~2~ or dashed for 250 µM O~2~) shows linear model fit for data from each strain across spectral bandwidths. Different blue lowercase letters indicate statistically significant differences between the fit models for different strains or given O~2~ concentrations (*t*-test; *p* < 0.05).", .sep = " ")
-knitr::include_graphics(file.path(FiguresFP,"SFig_JVPSIIHalf_Cell.png"))
+```{r JvpsiiAll, fig.cap = JvpsiiAll_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+JvpsiiAll_cap<- glue("PSII electron flux (*JV*~PSII~; µmol e^−^ L^−1^ s^−1^) vs. Actinic PAR (µmol photons m^−2^s^−1^). \u03C3~PSII~ were estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths (rows) of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Shaded area show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm. The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"SFig_CalibJVPSII_eLs.png"))
 ```
-
 
 <br>
 
@@ -145,6 +143,7 @@ knitr::include_graphics(file.path(FiguresFP,"SFig_JVPSIIHalf_Cell.png"))
 # BalticO2_Anova_SigLRC.Rds
 # BalticO2_Anova_TauLRC.Rds
 # BalticO2_Anova_qpLRC.Rds
+# BalticO2_Anova_JVPSII_eLsLRC.Rds
 # 
 # BalticO2_Anova_GrowthPigRatio_Model.Rds
 # BalticO2_Anova_GrowthJVPSII_Model.Rds
@@ -349,6 +348,36 @@ Anova_qpLRC<-Anova_qpLRC %>%
 
 myft <- flextable(Anova_qpLRC) 
 myft <- set_caption(myft, caption = "Three-way factorial ANOVA testing whether strain, Actinic PAR, O~2~ concentration, and their interactions (Source_of_variation), significantly influence the qP, for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM or 2.5 µM. Df – degrees of freedom; Sum Sq – sum of squares; Mean Sq – mean sum of squares; F_value – Fisher's F-test statistic; p_value - level of significance.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(Anova_qpLRC)
+```
+
+<br>
+
+```{r echo = FALSE}
+Anova_qpLRC <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_JVPSII_eLsLRC.Rds"))
+Anova_qpLRC<-Anova_qpLRC %>% 
+  rename(p_value = "Pr(>F)") %>%
+  rename(F_value = "F value") %>%
+  mutate(Df=as.character(Df))
+
+# df <- data.frame(Source_of_variation = c("O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain",  "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals","O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals"))
+# Anova_SigLRC<-cbind(df, Anova_SigLRC) 
+# Anova_SigLRC<-Anova_SigLRC %>% 
+#   rename(p_value = "Pr(>F)") %>% 
+#   rename(F_value = "F value") %>% 
+#   mutate(Df=as.character(Df))
+
+
+myft <- flextable(Anova_qpLRC) 
+myft <- set_caption(myft, caption = "Three-way factorial ANOVA testing whether strain, Actinic PAR, O~2~ concentration, and their interactions (Source_of_variation), significantly influence the JVPSII_eLs, for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM or 2.5 µM. Df – degrees of freedom; Sum Sq – sum of squares; Mean Sq – mean sum of squares; F_value – Fisher's F-test statistic; p_value - level of significance.")
 myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
 myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
 myft <- fontsize(myft, size = 12, part = "header")
