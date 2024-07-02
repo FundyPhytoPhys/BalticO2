@@ -86,7 +86,7 @@ knitr::opts_chunk$set(echo = TRUE)
 <br>
 
 ```{r GrowthCurve, fig.cap = GrowthCurve_cap, fig.height = 8, fig.width = 6, echo = FALSE}
-GrowthCurve_cap<- glue("Growth curves, tracked as OD~680~ (*a*), OD~720~(*b*), or chlorophyll proxy OD~680~-OD~720~ (ΔOD) (*c*) vs. elapsed time (d). Growth curves were estimated over 5-min intervals for PC-rich (light green) and PE-rich (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM or 2.5 µM. Logistic fits (thick lines) of ΔOD vs. elapsed time (d) measured over 5-min intervals were also presented.", .sep = " ")
+GrowthCurve_cap<- glue("Growth curves, tracked as OD~680~ (*a*), OD~720~ (*b*), or chlorophyll proxy OD~680~-OD~720~ (ΔOD) (*c*) vs. elapsed time (d). Growth curves were estimated over 5-min intervals for PC-rich (light green) and PE-rich (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM or 2.5 µM. Logistic fits (thick lines) of ΔOD vs. elapsed time (d) measured over 5-min intervals were also presented.", .sep = " ")
 knitr::include_graphics(file.path(FiguresFP,"SFig_GrowthCurve.png"))
 ```
 
@@ -437,5 +437,5 @@ rm(GrowthJVPSII_Model)
 
 <br>
 
-# References {.unnumbered}
+
 
