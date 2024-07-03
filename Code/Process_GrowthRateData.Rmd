@@ -1112,10 +1112,10 @@ lab2=c(expression("2.5 µM"), expression("250 µM"))
 
 data_textb <- data.frame(Strain  = c("PC-rich"), label = c('italic(b)'))
 
-data_text_PC1<- data.frame(Strain  = c("PC-rich"), label = c('aA'))
+data_text_PC1<- data.frame(Strain  = c("PC-rich"), label = c('aC'))
 data_text_PC2<- data.frame(Strain  = c("PC-rich"), label = c('aA'))
 data_text_PE1<- data.frame(Strain  = c("PE-rich"), label = c('bB'))
-data_text_PE2<- data.frame(Strain  = c("PE-rich"), label = c('cB'))
+data_text_PE2<- data.frame(Strain  = c("PE-rich"), label = c('cD'))
 
 data_text_Anova<- data.frame(Strain  = c("PE-rich"),  label = c(' , \u03B1 = 0.05'))
 data_text_Anova2<- data.frame(Strain  = c("PE-rich"),  label = c('italic(t)~-test'))

@@ -958,8 +958,8 @@ lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
 data_text_PC1<- data.frame(Strain  = c("PC-rich"), label = c('aA'))
-data_text_PC2<- data.frame(Strain  = c("PC-rich"), label = c('bA'))
-data_text_PE1<- data.frame(Strain  = c("PE-rich"), label = c('cA'))
+data_text_PC2<- data.frame(Strain  = c("PC-rich"), label = c('bB'))
+data_text_PE1<- data.frame(Strain  = c("PE-rich"), label = c('cB'))
 data_text_PE2<- data.frame(Strain  = c("PE-rich"), label = c('dA'))
 
 data_text_Anova<- data.frame(Strain  = c("PE-rich"),  label = c('  , \u03B1 = 0.05'))
@@ -1003,14 +1003,14 @@ JVPSIIGrowth<-SolFitsAllPigmentfitPhycoChlalinear %>%
   
   
   
-  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PC21, linetype = "dotted") +  
+  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PC21, linetype = "dashed") +  
   geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PC0, linetype = "solid") +  
-  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PE21, linetype = "dotted") +  
+  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PE21, linetype = "dashed") +  
   geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PE0, linetype = "solid") +  
   
   geom_text(data=data_text_PC1, aes(x=2000, y=0.15, label=label), colour = "blue", size=5) +
   geom_text(data=data_text_PC2, aes(x=4100, y=0.14, label=label), colour = "blue", size=5) +
-  geom_text(data=data_text_PE1, aes(x=2000, y=0.2, label=label), colour = "blue", size=5) +
+  geom_text(data=data_text_PE1, aes(x=1700, y=0.18, label=label), colour = "blue", size=5) +
   geom_text(data=data_text_PE2, aes(x=6200, y=0.15, label=label), colour = "blue", size=5) +
   
   geom_text(data=data_text_Anova, aes(x=5700, y=0, label=label), colour = "blue", size=5) +
