@@ -54,6 +54,7 @@ library(googlesheets4)
 library(readxl)
 library(multcompView)
 library("patchwork") # merging plots
+library(minpack.lm) #Standard 'nls' framework that uses 'nls.lm' for fitting
 ```
 
 ```{r set project variables}
@@ -2130,7 +2131,7 @@ ggp
 ```
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_jvpsii",".png",sep = "")), height=8, width= 6, dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("Fig_jvpsii",".png",sep = "")), height=8, width= 6, dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -2205,8 +2206,6 @@ GrowthRateSol %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   ggplot() +
   geom_point(aes(x = ActPARCorr, y = ETRqpOxbo, shape = as.factor(O2)), size = 3, show.legend = T) +
-  # geom_line(aes(x = ActPARCorr, y = JVPSII_umol_eLs_Par_ue_umolChl, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
-
   geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
   scale_fill_identity() +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
@@ -2215,8 +2214,17 @@ GrowthRateSol %>%
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw() 
 
-#colnames(GrowthRateSol)
-
+GrowthRateSol %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanETRqpOxbo, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
 ```
 
 
@@ -2226,8 +2234,6 @@ GrowthRateSol %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   ggplot() +
   geom_point(aes(x = ActPARCorr, y = ETRqpOxbo/JVPSII_umol_eLs_Par_ue_umolChl, shape = as.factor(O2)), size = 3, show.legend = T) +
-  # geom_line(aes(x = ActPARCorr, y = JVPSII_umol_eLs_Par_ue_umolChl, linetype = as.factor(O2)), size = 0.3, show.legend = T) +
-
   geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
   scale_fill_identity() +
   scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
@@ -2236,8 +2242,17 @@ GrowthRateSol %>%
   ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw() 
 
-#colnames(GrowthRateSol)
-
+GrowthRateSol %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanETRqpOxbo/JVPSII_umol_eLs_Par_ue_umolChl, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
 ```
 
 
