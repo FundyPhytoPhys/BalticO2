@@ -64,7 +64,7 @@ csl: "botany.csl"
 
 <br>
 
-![<span id="fig:GrowthCurve"></span>**Fig. **1: Growth curves, tracked as OD~680~ (*a*), OD~720~(*b*), or chlorophyll proxy OD~680~-OD~720~ (ΔOD) (*c*) vs. elapsed time (d). Growth curves were estimated over 5-min intervals for PC-rich (light green) and PE-rich (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM or 2.5 µM. Logistic fits (thick lines) of ΔOD vs. elapsed time (d) measured over 5-min intervals were also presented.](../Output/Figures/SFig_GrowthCurve.png)
+![<span id="fig:GrowthCurve"></span>**Fig. **1: Growth curves, tracked as OD~680~ (*a*), OD~720~ (*b*), or chlorophyll proxy OD~680~-OD~720~ (ΔOD) (*c*) vs. elapsed time (d). Growth curves were estimated over 5-min intervals for PC-rich (light green) and PE-rich (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM or 2.5 µM. Logistic fits (thick lines) of ΔOD vs. elapsed time (d) measured over 5-min intervals were also presented.](../Output/Figures/SFig_GrowthCurve.png)
 
 ![<span id="fig:GrowthRateOD720"></span>**Fig. **2: Cell-specific exponential growth rates (µ; d^−1^) vs. growth waveband (nm, shaded regions). Growth rates (± SE) were estimated from logistic fits of OD~720~ vs. elapsed time, for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line).](../Output/Figures/SFig_GrowthRateOD720.png)
 
@@ -85,6 +85,10 @@ csl: "botany.csl"
 
 
 ![<span id="fig:JvpsiiAll"></span>**Fig. **7: PSII electron flux (*JV*~PSII~; µmol e^−^ L^−1^ s^−1^) vs. Actinic PAR (µmol photons m^−2^s^−1^). σ~PSII~ were estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths (rows) of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Shaded area show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm. The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.](../Output/Figures/SFig_CalibJVPSII_eLs.png)
+
+<br>
+
+![<span id="fig:PUR"></span>**Fig. **8: Phycobiliproteins:Chlorophyll *a* ratio (µg:µg) (*a*); chlorophyll-specific growth rates (µ; d^−1^) (*b*) vs. Photosynthetically Usable Radiation (PUR, µmol photons m^−2^s^−1^) for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* grown at spectral wavebands of 405, 450, 470, 530, 620, 660, or 730 nm and 250 µM [O~2~] (open symbols and dashed line) or 2.5 µM [O~2~] (closed symbols and solid line). Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM [O~2~]; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM [O~2~]. Blue lines shows linear model fit for data from each strain and [O~2~] (solid for 2.5 µM [O~2~] or dashed for 250 µM [O~2~]) across spectral wavebands.](../Output/Figures/SFig_GrowthPUR.png)
 
 <br>
 
@@ -228,5 +232,5 @@ csl: "botany.csl"
 
 <br>
 
-# References {.unnumbered}
+
 

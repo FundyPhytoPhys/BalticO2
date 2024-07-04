@@ -754,40 +754,57 @@ lab3=c(expression("405"), expression("450"), expression("470"), expression("530"
 
 data_textA <- data.frame(Strain  = c("PC-rich"), label = c('italic(a)'))
 
+MultiCultiGrowth1PC21<-MCPigmentChoosenPlotTrim %>% 
+    filter(PigmentsRatioName!= "Carotenoids:Chlorophyll~italic(a)") %>% 
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-MCPigmentChoosenPlotTrim %>% 
+    filter(PigmentsRatioName!= "Carotenoids:Chlorophyll~italic(a)") %>% 
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-MCPigmentChoosenPlotTrim %>% 
+    filter(PigmentsRatioName!= "Carotenoids:Chlorophyll~italic(a)") %>% 
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-MCPigmentChoosenPlotTrim %>% 
+    filter(PigmentsRatioName!= "Carotenoids:Chlorophyll~italic(a)") %>% 
+  filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+
 
 PigRatioPUR<-MCPigmentChoosenPlotTrim %>%
   filter(PigmentsRatioName!= "Carotenoids:Chlorophyll~italic(a)") %>% 
   filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   ggplot() +
-  geom_point(aes(x = meanPUR, y = meanPigmentsRatio, shape = as.factor(O2), colour = as.factor(Strain)), size = 4, show.legend = T) +
+  geom_point(aes(x = meanPUR, y = meanPigmentsRatio, shape = as.factor(O2)), size = 4, show.legend = T) +
+  geom_smooth(aes(x = meanPUR, y = meanPigmentsRatio, linetype = as.factor(O2)), alpha = 0, size = 1, method = "lm", show.legend = F) +
+
+    geom_point(aes(x = meanPUR, y = meanPigmentsRatio), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
+    geom_point(aes(x = meanPUR, y = meanPigmentsRatio), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
+    geom_point(aes(x = meanPUR, y = meanPigmentsRatio), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
+    geom_point(aes(x = meanPUR, y = meanPigmentsRatio), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
+
+  geom_errorbar(aes(x = meanPUR, ymin = meanPigmentsRatio - sdPigmentsRatio, ymax = meanPigmentsRatio + sdPigmentsRatio, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+
+  geom_text(data=data_textA, aes(x=180, y=5.5, label=label), size=6, parse = TRUE) +
   
-  geom_smooth(aes(x = meanPUR, y = meanPigmentsRatio, linetype = as.factor(O2)), alpha = 0.5, size = 1, method = "lm", show.legend = T) +
-  
-  #geom_line(aes(x = PUR, y = meanPigmentsRatio, linetype = as.factor(O2)), show.legend = T) +
-  
-    # geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
-    # geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
-    # geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
-    # geom_point(aes(x = WLNum, y = meanPigmentsRatio), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
-    # 
-  
-  #geom_line(aes(x = WLNum, y = svr_pred, linetype = as.factor(O2)), size = 0.6, show.legend = F, MCDataHourSVRRatio) +
-  
-  geom_errorbar(aes(x = meanPUR, ymin = meanPigmentsRatio - sdPigmentsRatio, ymax = meanPigmentsRatio + sdPigmentsRatio), width=0, size=0.3, show.legend = F) +
-  #geom_text(data=data_textB, aes(x=720, y=4, label=label), size=6, parse = TRUE) +
-  # stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.025, alpha = 0.5) +
-  # scale_fill_identity() +
+  scale_x_continuous(breaks=seq(0, 180, by = 40)) +
+  scale_y_continuous(breaks=seq(0, 6, by = 1)) +
+  coord_cartesian(xlim = c (0, 180), ylim = c (0, 6)) +
   
   #scale_colour_manual(values = c("royalblue4", "steelblue3", "lightseagreen", "limegreen", "coral","brown1","indianred4"), name="", labels = lab3) +
-  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
-  geom_text(data=data_textA, aes(x=150, y=5, label=label), size=6, parse = TRUE) +
-  
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
   scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
-  labs(y = "Phycobiliproteins:Chlorophyll a ratio (µg:µg)", x = "PUR") +
+  labs(y = "Pigment ratio (µg:µg)", x = "PUR ( µmol photons "~m^-2~""~s^-1~")") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
-  
-  #ggh4x::facet_nested(cols = vars(factor(PigmentsRatioName, levels=c("Phycobilins:Chlorophyll~italic(a)","Carotenoids:Chlorophyll~italic(a)"))), rows = vars(Strain), labeller = label_parsed) +
+
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
@@ -802,7 +819,7 @@ PigRatioPUR<-MCPigmentChoosenPlotTrim %>%
         legend.background = element_rect(fill="transparent"),
         legend.key = element_blank(),
         legend.title = element_blank(),
-        legend.position = c(0.10,0.90),
+        legend.position = c(0.10,0.99),
         legend.text = element_text(size=10))
 PigRatioPUR
 
@@ -938,7 +955,7 @@ MCPigmentChoosenPlotTrim %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("SFig_PigmentRatio",".png",sep = "")), height=5, width= 6,  dpi = 300, limitsize = TRUE)
+#ggsave(file = file.path(FigPath, paste("SFig_PigmentRatio",".png",sep = "")), height=5, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -952,7 +969,7 @@ ggp
 # Save plot 
 
 ```{r save plot}
-#ggsave(file = file.path(FigPath, paste("SFig_GrowthPUR,".png",sep = "")), height=9, width= 7,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("SFig_GrowthPUR",".png",sep = "")), height=9, width= 7,  dpi = 300, limitsize = TRUE)
 ```
 
 

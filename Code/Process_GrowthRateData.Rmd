@@ -521,7 +521,113 @@ MCGrowthRate <- MultiCultiGrowth %>%
 ```
 
 
+------------------------------ Trim no growt data ------------------------------
 
+# Filter condition where no growt
+
+```{r}
+SolFitsMetaLightCorr445590Trim1<-MCGrowthRate %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21) %>% 
+  filter(WL != 405) 
+
+SolFitsMetaLightCorr445590Trim3<-MCGrowthRate %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0) 
+
+SolFitsMetaLightCorr445590Trim4<-MCGrowthRate %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 21) %>% 
+  filter(WL != 405) %>% 
+  filter(WL != 450) %>% 
+  filter(WL != 730) 
+  
+SolFitsMetaLightCorr445590Trim5<-MCGrowthRate %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 0) 
+
+
+MCGrowthRateTrim<-rbind(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMetaLightCorr445590Trim4, SolFitsMetaLightCorr445590Trim5)
+
+rm(SolFitsMetaLightCorr445590Trim1, SolFitsMetaLightCorr445590Trim3, SolFitsMetaLightCorr445590Trim4, SolFitsMetaLightCorr445590Trim5)
+```
+
+
+```{r}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+# lab3=c(expression("405"), expression("450"), expression("470"), expression("530"), expression("620"), expression("660"), expression("730"))
+
+
+data_textD <- data.frame(Strain  = c("PC-rich"), label = c('italic(b)'))
+
+MultiCultiGrowthPC21<-MCGrowthRateTrim %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowthPE21<-MCGrowthRateTrim %>% 
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowthPC0<-MCGrowthRateTrim %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowthPE0<-MCGrowthRateTrim %>% 
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+
+GrowthPURPlot<-MCGrowthRateTrim %>%
+  filter(deltaOD_Lmu_se<0.2) %>% 
+  filter(deltaOD_Lmu_corr>0) %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL != "WW") %>%
+  ggplot() +
+  geom_point(aes(x = meanPUR, y = deltaOD_Lmu_corr, shape = as.factor(O2)), size = 4, show.legend = F) +
+  geom_smooth(aes(x = meanPUR, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), alpha = 0, size = 1, method = "lm", show.legend = F) +
+  
+    geom_point(aes(x = meanPUR, y = deltaOD_Lmu_corr), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowthPC21) +
+    geom_point(aes(x = meanPUR, y = deltaOD_Lmu_corr), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowthPE21) +
+    geom_point(aes(x = meanPUR, y = deltaOD_Lmu_corr), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowthPC0) +
+    geom_point(aes(x = meanPUR, y = deltaOD_Lmu_corr), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowthPE0) +
+  
+  geom_errorbar(aes(x = meanPUR, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
+  geom_text(data=data_textD, aes(x=180, y=0.25, label=label), size=6, parse = TRUE) +
+
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab1) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  
+  
+  scale_x_continuous(breaks=seq(0, 180, by = 40)) +
+  scale_y_continuous(breaks=seq(0, 0.3, by = 0.1)) +
+  coord_cartesian(xlim = c (0, 180), ylim = c (0, 0.3)) +
+  # guides(colour = FALSE) +
+  #ggh4x::facet_nested(rows = vars(O2), cols = vars(Strain), labeller = label_parsed) +
+  #labs(y = "µ " ~ "("~d^-1~")", x = "waveband (nm)") +
+  labs(y = "µ " ~ "("~d^-1~")", x = "PUR ( µmol photons "~m^-2~""~s^-1~")") +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+ #ggh4x::facet_nested(cols = vars(Strain), rows = vars(factor(O2, levels=c("21","0"))), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.99),
+        legend.text = element_text(size=10))
+GrowthPURPlot
+
+
+
+```
 
 ```{r}
 lab1=c(expression("PC-rich"), expression("PE-rich"))
@@ -601,6 +707,8 @@ GrowthPURPlot<-MCGrowthRate %>%
         legend.text = element_text(size=10))
 GrowthPURPlot
 ```
+
+
 # Save plot 
 
 ```{r save plot}
