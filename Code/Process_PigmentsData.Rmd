@@ -783,7 +783,7 @@ PigRatioPUR<-MCPigmentChoosenPlotTrim %>%
   filter(E_days == 7 | E_days == 8| E_days == 6 | E_days == 5| E_days == 10) %>% 
   ggplot() +
   geom_point(aes(x = meanPUR, y = meanPigmentsRatio, shape = as.factor(O2)), size = 4, show.legend = T) +
-  geom_smooth(aes(x = meanPUR, y = meanPigmentsRatio, linetype = as.factor(O2)), alpha = 0, size = 1, method = "lm", show.legend = F) +
+  geom_smooth(aes(x = meanPUR, y = meanPigmentsRatio, linetype = as.factor(O2)), alpha = 0, size = 0.3, method = "lm", show.legend = F) +
 
     geom_point(aes(x = meanPUR, y = meanPigmentsRatio), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
     geom_point(aes(x = meanPUR, y = meanPigmentsRatio), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +

@@ -583,7 +583,7 @@ GrowthPURPlot<-MCGrowthRateTrim %>%
   filter(WL != "WW") %>%
   ggplot() +
   geom_point(aes(x = meanPUR, y = deltaOD_Lmu_corr, shape = as.factor(O2)), size = 4, show.legend = F) +
-  geom_smooth(aes(x = meanPUR, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), alpha = 0, size = 1, method = "lm", show.legend = F) +
+  geom_smooth(aes(x = meanPUR, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), alpha = 0, size = 0.3, method = "lm", show.legend = F) +
   
     geom_point(aes(x = meanPUR, y = deltaOD_Lmu_corr), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowthPC21) +
     geom_point(aes(x = meanPUR, y = deltaOD_Lmu_corr), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowthPE21) +
@@ -665,7 +665,7 @@ MCGrowthRate %>%
 
 
 
-GrowthPURPlot<-MCGrowthRate %>%
+MCGrowthRate %>%
   filter(deltaOD_Lmu_se<0.2) %>% 
   filter(deltaOD_Lmu_corr>0) %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
@@ -705,7 +705,7 @@ GrowthPURPlot<-MCGrowthRate %>%
         legend.title = element_blank(),
         legend.position = c(0.10,0.70),
         legend.text = element_text(size=10))
-GrowthPURPlot
+
 ```
 
 
@@ -1071,7 +1071,7 @@ MCGrowthPig %>%
   theme_bw() 
 
 
-FigGrowthPig<-MCGrowthPig %>%
+MCGrowthPig %>%
   filter(deltaOD_Lmu_corr>0) %>% 
   ggplot() +
   geom_point(aes(x = meanPhycoChlaRatio, y = deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(O2)), size = 4, show.legend = F) +
@@ -1092,23 +1092,8 @@ FigGrowthPig<-MCGrowthPig %>%
   #labs(y = "µ " ~ "("~d^-1~") and normalized emission spectra", x = "Growth waveband (nm)") +
   labs(y = "µ " ~ "("~d^-1~")", x = "Phycobiliprotein to Chl" ~italic(a)~ "ratio (µg:µg)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.10,0.90),
-        legend.text = element_text(size=10))
-FigGrowthPig
+  theme_bw() 
+
 ```
 
 ------------------------------------ Linear regression ---------------------------------
@@ -1233,7 +1218,7 @@ FigGrowthPig<-MCGrowthPig %>%
   ggplot() +
   geom_point(aes(x = meanPhycoChlaRatio, y = deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(O2)), size = 4, show.legend = F) +
   #geom_point(aes(x = PhycoChlaRatio, y = deltaOD_Lmu_corr, colour = as.factor(Strain), shape = as.factor(O2)), size = 1, alpha = 0.5, show.legend = F) +
-  geom_smooth(aes(x = meanPhycoChlaRatio, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), size = 0.7, colour = "blue", show.legend = F, alpha = 0, method = "lm") +
+  geom_smooth(aes(x = meanPhycoChlaRatio, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), size = 0.3, colour = "blue", show.legend = F, alpha = 0, method = "lm") +
   # geom_line(aes(x = meanPhycoChlaRatio, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), show.legend = T) +
   geom_errorbar(aes(x = meanPhycoChlaRatio, ymin = deltaOD_Lmu_corr - deltaOD_Lmu_se, ymax = deltaOD_Lmu_corr + deltaOD_Lmu_se, colour = as.factor(Strain)), width=0, size=0.3, show.legend = F) +
     #geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype = as.factor(O2)), size = 0.6, show.legend = T) +

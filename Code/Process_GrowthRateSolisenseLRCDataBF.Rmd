@@ -1003,10 +1003,10 @@ JVPSIIGrowth<-SolFitsAllPigmentfitPhycoChlalinear %>%
   
   
   
-  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PC21, linetype = "dashed") +  
-  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PC0, linetype = "solid") +  
-  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PE21, linetype = "dashed") +  
-  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), show.legend = F, colour = "blue", size = 0.7, PE0, linetype = "solid") +  
+  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), size = 0.3, show.legend = F, colour = "blue", size = 0.7, PC21, linetype = "dashed") +  
+  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), size = 0.3, show.legend = F, colour = "blue", size = 0.7, PC0, linetype = "solid") +  
+  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), size = 0.3, show.legend = F, colour = "blue", size = 0.7, PE21, linetype = "dashed") +  
+  geom_line(aes(x = meanJVPSII_umol_eLs_HalfPar_ue_umolChl_day, y = `.fitted`), size = 0.3, show.legend = F, colour = "blue", size = 0.7, PE0, linetype = "solid") +  
   
   geom_text(data=data_text_PC1, aes(x=2000, y=0.15, label=label), colour = "blue", size=5) +
   geom_text(data=data_text_PC2, aes(x=4100, y=0.14, label=label), colour = "blue", size=5) +
