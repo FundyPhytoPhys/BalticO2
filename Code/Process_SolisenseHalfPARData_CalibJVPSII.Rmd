@@ -2111,7 +2111,141 @@ GrowthRateSol %>%
   scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
   ggh4x::facet_nested(cols = vars(Ex_WL, WL), rows = vars(Strain), labeller = label_parsed) +
   theme_bw() 
+
+
+GrowthRateSol %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  #filter(Ex_WL == 445 | Ex_WL == 535 | Ex_WL == 590 | Ex_WL == 470) %>%
+  filter(Ex_WL == 445) %>%
+  #filter(Strain == "PC-rich") %>% 
+  ggplot() +
+  geom_point(aes(x = WL, y = AllmeanETRqpOxbo/JVPSII_umol_eumolChls, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() 
+
+GrowthRateSol %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445) %>%
+  filter(Strain == "PE-rich") %>% 
+  ggplot() +
+  geom_point(aes(x = ActPARCorr, y = AllmeanETRqpOxbo/JVPSII_umol_eumolChls, shape = as.factor(O2)), size = 3, show.legend = T) +
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  ggh4x::facet_nested(cols = vars(Ex_WL), rows = vars(Strain, WL), labeller = label_parsed) +
+  theme_bw()
 ```
+
+# mean of ActPAR only for plot
+
+```{r calculate Sigma mean from 3 replica measured on the same day}
+GrowthRateSolPlot <- GrowthRateSol %>%
+    mutate(PSIIChla = AllmeanETRqpOxbo/JVPSII_umol_eumolChls) %>% 
+
+  group_by(Strain, Ex_WL, WLNum, WL, O2, Oxygen) %>%
+  
+  
+  summarize(GrowthRateSolPlot, PSIIChla, 
+            meanPSIIChlas = mean(PSIIChla),
+            sdPSIIChlas = sd(PSIIChla)) %>%
+  ungroup() 
+```
+
+
+
+```{r}
+lab1=c(expression("PC-rich"), expression("PE-rich"))
+lab2=c(expression("2.5 µM"), expression("250 µM"))
+
+MultiCultiGrowth1PC21<-GrowthRateSolPlot %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+MultiCultiGrowth1PE21<-GrowthRateSolPlot %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 21)
+  
+MultiCultiGrowth1PC0<-GrowthRateSolPlot %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445) %>%
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+MultiCultiGrowth1PE0<-GrowthRateSolPlot %>% 
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445) %>%
+  filter(Strain == "PE-rich") %>% 
+    filter(O2 == 0)
+
+
+GrowthRateSolPlot %>%
+  mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445) %>%
+  #filter(Strain == "PC-rich") %>% 
+  ggplot() +
+  geom_point(aes(x = WL, y = meanPSIIChla, shape = as.factor(O2)), size = 4, show.legend = T) +
+  #geom_line(aes(x = WL, y = AllmeanETRqpOxbo/JVPSII_umol_eumolChls, linetype = as.factor(O2)), show.legend = F) +
+    
+  geom_point(aes(x = WL, y = meanPSIIChla), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
+  geom_point(aes(x = WL, y = meanPSIIChla), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
+  geom_point(aes(x = WL, y = meanPSIIChla), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
+  geom_point(aes(x = WL, y = meanPSIIChla), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
+  
+  
+  geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
+  
+  #stat_wl_strip(aes(x = WLNum), ymin = -Inf, ymax = -0.080, alpha = 0.5) +
+  #scale_fill_identity() +
+  scale_colour_manual(values = c("palegreen3", "brown4"), name="", labels = lab2) +
+  scale_shape_manual(values = c(16, 1), name="", labels = lab2) +
+  scale_linetype_manual(values = c("solid", "dashed"), name="", labels = lab2) +
+  
+  scale_y_continuous(breaks=seq(0, 1200, by = 300)) +
+  coord_cartesian(ylim = c (0, 1300)) +
+  labs(y = "PSII to Chl" ~italic(a)~ "ratio", x = "Growth waveband (nm)") +
+  ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.spacing.x = unit(0.4, 'cm'),
+        axis.text = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.title = element_text(size=16),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=12),
+        axis.title.y = element_text(margin=margin(r=10)),
+        axis.title.x = element_text(margin=margin(t=10)),
+        legend.background = element_rect(fill="transparent"),
+        legend.key = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.10,0.94),
+        legend.text = element_text(size=10))
+  
+```
+
+
+# Save plot 
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("SFig_PSIIChla",".png",sep = "")), height=4, width= 5,  dpi = 300, limitsize = TRUE)
+```
+
 
 
 ```{r electron PSII per s}
