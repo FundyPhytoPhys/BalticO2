@@ -131,8 +131,15 @@ knitr::include_graphics(file.path( FiguresFP,"SFig_qpOxbo.png"))
 
 
 ```{r JvpsiiAll, fig.cap = JvpsiiAll_cap, fig.height = 6, fig.width = 8, echo = FALSE}
-JvpsiiAll_cap<- glue("PSII electron flux (*JV*~PSII~; µmol e^−^ L^−1^ s^−1^) vs. Actinic PAR (µmol photons m^−2^s^−1^). \u03C3~PSII~ were estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths (rows) of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Shaded area show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm. The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+JvpsiiAll_cap<- glue("PSII electron flux (*JV*~PSII~; µmol e^−^ Chl *a* ^−1^ s^−1^) vs. Actinic PAR (µmol photons m^−2^s^−1^). \u03C3~PSII~ were estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths (rows) of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Shaded area show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm. The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
 knitr::include_graphics(file.path( FiguresFP,"SFig_CalibJVPSII_eChls.png"))
+```
+
+<br>
+
+```{r PSII, fig.cap = PSII_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+PSII_cap<- glue("PSII to Chl *a* ratio vs. growth waveband (nm). ETR (µmol e^−^ PSII^−1^ s^−1^) and *JV*~PSII~ (µmol e^−^ Chl *a*^−1^ s^−1^) were estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"SFig_PSIIChla.png"))
 ```
 
 <br>
