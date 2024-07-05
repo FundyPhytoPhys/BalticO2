@@ -2168,26 +2168,26 @@ GrowthRateSolPlot2 <- GrowthRateSolPlot %>%
 lab1=c(expression("PC-rich"), expression("PE-rich"))
 lab2=c(expression("2.5 µM"), expression("250 µM"))
 
-MultiCultiGrowth1PC21<-GrowthRateSolPlot %>% 
+MultiCultiGrowth1PC21<-GrowthRateSol %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
   filter(Ex_WL == 445) %>%
   filter(Strain == "PC-rich") %>% 
   filter(O2 == 21)
-MultiCultiGrowth1PE21<-GrowthRateSolPlot %>% 
+MultiCultiGrowth1PE21<-GrowthRateSol %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
   filter(Ex_WL == 445) %>%
   filter(Strain == "PE-rich") %>% 
     filter(O2 == 21)
   
-MultiCultiGrowth1PC0<-GrowthRateSolPlot %>% 
+MultiCultiGrowth1PC0<-GrowthRateSol %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
   filter(Ex_WL == 445) %>%
   filter(Strain == "PC-rich") %>% 
   filter(O2 == 0)
-MultiCultiGrowth1PE0<-GrowthRateSolPlot %>% 
+MultiCultiGrowth1PE0<-GrowthRateSol %>% 
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
   filter(Ex_WL == 445) %>%
@@ -2195,19 +2195,19 @@ MultiCultiGrowth1PE0<-GrowthRateSolPlot %>%
     filter(O2 == 0)
 
 
-GrowthRateSolPlot %>%
+GrowthRateSol %>%
   mutate(WLNum = if_else(WL == "WW", 750, as.numeric(WL))) %>%
   filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
   filter(Ex_WL == 445) %>%
   #filter(Strain == "PC-rich") %>% 
   ggplot() +
-  geom_point(aes(x = WL, y = meanPSIIChla, shape = as.factor(O2)), size = 4, show.legend = T) +
+  geom_point(aes(x = WL, y = AllmeanETRqpOxbo/JVPSII_umol_eumolChls, shape = as.factor(O2)), size = 4, show.legend = T) +
   #geom_line(aes(x = WL, y = AllmeanETRqpOxbo/JVPSII_umol_eumolChls, linetype = as.factor(O2)), show.legend = F) +
     
-  geom_point(aes(x = WL, y = meanPSIIChla), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
-  geom_point(aes(x = WL, y = meanPSIIChla), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
-  geom_point(aes(x = WL, y = meanPSIIChla), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
-  geom_point(aes(x = WL, y = meanPSIIChla), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
+  geom_point(aes(x = WL, y = AllmeanETRqpOxbo/JVPSII_umol_eumolChls), colour = "palegreen3", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PC21) +
+  geom_point(aes(x = WL, y = AllmeanETRqpOxbo/JVPSII_umol_eumolChls), colour = "brown4", shape = 1, size = 4, show.legend = F, MultiCultiGrowth1PE21) +
+  geom_point(aes(x = WL, y = AllmeanETRqpOxbo/JVPSII_umol_eumolChls), colour = "palegreen3", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PC0) +
+  geom_point(aes(x = WL, y = AllmeanETRqpOxbo/JVPSII_umol_eumolChls), colour = "brown4", shape = 16, size = 4, show.legend = F, MultiCultiGrowth1PE0) +
   
   
   geom_vline(xintercept = 90, linetype = "dotted", size = 0.7) +
@@ -2220,7 +2220,7 @@ GrowthRateSolPlot %>%
   
   scale_y_continuous(breaks=seq(0, 1200, by = 300)) +
   coord_cartesian(ylim = c (0, 1300)) +
-  labs(y = "PSII to Chl" ~italic(a)~ "ratio", x = "Growth waveband (nm)") +
+  labs(y = "Chl" ~italic(a)~ " to PSII (mole:mole)", x = "Growth waveband (nm)") +
   ggh4x::facet_nested(rows = vars(Strain), labeller = label_parsed) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
@@ -2248,6 +2248,40 @@ GrowthRateSolPlot %>%
 ggsave(file = file.path(FigPath, paste("SFig_PSIIChla",".png",sep = "")), height=4, width= 5,  dpi = 300, limitsize = TRUE)
 ```
 
+
+--------------- ANOVA ------------
+
+
+# Calculated Anova and Tukey test
+
+```{r calculated statistics}
+GrowthRateSol2<-GrowthRateSol %>% 
+  filter(WL == 450 | WL == 530 |  WL == 620 | WL == 470) %>%
+  filter(Ex_WL == 445) 
+  #mutate(ChlPSII= AllmeanETRqpOxbo/JVPSII_umol_eumolChls)
+
+
+MCGrowthRateStats<-GrowthRateSol2 
+
+MCGrowthRateStats$O2 <- factor(MCGrowthRateStats$O2)
+MCGrowthRateStats$WL <- factor(MCGrowthRateStats$WL)
+MCGrowthRateStats$Strain <- factor(MCGrowthRateStats$Strain)
+
+# Two way Anova with interactions
+model<-aov(AllmeanETRqpOxbo/JVPSII_umol_eumolChls~O2*WL*Strain, data=MCGrowthRateStats)
+AnovaTest_ChlaPSII<-data.frame(unclass(summary(model)), check.names = FALSE, stringsAsFactors = FALSE)
+#TukeyHSDTest_GrowthRate<-TukeyHSD(model, which = c("O2", "WL", "Strain"))
+
+
+```
+
+
+# Save RDS that create stats and tables
+
+```{r}
+saveRDS(AnovaTest_ChlaPSII, file.path(TableRdsPath, paste(Project, "Anova_ChlaPSII.Rds", sep = "_"), fsep = .Platform$file.sep), ascii = FALSE, version = NULL, compress = "xz", refhook = NULL)
+
+```
 
 
 ```{r electron PSII per s}

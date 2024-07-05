@@ -376,8 +376,8 @@ rm(Anova_qpLRC)
 <br>
 
 ```{r echo = FALSE}
-Anova_qpLRC <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_JVPSII_eLsLRC.Rds"))
-Anova_qpLRC<-Anova_qpLRC %>% 
+Anova_jvpsiiLRC <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_JVPSII_eLsLRC.Rds"))
+Anova_qpLRC<-Anova_jvpsiiLRC %>% 
   rename(p_value = "Pr(>F)") %>%
   rename(F_value = "F value") %>%
   mutate(Df=as.character(Df))
@@ -390,7 +390,7 @@ Anova_qpLRC<-Anova_qpLRC %>%
 #   mutate(Df=as.character(Df))
 
 
-myft <- flextable(Anova_qpLRC) 
+myft <- flextable(Anova_jvpsiiLRC) 
 myft <- set_caption(myft, caption = "Three-way factorial ANOVA testing whether strain, Actinic PAR, O~2~ concentration, and their interactions (Source_of_variation), significantly influence the JVPSII_eLs, for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM or 2.5 µM. Df – degrees of freedom; Sum Sq – sum of squares; Mean Sq – mean sum of squares; F_value – Fisher's F-test statistic; p_value - level of significance.")
 myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
 myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
@@ -400,7 +400,38 @@ myft <- align(myft, align = "left", part = "all")
 myft <- autofit(myft)
 myft
 
-rm(Anova_qpLRC)
+rm(Anova_jvpsiiLRC)
+```
+
+
+<br>
+
+```{r echo = FALSE}
+Anova_ChlaPSII <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_ChlaPSII.Rds"))
+Anova_qpLRC<-Anova_ChlaPSII %>% 
+  rename(p_value = "Pr(>F)") %>%
+  rename(F_value = "F value") %>%
+  mutate(Df=as.character(Df))
+
+# df <- data.frame(Source_of_variation = c("O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain",  "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals","O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals"))
+# Anova_SigLRC<-cbind(df, Anova_SigLRC) 
+# Anova_SigLRC<-Anova_SigLRC %>% 
+#   rename(p_value = "Pr(>F)") %>% 
+#   rename(F_value = "F value") %>% 
+#   mutate(Df=as.character(Df))
+
+
+myft <- flextable(Anova_ChlaPSII) 
+myft <- set_caption(myft, caption = "Three-way factorial ANOVA testing whether strain, growth wavebands, O~2~ concentration, and their interactions (Source_of_variation), significantly influence the Chl a to PSII (mole:mole), for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 450, 470, 530, or 620, and O~2~ concentrations of 250 µM or 2.5 µM. Df – degrees of freedom; Sum Sq – sum of squares; Mean Sq – mean sum of squares; F_value – Fisher's F-test statistic; p_value - level of significance.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(Anova_ChlaPSII)
 ```
 
 <br>

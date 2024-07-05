@@ -824,6 +824,71 @@ PigRatioPUR<-MCPigmentChoosenPlotTrim %>%
 PigRatioPUR
 
 ```
+
+--------------- Linear fit -------------------
+
+```{r}
+MCPigmentChoosenPlotTrimlinear <- MCPigmentChoosenPlotTrim %>%   
+  #drop_na(Par_ue, Ex_WL, Phase, meanSig_nm2psii, AllmeanPhycoChlaRatio) %>% 
+  select(c(Strain, meanPigmentsRatio, meanPUR, O2, WL)) %>%  
+  nest(data = -c("O2", "Strain")) %>%   
+  mutate(Linear_Model = map(data, ~lm(meanPigmentsRatio ~ 0 + meanPUR, data = .x))) %>%     
+  mutate(Linear_Model_Param = map(Linear_Model, tidy),          
+         Linear_Model_Predict = map(Linear_Model, possibly(augment)),          
+         Linear_Model_Glance = map(Linear_Model, possibly(glance)))
+```
+
+-------------------------
+
+# Checking if slope significantly different than 0
+```{r}
+GrowthJVPSIIPE21<-MCPigmentChoosenPlotTrim %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 21)
+PE21lm<-lm(meanPigmentsRatio~ 0 + meanPUR, data=GrowthJVPSIIPE21)
+GrowthJVPSIIPE21lm<-summary(PE21lm)
+# Coefficients:
+#          Estimate Std. Error t value Pr(>|t|)    
+# meanPUR 0.0175348  0.0003996   43.88   <2e-16 ***
+
+
+GrowthJVPSIIPE0<-MCPigmentChoosenPlotTrim %>% 
+  filter(Strain == "PE-rich") %>% 
+  filter(O2 == 0)
+PE0lm<-lm(meanPigmentsRatio~ 0 + meanPUR, data=GrowthJVPSIIPE0)
+GrowthJVPSIIPE0lm<-summary(PE0lm)
+# Coefficients:
+#          Estimate Std. Error t value Pr(>|t|)    
+# meanPUR 0.0231697  0.0007836   29.57   <2e-16 ***
+
+
+GrowthJVPSIIPC21<-MCPigmentChoosenPlotTrim %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 21)
+PC21lm<-lm(meanPigmentsRatio~ 0 + meanPUR, data=GrowthJVPSIIPC21)
+GrowthJVPSIIPC21lm<-summary(PC21lm)
+# Coefficients:
+#          Estimate Std. Error t value Pr(>|t|)    
+# meanPUR 0.0170315  0.0004428   38.46   <2e-16 ***
+
+
+GrowthJVPSIIPC0<-MCPigmentChoosenPlotTrim %>% 
+  filter(Strain == "PC-rich") %>% 
+  filter(O2 == 0)
+PC0lm<-lm(meanPigmentsRatio~ 0 + meanPUR, data=GrowthJVPSIIPC0)
+GrowthJVPSIIPC0lm<-summary(PC0lm)
+# Coefficients:
+#          Estimate Std. Error t value Pr(>|t|)    
+# meanPUR 0.0155100  0.0003117   49.76   <2e-16 ***
+
+```
+
+
+
+
+
+
+
 #Create preliminary plot
 
 ```{r preliminary plot}
