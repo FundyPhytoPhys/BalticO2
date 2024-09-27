@@ -1,0 +1,480 @@
+---
+title: "Coastal picocyanobacteria can exploit low oxygen habitats"
+
+author:
+- Sylwia Śliwińska-Wilczewska:
+    institute:
+    - MTA
+    - UG
+    email: ssliwinskawilczews@mta.ca
+    ORCID: ORCID 0000-0002-3147-6605
+- Mireille Savoie:
+    institute: MTA
+    email: msavoie@mta.ca
+    ORCID: 0009-0009-9499-6657
+- Douglas A. Campbell:
+    institute: MTA
+    email: dubhglascambeuil@gmail.com
+    ORCID: 0000-0001-8996-5463
+    correspondence: true
+institute:
+- MTA: Department of Biology, Mount Allison University, 53 York St., Sackville, NB, E4L 1C9, Canada
+- UG: "Institute of Oceanography, University of Gdansk, 46 Pilsudskiego St, P81-378,
+    Gdynia, Poland"
+output:
+  bookdown::word_document2:
+    reference_docx: Template.docx
+    code-folding: show
+    keep_md: yes
+    fig.caption: yes
+    toc: FALSE
+    pandoc_args:
+    - "--lua-filter=scholarly-metadata.lua"
+    - "--lua-filter=author-info-blocks.lua"
+  html_document:
+    df_print: paged
+  word_document:
+    reference_docx: Template.docx
+    code-folding: show
+    keep_md: yes
+    fig.caption: yes
+    toc: FALSE
+    pandoc_args:
+    - "--lua-filter=scholarly-metadata.lua"
+    - "--lua-filter=author-info-blocks.lua"
+    - "--lua-filter=custom_filter.lua"
+bibliography:
+- BalticO2.bib
+- packages.bib
+- faultycitations.bib
+csl: "botany.csl"
+---
+
+```{r, import libraries, include = FALSE}
+library(tidyverse)
+library(glue)
+library(googlesheets4)
+googlesheets4:: gs4_deauth()
+#library(kableExtra)
+library(flextable)
+library(officer)
+library(knitr)
+library(readxl)
+library(stringr)
+library(rmarkdown)
+library(gdtools)
+#library(trackdown)
+options(knitr.table.format = "word_document2", knitr.kable.NA = '') 
+```
+
+```{r, save package citations, include = FALSE}
+knitr:: write_bib(c("tidyverse", "glue", "googlesheets4", "kableExtra"), "packages.bib")
+```
+
+```{r defining filepaths, include = FALSE}
+FiguresFP <- file.path("..", "Output", "Figures")
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<br>
+
+# Supplemental materials {.unnumbered}
+
+<br>
+
+```{r GrowthCurve, fig.cap = GrowthCurve_cap, fig.height = 8, fig.width = 6, echo = FALSE}
+GrowthCurve_cap<- glue("Growth curves, tracked as OD~680~ (*a*), OD~720~ (*b*), or chlorophyll proxy OD~680~-OD~720~ (ΔOD) (*c*) vs. elapsed time (d). Growth curves were estimated over 5-min intervals for PC-rich (light green) and PE-rich (dark red) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM or 2.5 µM. Logistic fits (thick lines) of ΔOD vs. elapsed time (d) measured over 5-min intervals were also presented.", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP,"SFig_GrowthCurve.png"))
+```
+
+<br>
+
+```{r GrowthRateOD720, fig.cap = GrowthRateOD720_cap, fig.height = 8, fig.width = 6, echo = FALSE}
+GrowthRateOD720_cap<- glue("Cell-specific exponential growth rates (µ; d^−1^) vs. growth waveband (nm, shaded regions). Growth rates (± SE) were estimated from logistic fits of OD~720~ vs. elapsed time, for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line).", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP,"SFig_GrowthRateOD720.png"))
+```
+
+<br>
+
+```{r PigRatio, fig.cap = PigRatio_cap, fig.height = 8, fig.width = 6, echo = FALSE}
+PigRatio_cap<- glue("Pigment ratio (µg:µg) vs. growth waveband (nm) for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM [O~2~]; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM [O~2~].", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP,"SFig_PigmentRatio.png"))
+```
+
+
+<br>
+
+```{r PUR, fig.cap = PUR_cap, fig.height = 8, fig.width = 6, echo = FALSE}
+PUR_cap<- glue("Phycobiliproteins:Chlorophyll *a* ratio (µg:µg) (*a*); chlorophyll-specific growth rates (µ; d^−1^) (*b*) vs. Photosynthetically Usable Radiation (PUR, µmol photons m^−2^s^−1^) for PC-rich (green circle) and PE-rich (red circle) cultures of *Synechococcus* grown at spectral wavebands of 405, 450, 470, 530, 620, 660, or 730 nm and 250 µM [O~2~] (open symbols and dashed line) or 2.5 µM [O~2~] (closed symbols and solid line). Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM [O~2~]; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM [O~2~]. Blue lines shows linear model fit for data from each strain and [O~2~] (solid for 2.5 µM [O~2~] or dashed for 250 µM [O~2~]) across spectral wavebands.", .sep = " ")
+knitr::include_graphics(file.path(FiguresFP,"SFig_GrowthPUR.png"))
+```
+
+<br>
+
+```{r SigAll, fig.cap = SigAll_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+SigAll_cap<- glue("Effective absorption cross section of PSII (\u03C3~PSII~; nm^2^ quanta^−1^) vs. Actinic PAR (µmol photons m^−2^s^−1^). \u03C3~PSII~ were estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths (rows) of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Shaded area show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm. The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"SFig_Sig.png"))
+```
+
+
+```{r TauAll, fig.cap = TauAll_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+TauAll_cap<- glue("Turnover time of PSII photochemistry (\u03C4~PSII~; µs) vs. Actinic PAR (µmol photons m^−2^s^−1^). \u03C4~PSII~ were estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths (rows) of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Shaded area show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm. The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"SFig_Tau.png"))
+```
+
+
+```{r qpAll, fig.cap = qpAll_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+qpAll_cap<- glue("Photochemical quenching coefficient (q~P~) vs. Actinic PAR (µmol photons m^−2^s^−1^). q~P~ were estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths (rows) of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Shaded area show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm. The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"SFig_qpOxbo.png"))
+```
+
+
+```{r JvpsiiAll, fig.cap = JvpsiiAll_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+JvpsiiAll_cap<- glue("PSII electron flux (*JV*~PSII~; µmol e^−^ Chl *a* ^−1^ s^−1^) vs. Actinic PAR (µmol photons m^−2^s^−1^). \u03C3~PSII~ were estimated using FRRf induction curves with excitation (columns) at Ex~445nm~, blue; Ex~470nm~, blue-green; Ex~535nm~, green; or Ex~590nm~, orange; for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths (rows) of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Shaded area show situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm. The vertical lines show half diel peak PAR growth light of 90 µmol photons m^−2^s^−1^. Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"SFig_CalibJVPSII_eChls.png"))
+```
+
+<br>
+
+```{r PSII, fig.cap = PSII_cap, fig.height = 6, fig.width = 8, echo = FALSE}
+PSII_cap<- glue("PSII to Chl *a* ratio (mole:mole) vs. growth waveband (nm). ETR (µmol e^−^ PSII^−1^ s^−1^) and *JV*~PSII~ (µmol e^−^ Chl *a*^−1^ s^−1^) were estimated using FRRf induction curves with excitation at Ex~445nm~, blue for PC-rich (green circle) or PE-rich (red circle) cultures of *Synechococcus* sp. grown at spectral bandwidths of 450, 470, 530, or 620 nm and O~2~ concentrations of 250 µM (open symbols and dashed line) or 2.5 µM (closed symbols and solid line). Data not presented for those PE-rich cultures which showed negligible growth under 405, 450, 730 nm and 250 µM O~2~; nor for those PC-rich cultures which showed negligible growth under 405 nm and 250 µM O~2~.", .sep = " ")
+knitr::include_graphics(file.path( FiguresFP,"SFig_PSIIChla.png"))
+```
+
+<br>
+
+```{r locally stored metadata from rds, echo = FALSE}
+# https://davidgohel.github.io/flextable/reference/index.html
+
+# BalticO2_Tab_MDPicoMCODCorrelation.Rds
+# BalticPhotoperiod_Tab_PigmentsCorrelation.Rds
+# JVPSII_eLs_ModelTerms.Rds
+# BalticO2_Anova_GrowthRate.Rds
+# 
+# BalticO2_Anova_Pig.Rds
+
+# BalticO2_Anova_SigLRC.Rds
+# BalticO2_Anova_TauLRC.Rds
+# BalticO2_Anova_qpLRC.Rds
+# BalticO2_Anova_JVPSII_eLsLRC.Rds
+# 
+# BalticO2_Anova_GrowthPigRatio_Model.Rds
+# BalticO2_Anova_GrowthJVPSII_Model.Rds
+
+```
+
+<br>
+<br>
+<br>
+
+```{r echo = FALSE}
+CellCorrelation <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Tab_MDPicoMCODCorrelation.Rds"))
+CellCorrelation<-CellCorrelation 
+
+myft <- flextable(CellCorrelation)
+myft <- set_caption(myft, caption = "Linear regression, coefficient of determination (R square), Pearson correlation coefficients (R), and p-value used to calculate the number of cells (mL-1) of PC-rich and PE-rich cultures of *Synechococcus* sp. based on OD~680~ and OD~720~ (nm) measurements.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(CellCorrelation)
+```
+
+
+```{r echo = FALSE}
+PigmentsCorrelation <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticPhotoperiod_Tab_PigmentsCorrelation.Rds"))
+PigmentsCorrelation<-PigmentsCorrelation %>%  
+  relocate(Pigment, .before = Linear_regression) %>%
+  relocate(Abs, .before = Linear_regression)
+
+myft <- flextable(PigmentsCorrelation)
+myft <- set_caption(myft, caption = "Linear regression, coefficient of determination (R square), Pearson correlation coefficients (R), and p-value used to calculate the pigment content (µg mL-1) of PC-rich and PE-rich cultures of *Synechococcus* sp. based on absorbance (A) measurements.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(PigmentsCorrelation)
+```
+
+<br>
+
+```{r echo = FALSE}
+JVPSIITerms <- readRDS(file = file.path("..", "Output", "TablesRds", "JVPSII_eLs_ModelTerms.Rds"))
+JVPSIITerms<-JVPSIITerms %>% 
+  filter(Ex_WL !=505)
+  
+myft <- flextable(JVPSIITerms) 
+myft <- set_caption(myft, caption = "Calibration slope for the blue LED (Ex~445nm~), blue-green LED (Ex~470nm~),  green LED (Ex~530nm~), orangr LED (Ex~590nm~) excitations.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(JVPSIITerms)
+```
+
+
+<br>
+
+```{r echo = FALSE}
+Anova_GrowthRate <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_GrowthRate.Rds"))
+Anova_GrowthRate<-Anova_GrowthRate 
+
+df <- data.frame(Source_of_variation = c("O2", "WL", "Strain", "O2:WL", "O2:Strain", "WL:Strain", "O2:WL:Strain", "Residuals"))
+Anova_GrowthRate<-cbind(df, Anova_GrowthRate) 
+Anova_GrowthRate<-Anova_GrowthRate %>% 
+  rename(p_value = "Pr(>F)") %>% 
+  rename(F_value = "F value") %>% 
+  mutate(Df=as.character(Df))
+
+
+myft <- flextable(Anova_GrowthRate) 
+myft <- set_caption(myft, caption = "Three-way factorial ANOVA testing whether strain, growth waveband, O~2~ concentration, and their interactions (Source_of_variation), significantly influence the chlorophyll specific exponential growth rate (µ; d−1), for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM or 2.5 µM. Df – degrees of freedom; Sum Sq – sum of squares; Mean Sq – mean sum of squares; F_value – Fisher's F-test statistic; p_value - level of significance.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(Anova_GrowthRate, df)
+```
+
+
+<br>
+
+```{r echo = FALSE}
+Anova_Pig <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_Pig.Rds"))
+Anova_Pig<-Anova_Pig %>% 
+  rename(p_value = "Pr(>F)") %>%
+  rename(F_value = "F value") %>%
+  mutate(Df=as.character(Df))
+
+# df <- data.frame(Source_of_variation = c("O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain",  "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals","O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals"))
+# Anova_SigLRC<-cbind(df, Anova_SigLRC) 
+# Anova_SigLRC<-Anova_SigLRC %>% 
+#   rename(p_value = "Pr(>F)") %>% 
+#   rename(F_value = "F value") %>% 
+#   mutate(Df=as.character(Df))
+
+
+myft <- flextable(Anova_Pig) 
+myft <- set_caption(myft, caption = "Three-way factorial ANOVA testing whether strain, growth waveband, O~2~ concentration, and their interactions (Source_of_variation), significantly influence the pigment content, for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM or 2.5 µM. Df – degrees of freedom; Sum Sq – sum of squares; Mean Sq – mean sum of squares; F_value – Fisher's F-test statistic; p_value - level of significance.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(Anova_Pig)
+```
+
+
+<br>
+
+```{r echo = FALSE}
+Anova_SigLRC <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_SigLRC.Rds"))
+Anova_SigLRC<-Anova_SigLRC %>% 
+  rename(p_value = "Pr(>F)") %>%
+  rename(F_value = "F value") %>%
+  mutate(Df=as.character(Df))
+
+# df <- data.frame(Source_of_variation = c("O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain",  "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals","O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals"))
+# Anova_SigLRC<-cbind(df, Anova_SigLRC) 
+# Anova_SigLRC<-Anova_SigLRC %>% 
+#   rename(p_value = "Pr(>F)") %>% 
+#   rename(F_value = "F value") %>% 
+#   mutate(Df=as.character(Df))
+
+
+myft <- flextable(Anova_SigLRC) 
+myft <- set_caption(myft, caption = "Three-way factorial ANOVA testing whether strain, Actinic PAR, O~2~ concentration, and their interactions (Source_of_variation), significantly influence the Sig, for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM or 2.5 µM. Df – degrees of freedom; Sum Sq – sum of squares; Mean Sq – mean sum of squares; F_value – Fisher's F-test statistic; p_value - level of significance.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(Anova_SigLRC)
+```
+
+<br>
+
+```{r echo = FALSE}
+Anova_TauLRC <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_TauLRC.Rds"))
+Anova_TauLRC<-Anova_TauLRC %>% 
+  rename(p_value = "Pr(>F)") %>%
+  rename(F_value = "F value") %>%
+  mutate(Df=as.character(Df))
+
+# df <- data.frame(Source_of_variation = c("O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain",  "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals","O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals"))
+# Anova_SigLRC<-cbind(df, Anova_SigLRC) 
+# Anova_SigLRC<-Anova_SigLRC %>% 
+#   rename(p_value = "Pr(>F)") %>% 
+#   rename(F_value = "F value") %>% 
+#   mutate(Df=as.character(Df))
+
+
+myft <- flextable(Anova_TauLRC) 
+myft <- set_caption(myft, caption = "Three-way factorial ANOVA testing whether strain, Actinic PAR, O~2~ concentration, and their interactions (Source_of_variation), significantly influence the Tau, for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM or 2.5 µM. Df – degrees of freedom; Sum Sq – sum of squares; Mean Sq – mean sum of squares; F_value – Fisher's F-test statistic; p_value - level of significance.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(Anova_TauLRC)
+```
+
+<br>
+
+```{r echo = FALSE}
+Anova_qpLRC <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_qpLRC.Rds"))
+Anova_qpLRC<-Anova_qpLRC %>% 
+  rename(p_value = "Pr(>F)") %>%
+  rename(F_value = "F value") %>%
+  mutate(Df=as.character(Df))
+
+# df <- data.frame(Source_of_variation = c("O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain",  "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals","O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals"))
+# Anova_SigLRC<-cbind(df, Anova_SigLRC) 
+# Anova_SigLRC<-Anova_SigLRC %>% 
+#   rename(p_value = "Pr(>F)") %>% 
+#   rename(F_value = "F value") %>% 
+#   mutate(Df=as.character(Df))
+
+
+myft <- flextable(Anova_qpLRC) 
+myft <- set_caption(myft, caption = "Three-way factorial ANOVA testing whether strain, Actinic PAR, O~2~ concentration, and their interactions (Source_of_variation), significantly influence the qP, for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM or 2.5 µM. Df – degrees of freedom; Sum Sq – sum of squares; Mean Sq – mean sum of squares; F_value – Fisher's F-test statistic; p_value - level of significance.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(Anova_qpLRC)
+```
+
+<br>
+
+```{r echo = FALSE}
+Anova_jvpsiiLRC <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_JVPSII_eLsLRC.Rds"))
+Anova_qpLRC<-Anova_jvpsiiLRC %>% 
+  rename(p_value = "Pr(>F)") %>%
+  rename(F_value = "F value") %>%
+  mutate(Df=as.character(Df))
+
+# df <- data.frame(Source_of_variation = c("O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain",  "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals", "O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals","O2", "ActPAR", "Strain", "O2:ActPAR", "O2:Strain", "ActPAR:Strain", "O2:ActPAR:Strain", "Residuals"))
+# Anova_SigLRC<-cbind(df, Anova_SigLRC) 
+# Anova_SigLRC<-Anova_SigLRC %>% 
+#   rename(p_value = "Pr(>F)") %>% 
+#   rename(F_value = "F value") %>% 
+#   mutate(Df=as.character(Df))
+
+
+myft <- flextable(Anova_jvpsiiLRC) 
+myft <- set_caption(myft, caption = "Three-way factorial ANOVA testing whether strain, Actinic PAR, O~2~ concentration, and their interactions (Source_of_variation), significantly influence the JVPSII_eLs, for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM or 2.5 µM. Df – degrees of freedom; Sum Sq – sum of squares; Mean Sq – mean sum of squares; F_value – Fisher's F-test statistic; p_value - level of significance.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(Anova_jvpsiiLRC)
+```
+
+
+<br>
+
+```{r echo = FALSE}
+Anova_ChlaPSII <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_ChlaPSII.Rds"))
+Anova_qpLRC<-Anova_ChlaPSII %>% 
+  rename(p_value = "Pr(>F)") %>%
+  rename(F_value = "F value") %>%
+  mutate(Df=as.character(Df))
+
+myft <- flextable(Anova_ChlaPSII) 
+myft <- set_caption(myft, caption = "Three-way factorial ANOVA testing whether strain, growth wavebands, O~2~ concentration, and their interactions (Source_of_variation), significantly influence the Chl a to PSII (mole:mole), for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 450, 470, 530, or 620, and O~2~ concentrations of 250 µM or 2.5 µM. Df – degrees of freedom; Sum Sq – sum of squares; Mean Sq – mean sum of squares; F_value – Fisher's F-test statistic; p_value - level of significance.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(Anova_ChlaPSII)
+```
+
+<br>
+
+```{r echo = FALSE}
+GrowthPigRatio_Model <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_GrowthPigRatio_Model.Rds"))
+GrowthPigRatio_Model<-GrowthPigRatio_Model %>% 
+  rename(Fit_model = "FitComparison") %>% 
+  relocate(Fit_model, .before = Estimate) 
+
+myft <- flextable(GrowthPigRatio_Model)
+myft <- set_caption(myft, caption = "T-test of linear fit model (Fit_model) across different strains and O~2~ concentration for a given growth waveband, for chlorophyll-specific exponential growth rate vs. Phycobiliproteins to Chl *a* ratio for PC-rich and PE-rich cultures of *Synechococcus* sp. grown at spectral bandwidths of 405, 450, 470, 530, 620, 660, or 730 nm, and O~2~ concentrations of 250 µM or 2.5 µM. Estimate - estimation statistics; Std.Error - standard error of the estimate; t_value – t-test statistic; p_value - level of significance.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- set_formatter(myft, Estimate = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- set_formatter(myft, Std.Error = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(GrowthPigRatio_Model)
+```
+
+<br>
+
+```{r echo = FALSE}
+GrowthJVPSII_Model <- readRDS(file = file.path("..", "Output", "TablesRds", "BalticO2_Anova_GrowthJVPSII_Model.Rds"))
+GrowthJVPSII_Model<-GrowthJVPSII_Model %>% 
+  rename(Fit_model = "FitComparison") %>% 
+  relocate(Fit_model, .before = Estimate) 
+
+myft <- flextable(GrowthJVPSII_Model)
+myft <- set_caption(myft, caption = "T-test of linear fit model (Fit_model) across different strains and O~2~ concentration in situations in which cultures were excited by, and growing in, corresponding growth wavebands of 450, 470, 530, or 620 nm, for chlorophyll-specific exponential growth rate vs. *JV*~PSII~. Estimate - estimation statistics; Std.Error - standard error of the estimate; t_value – t-test statistic; p_value - level of significance.")
+myft <- colformat_double(x = myft, big.mark = ",", digits = 3, na_str = "N/A")
+myft <- set_formatter(myft, F_value = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- set_formatter(myft, Estimate = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- set_formatter(myft, Std.Error = function(x) {formatC(x, format = "e", digits = 3)})
+myft <- fontsize(myft, size = 12, part = "header")
+myft <- fontsize(myft, size = 10, part = "body")
+myft <- align(myft, align = "left", part = "all")
+myft <- autofit(myft)
+myft
+
+rm(GrowthJVPSII_Model)
+```
+
+<br>
+
+
+
